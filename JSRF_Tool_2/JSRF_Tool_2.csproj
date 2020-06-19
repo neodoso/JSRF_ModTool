@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{883471F4-3330-4A25-B4E4-0463EEF09315}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JSRF_Tool_2</RootNamespace>
+    <AssemblyName>JSRF_Tool_2</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>jsrf_soul_icon_64.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HelixToolkit, Version=2.7.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
+      <HintPath>..\packages\HelixToolkit.2.7.0\lib\netstandard1.1\HelixToolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="HelixToolkit.Wpf, Version=2.7.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
+      <HintPath>..\packages\HelixToolkit.Wpf.2.7.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataFormats\JSRF\JSRF_Containers.cs" />
+    <Compile Include="DataFormats\JSRF\Level_model.cs" />
+    <Compile Include="DataFormats\JSRF\mission_bin.cs" />
+    <Compile Include="DataFormats\JSRF\mission_dat.cs" />
+    <Compile Include="Functions\FTP.cs" />
+    <Compile Include="Functions\FileExplorer.cs" />
+    <Compile Include="Functions\IO.cs" />
+    <Compile Include="HelixModelViewer.xaml.cs">
+      <DependentUpon>HelixModelViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Main.Designer.cs">
+      <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Functions\ByteConvert.cs" />
+    <Compile Include="Functions\Parsing.cs" />
+    <Compile Include="DataFormats\JSRF\MDLBL.cs" />
+    <Compile Include="MDLB_Import\UserControls\Color.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MDLB_Import\UserControls\Color.Designer.cs">
+      <DependentUpon>Color.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MDLB_Import\UserControls\Material_Inspector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MDLB_Import\UserControls\Material_Inspector.Designer.cs">
+      <DependentUpon>Material_Inspector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MDLB_Import\Materials.cs" />
+    <Compile Include="MDLB_Import\MDLB_builder.cs" />
+    <Compile Include="MDLB_Import\UserControls\MDLB_import_options_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MDLB_Import\UserControls\MDLB_import_options_Form.Designer.cs">
+      <DependentUpon>MDLB_import_options_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MDLB_Import\ModelPart_Import_Settings.cs" />
+    <Compile Include="MDLB_Import\UserControls\Model_Inspector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MDLB_Import\UserControls\Model_Inspector.Designer.cs">
+      <DependentUpon>Model_Inspector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MDLB_Import\SMD.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DataFormats\JSRF\Level_bin.cs" />
+    <Compile Include="DataFormats\JSRF\Material.cs" />
+    <Compile Include="DataFormats\MeshData.cs" />
+    <Compile Include="DataFormats\Vector.cs" />
+    <Compile Include="DataFormats\JSRF\File_Headers.cs" />
+    <Compile Include="DataFormats\JSRF\MDLB.cs" />
+    <EmbeddedResource Include="Main.resx">
+      <DependentUpon>Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDLB_Import\UserControls\Color.resx">
+      <DependentUpon>Color.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDLB_Import\UserControls\Material_Inspector.resx">
+      <DependentUpon>Material_Inspector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDLB_Import\UserControls\MDLB_import_options_Form.resx">
+      <DependentUpon>MDLB_import_options_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDLB_Import\UserControls\Model_Inspector.resx">
+      <DependentUpon>Model_Inspector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="HelixModelViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\jsrf_soul_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="jsrf_soul_icon_64.ico" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
