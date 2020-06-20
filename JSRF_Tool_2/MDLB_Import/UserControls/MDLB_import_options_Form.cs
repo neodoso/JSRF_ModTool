@@ -418,7 +418,7 @@ namespace JSRF_Tool_2.MDLB_Import
                    Convert.ToSingle(txtb_drawDist_z.Text),
                    Convert.ToSingle(txtb_drawDist_w.Text)));
 
-            List<MDLB_builder.material> materials = new List<MDLB_builder.material>();
+            List <MDLB_Import.MDLB_classes.material> materials = new List<MDLB_Import.MDLB_classes.material>();
             // for each material inspector, create MDLB_builder.material and add to list
             for (int i = 0; i < mat_inspector_list.Count; i++)
             {
@@ -448,7 +448,7 @@ namespace JSRF_Tool_2.MDLB_Import
 
                 #endregion
 
-                materials.Add(new MDLB_builder.material(new MDLB_builder.color(c.B, c.G, c.R, c.A), shader_id, Convert.ToInt32(mi.txtb_unk_id2.Text), Convert.ToSingle(mi.txtb_hb.Text)));
+                materials.Add(new MDLB_Import.MDLB_classes.material(new MDLB_Import.MDLB_classes.color(c.B, c.G, c.R, c.A), shader_id, Convert.ToInt32(mi.txtb_unk_id2.Text), Convert.ToSingle(mi.txtb_hb.Text)));
             }
 
             /*

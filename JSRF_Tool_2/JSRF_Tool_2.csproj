@@ -95,20 +95,21 @@
     <Compile Include="Functions\ByteConvert.cs" />
     <Compile Include="Functions\Parsing.cs" />
     <Compile Include="DataFormats\JSRF\MDLBL.cs" />
+    <Compile Include="MDLB_Import\MDLB_classes.cs" />
+    <Compile Include="MDLB_Import\Materials.cs" />
+    <Compile Include="MDLB_Import\MDLB_builder.cs" />
     <Compile Include="MDLB_Import\UserControls\Color.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MDLB_Import\UserControls\Color.Designer.cs">
+    <Compile Include="MDLB_Import\UserControls\Color.designer.cs">
       <DependentUpon>Color.cs</DependentUpon>
     </Compile>
     <Compile Include="MDLB_Import\UserControls\Material_Inspector.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MDLB_Import\UserControls\Material_Inspector.Designer.cs">
+    <Compile Include="MDLB_Import\UserControls\Material_Inspector.designer.cs">
       <DependentUpon>Material_Inspector.cs</DependentUpon>
     </Compile>
-    <Compile Include="MDLB_Import\Materials.cs" />
-    <Compile Include="MDLB_Import\MDLB_builder.cs" />
     <Compile Include="MDLB_Import\UserControls\MDLB_import_options_Form.cs">
       <SubType>Form</SubType>
     </Compile>
