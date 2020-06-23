@@ -39,6 +39,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
     /// TODO: refactor Main.load_block_MDLB() as voids in the MDLB class
     /// also create a class for MDLB triangle and vertex defitions, right now this is in load_block_MDLB()
     /// </remarks>
+
     public class MDLB 
     { 
        public MDLB_header header = new MDLB_header();
