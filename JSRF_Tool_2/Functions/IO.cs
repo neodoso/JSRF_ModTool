@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace JSRF_Tool_2.Functions
+namespace JSRF_ModTool.Functions
 {
     class IO
     {

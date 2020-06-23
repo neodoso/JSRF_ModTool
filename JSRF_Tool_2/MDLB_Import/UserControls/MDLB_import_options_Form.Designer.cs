@@ -1,4 +1,4 @@
-﻿namespace JSRF_Tool_2.MDLB_Import
+﻿namespace JSRF_ModTool.MDLB_Import
 {
     partial class MDLB_import_options_Form
     {

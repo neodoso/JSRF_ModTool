@@ -6,11 +6,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using JSRF_Tool_2.MDLB_Import;
+using JSRF_ModTool.MDLB_Import;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace JSRF_Tool_2.MDLB_Import
+namespace JSRF_ModTool.MDLB_Import
 {
     public partial class MDLB_import_options_Form : Form
     {
@@ -40,12 +40,12 @@ namespace JSRF_Tool_2.MDLB_Import
             panel_models.VerticalScroll.Visible = true;
 
 
-            srcMDLB_vert_size = Main.model.VertexBlock_header_List[Main.model.Model_Parts_header_List.Count-1].vertex_def_size;
+            srcMDLB_vert_size = Main.current_model.VertexBlock_header_List[Main.current_model.Model_Parts_header_List.Count-1].vertex_def_size;
 
-            txtb_drawDist_x.Text = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].draw_distance_x.ToString();
-            txtb_drawDist_y.Text = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].draw_distance_y.ToString();
-            txtb_drawDist_z.Text = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].draw_distance_z.ToString();
-            txtb_drawDist_w.Text = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].draw_distance_w.ToString();
+            txtb_drawDist_x.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_x.ToString();
+            txtb_drawDist_y.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_y.ToString();
+            txtb_drawDist_z.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_z.ToString();
+            txtb_drawDist_w.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_w.ToString();
             //srcMDLB_materials_count = Main.model.materials_List.Count;
 
             cb_vertex_def_size.SelectedItem = srcMDLB_vert_size.ToString();
@@ -131,7 +131,7 @@ namespace JSRF_Tool_2.MDLB_Import
                 // get the original vertex block size of model the part
                 //int vert_size = BitConverter.ToInt32(Main.data_block, Main.model.Model_Parts_header_List[i].vertex_block_offset + 16); 
 
-                int vert_size = Main.model.VertexBlock_header_List[i].vertex_def_size;
+                int vert_size = Main.current_model.VertexBlock_header_List[i].vertex_def_size;
 
                 string filename = Path.GetFileNameWithoutExtension(filepaths[i]);
 
@@ -244,13 +244,13 @@ namespace JSRF_Tool_2.MDLB_Import
 
 
             // load materials list from original model (last part)
-            for (int i = 0; i < Main.model.materials_List.Count; i++)
+            for (int i = 0; i < Main.current_model.materials_List.Count; i++)
             {
-                add_material_inspector(Main.model.materials_List[i]);
+                add_material_inspector(Main.current_model.materials_List[i]);
             }
 
             // if model hast materials after triangle groups return;
-            if (Main.model.materials_List.Count > 0) { return; }
+            if (Main.current_model.materials_List.Count > 0) { return; }
 
             /*
 
@@ -273,9 +273,9 @@ namespace JSRF_Tool_2.MDLB_Import
 
             //int vtx_mat_count = 0;
             // TODO
-            if (Main.model.header.materials_count == 0)
+            if (Main.current_model.header.materials_count == 0)
             {
-                List<DataFormats.JSRF.MDLB.material> mats = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].vtx_buffer_materials;
+                List<DataFormats.JSRF.MDLB.material> mats = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].vtx_buffer_materials;
 
                 foreach (var m in mats)
                 {
@@ -480,7 +480,7 @@ namespace JSRF_Tool_2.MDLB_Import
         public class model_part_triangle_groups
         {
             //public int model_part_number { get; set; }
-            public List<JSRF_Tool_2.DataFormats.JSRF.MDLB.triangle_group> tri_groups { get; set;}
+            public List<JSRF_ModTool.DataFormats.JSRF.MDLB.triangle_group> tri_groups { get; set;}
         }
         */
         private void btn_cancel_Click(object sender, EventArgs e)

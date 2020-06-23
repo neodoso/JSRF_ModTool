@@ -1,4 +1,4 @@
-﻿namespace JSRF_Tool_2
+﻿namespace JSRF_ModTool
 {
     partial class Main
     {

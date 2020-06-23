@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JSRF_Tool_2
+namespace JSRF_ModTool
 {
    public class ByteReader
     {

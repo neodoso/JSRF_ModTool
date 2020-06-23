@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.Vector;
 
-namespace JSRF_Tool_2
+namespace JSRF_ModTool
 {
     public class SMD
     {

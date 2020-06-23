@@ -1,4 +1,4 @@
-﻿namespace JSRF_Tool_2.MDLB_Import
+﻿namespace JSRF_ModTool.MDLB_Import
 {
     partial class Material_Inspector
     {
@@ -40,7 +40,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.color_0 = new JSRF_Tool_2.MDLB_Import.Color();
+            this.color_0 = new JSRF_ModTool.MDLB_Import.Color();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 

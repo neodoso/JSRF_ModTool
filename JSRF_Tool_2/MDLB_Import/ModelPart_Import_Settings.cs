@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JSRF_Tool_2.MDLB_Import
+namespace JSRF_ModTool.MDLB_Import
 {
     public class ModelPart_Import_Settings
     {

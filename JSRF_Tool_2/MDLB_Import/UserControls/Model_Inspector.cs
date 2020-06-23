@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace JSRF_Tool_2.MDLB_Import
+namespace JSRF_ModTool.MDLB_Import
 {
     public partial class Model_Inspector : UserControl
     {

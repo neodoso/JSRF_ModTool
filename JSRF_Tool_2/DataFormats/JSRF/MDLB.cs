@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.Vector;
 
-namespace JSRF_Tool_2.DataFormats.JSRF
+namespace JSRF_ModTool.DataFormats.JSRF
 {
     /// <summary>
     ///  JSRF MDLB model format definition

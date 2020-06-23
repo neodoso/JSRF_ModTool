@@ -10,13 +10,13 @@ using HelixToolkit.Wpf;
 
 
 
-using JSRF_Tool_2.DataFormats;
+using JSRF_ModTool.DataFormats;
 
 using System.Collections.Generic;
 using System.IO;
 
 
-namespace JSRF_Tool_2
+namespace JSRF_ModTool
 {
     /// <summary>
     /// Interaction logic for HelixModelViewer.xaml

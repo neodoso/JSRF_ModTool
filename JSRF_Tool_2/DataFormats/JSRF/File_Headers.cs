@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 
-namespace JSRF_Tool_2.DataFormats.JSRF
+namespace JSRF_ModTool.DataFormats.JSRF
 {
     /// <summary>
     /// JSRF Container classes
@@ -33,7 +33,7 @@ namespace JSRF_Tool_2.DataFormats.JSRF
     /// TODO (maybe?) MULT and NORM headers seem to have the same  structure (start, end, int32 int32)
     /// perhaps it would be better/easier to create a generic class that gets used for MULT and NORM.
     /// </remarks>
-    public class JSRF_Container
+    public class File_Headers
     {
 
         #region generic header

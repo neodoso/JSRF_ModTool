@@ -5,15 +5,15 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 
-namespace JSRF_Tool_2.DataFormats.JSRF
+namespace JSRF_ModTool.DataFormats.JSRF
 {
     /// <summary>
     /// There 3 general types of file structures in JSRF
     /// -one MULT container  that containes multiplke NORM children
-    /// -one NORM (at the root) 
-    /// -No containers, a list of sequential items, I named these "indexed"
+    /// -one NORM container (at the root) that has child items
+    /// -No containers, sequential list of items,  I named these "indexed"
     /// </summary>
-    public class JSRF_Containers
+    public class File_Containers
     {
         #region Declarations
 
@@ -30,7 +30,7 @@ namespace JSRF_Tool_2.DataFormats.JSRF
         public bool root_node_is_NORM { get; }
 
 
-        public JSRF_Containers(string filepath = "")
+        public File_Containers(string filepath = "")
         {
             if (filepath == "") { return; }
             if (!File.Exists(filepath)) { return; }
@@ -115,7 +115,7 @@ namespace JSRF_Tool_2.DataFormats.JSRF
             {
                 this.type = container_types.indexed;
 
-                JSRF_Container.Indexed_container indexed_items = new JSRF_Container.Indexed_container();
+                File_Headers.Indexed_container indexed_items = new File_Headers.Indexed_container();
                 indexed_items.get_Indexed(file_data, 0, file_data.Length);
 
                 INDX_root = new INDEXED();

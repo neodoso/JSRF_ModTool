@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace JSRF_Tool_2.DataFormats.JSRF
+namespace JSRF_ModTool.DataFormats.JSRF
 {
     class mission_dat
     {

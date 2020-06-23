@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace JSRF_Tool_2.Vector
+namespace JSRF_ModTool.Vector
 {
 
         public class Vector2

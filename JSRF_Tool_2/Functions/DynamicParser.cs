@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Text;
-using System.IO;
 using System.Reflection;
-using JSRF_ModTool.Vector;
+using JSRF_Tool_2.Vector;
 
 using System.Windows.Media.Media3D;
 
-namespace JSRF_ModTool
+namespace JSRF_Tool_2
 {
 
-    public class Parsing 
+    public class DynamicParser 
     {
 
         /// <summary>
@@ -126,83 +125,6 @@ namespace JSRF_ModTool
         }
 
 
-        public static byte[] FileToByteArray(string _filePath, long _startpos)
-        {
-            FileStream fs = null;
-            byte[] _Buffer = null;
-            try
-            {
-                fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using (TextReader tr = new StreamReader(fs))
-                {
-                    // attach filestream to binary reader
-                    System.IO.BinaryReader _BinaryReader = new System.IO.BinaryReader(fs);
-                    _BinaryReader.BaseStream.Position = _startpos;
-
-                    // get total byte length of the file
-                    long _TotalBytes = new System.IO.FileInfo(_filePath).Length;
-
-                    // read entire file into buffer
-                    _Buffer = _BinaryReader.ReadBytes((Int32)_TotalBytes);
-
-                    // close file reader
-                    _BinaryReader.Close();
-                    _BinaryReader.Dispose();
-                    fs.Close();
-                    fs.Dispose();
-                }
-            }
-            finally
-            {
-                if (fs != null)
-                    fs.Dispose();
-            }
-
-            return _Buffer;
-        }
-
-        public static bool ByteArrayToFile(string _filePath, byte[] _ByteArray)
-        {
-            FileStream fs = null;
-
-            try
-            {
-                fs = new FileStream(_filePath, FileMode.Create, FileAccess.Write, FileShare.Write);
-                using (BinaryWriter tr = new BinaryWriter(fs))
-                {
-                    // Writes a block of bytes to this stream using data from
-                    // a byte array.
-                    fs.Write(_ByteArray, 0, _ByteArray.Length);
-
-                    // close file stream
-                    fs.Close();
-                    fs.Dispose();
-
-                    return true;
-                }
-            }
-            finally
-            {
-                if (fs != null)
-                    fs.Dispose();
-            }
-
-            return false;
-        }
-
-        // convert selected bytes to ascii, useful to read header types names
-        public string BytesToASCII(byte[] buff, long start, long end)
-        {
-            string ascii = "";
-            if (buff != null)
-            {
-                byte[] buffascii = new byte[end - start];
-                Array.Copy(buff, start, buffascii, 0, end - start);
-                ascii = System.Text.Encoding.UTF8.GetString(buffascii);
-            }
-            return ascii;
-        }
-
 
         /// <summary>
         /// read byte array as as floats and returns as a Point3D
@@ -285,30 +207,11 @@ namespace JSRF_ModTool
             }
         }
 
+
         public static DataFormats.JSRF.MDLB.color brReadColor(byte[] bytes, int i)
         {
             return new DataFormats.JSRF.MDLB.color(bytes[i], bytes[i+1], bytes[i+2], bytes[i+3]);
         }
 
-        /// <summary>
-        /// Converts hex code (as string) to Bytes and returns byte array
-        /// </summary>
-        public static byte[] String_HexToBytes(string s)
-        {
-            try
-            {
-                string[] bytes = s.Split(' ');
-                byte[] retval = new byte[bytes.Length];
-                for (int ix = 0; ix <= bytes.Length - 1; ix++)
-                {
-                    retval[ix] = byte.Parse(bytes[ix], System.Globalization.NumberStyles.HexNumber);
-                }
-                return retval;
-            }
-            catch
-            {
-                return null;
-            }
-        }
     }
 }

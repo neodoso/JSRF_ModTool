@@ -14,52 +14,45 @@ using System.Globalization;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 
-using JSRF_Tool_2.DataFormats;
-using JSRF_Tool_2.DataFormats.JSRF;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.DataFormats;
+using JSRF_ModTool.DataFormats.JSRF;
+using JSRF_ModTool.Vector;
 
 using System.Threading;
 
 using HelixToolkit.Wpf;
 
-namespace JSRF_Tool_2
+namespace JSRF_ModTool
 {
     public partial class Main : Form
     {
         #region Declarations
-
-        // converts long paths to short paths, for "dos" console commands
-        // [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        // public static extern int GetShortPathName(
-        // [MarshalAs(UnmanagedType.LPTStr)]string path,
-        // [MarshalAs(UnmanagedType.LPTStr)] StringBuilder shortPath, int shortPathLength);
 
         public static string startup_dir = Application.StartupPath;
         private string tmp_dir = Application.StartupPath + "\\resources\\tmp\\";
 
         FileExplorer fe = new FileExplorer();
 
-        /// Dynamic parser
-        /// pr.binary_to_struct() method automatically parses binary files and loads them into an instance of a class/struct
+
+        /// Dynamic parser: pr.binary_to_struct() method automatically parses binary files and loads them into an instance of a class/struct
         Parsing pr = new Parsing();
 
         private List<DataFormats.JSRF.Material> materials_dat_list = new List<DataFormats.JSRF.Material>();
         private List<DataFormats.JSRF.Material> materials_bin_list = new List<DataFormats.JSRF.Material>();
         private List<string> textures_id_list = new List<string>();
 
-        public JSRF_Containers jsrf_file = null;
+        public File_Containers jsrf_file = null;
 
 
         public string container_type = "null";
 
-        byte[] fdata = null; // our bin or dat file loaded into a byte array
 
-        public static DataFormats.JSRF.MDLB model;
-        public static byte[] data_block; // latest loaded item/block
+        public static DataFormats.JSRF.MDLB current_model;
+        public static byte[] current_item_data; // latest loaded item/block
 
         // store copy/paste item block data here
         private byte[] block_copy_clipboard;
-        private List<JSRF_Containers.item> node_copy_clipboard;
+        private List<File_Containers.item> node_copy_clipboard;
 
         // used to know if the model has already been loaded, so the model part count on the model viewer is properly updated
         bool mdlb_first_load = false;
@@ -146,6 +139,9 @@ namespace JSRF_Tool_2
             materials_dat_list.Clear();
             materials_bin_list.Clear();
 
+            trv_file.Nodes.Clear();
+            container_type = null;
+
             #region UI
 
             lab_itemSel_length.Text = "";
@@ -182,25 +178,24 @@ namespace JSRF_Tool_2
         private object Load_file(string filepath)
         {
             Reset_vars();
-            Clear_file_view();
 
-            jsrf_file = new JSRF_Containers(filepath);
+            jsrf_file = new File_Containers(filepath);
 
 
             if (filepath.Contains(".dat"))
             {
                 string filepath_bin = filepath.Replace(".dat", ".bin");
+                // get corresponding .bin file and load materials list from it
                 if (File.Exists(filepath_bin))
                 {
                     // load bin materials into list
-                    materials_bin_list = Get_materials_to_list(new JSRF_Containers(filepath_bin));
+                    materials_bin_list = Get_materials_to_list(new File_Containers(filepath_bin));
                 }
             }
 
             Populate_file_treeview(jsrf_file);
 
             current_filepath = filepath;
-
             lab_filename.Text = Path.GetFileName(filepath);
 
             return jsrf_file;
@@ -399,7 +394,7 @@ namespace JSRF_Tool_2
                 return;
             }
 
-            byte[] data = Collapse_model_vertices(data_block);
+            byte[] data = Collapse_model_vertices(current_item_data);
 
 
             jsrf_file.set_item(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, data);
@@ -514,7 +509,7 @@ namespace JSRF_Tool_2
                 return;
             }
 
-            byte[] data = fix_mdl_draw_distance(data_block);
+            byte[] data = fix_mdl_draw_distance(current_item_data);
 
             //byte[] data = nullify_model(data_block, 21);
 
@@ -533,6 +528,18 @@ namespace JSRF_Tool_2
         {
             proc_ImgEditor = null; // reset image editor process
             Settings_save(sender, e);
+        }
+
+        // select image editor file path (i.e. photoshop.exe)
+        private void Btn_img_editor_Click(object sender, EventArgs e)
+        {
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK) // Test result.
+            {
+                string path = openFileDialog1.FileName;
+                txtb_img_editor_path.Text = path;
+
+            }
         }
 
         #endregion
@@ -680,31 +687,17 @@ namespace JSRF_Tool_2
         }
 
 
-        // select image editor file path (i.e. photoshop.exe)
-        private void Btn_img_editor_Click(object sender, EventArgs e)
-        {
-            DialogResult result = openFileDialog1.ShowDialog();
-            if (result == DialogResult.OK) // Test result.
-            {
-                string path = openFileDialog1.FileName;
-                txtb_img_editor_path.Text = path;
-
-            }
-        }
-
-
         #endregion
 
 
         #region TreeView
 
-        /// <summary>
-        /// load MULT / NORM class object into the treeview
-        /// </summary>
-        private void Populate_file_treeview(JSRF_Containers file)
+
+        // load MULT / NORM class object into the treeview
+        private void Populate_file_treeview(File_Containers file)
         {
             #region MULT
-            if (file.type == JSRF_Containers.container_types.MULT)
+            if (file.type == File_Containers.container_types.MULT)
             {
                 // cast object as MULT class
                 //JSRF_Container.MULT_list MULT = (JSRF_Container.MULT_list)file;
@@ -729,10 +722,10 @@ namespace JSRF_Tool_2
                     // loop through NORMs child items
                     for (int n = 0; n < file.MULT_root.items[m].items.Count; n++)
                     {
-                        JSRF_Containers.item item = file.MULT_root.items[m].items[n];
+                        File_Containers.item item = file.MULT_root.items[m].items[n];
 
-                        if (item.type == JSRF_Containers.item_data_type.MDLB) { root.Nodes[m].BackColor = System.Drawing.Color.PaleVioletRed; }
-                        if (item.type == JSRF_Containers.item_data_type.Texture)
+                        if (item.type == File_Containers.item_data_type.MDLB) { root.Nodes[m].BackColor = System.Drawing.Color.PaleVioletRed; }
+                        if (item.type == File_Containers.item_data_type.Texture)
                         {
                             // set parent node color
                             root.Nodes[m].BackColor = System.Drawing.Color.SandyBrown;
@@ -741,7 +734,7 @@ namespace JSRF_Tool_2
                         }
 
                         // if its a material we store it in the materials list
-                        if (item.type == JSRF_Containers.item_data_type.Material)
+                        if (item.type == File_Containers.item_data_type.Material)
                         {
                             root.Nodes[m].BackColor = System.Drawing.Color.Linen;
                             // file_has_materials = true; 
@@ -786,7 +779,7 @@ namespace JSRF_Tool_2
             #endregion
 
             #region NORM
-            if (file.type == JSRF_Containers.container_types.NORM)
+            if (file.type == File_Containers.container_types.NORM)
             {
                 // cast object as MULT class
                 //JSRF_Container.MULT_list MULT = (JSRF_Container.MULT_list)file;
@@ -800,10 +793,10 @@ namespace JSRF_Tool_2
 
                 for (int n = 0; n < file.NORM_root.items.Count; n++)
                 {
-                    JSRF_Containers.item item = file.NORM_root.items[n];
+                    File_Containers.item item = file.NORM_root.items[n];
 
-                    if (item.type == JSRF_Containers.item_data_type.MDLB) { root.BackColor = System.Drawing.Color.PaleVioletRed; }
-                    if (item.type == JSRF_Containers.item_data_type.Texture)
+                    if (item.type == File_Containers.item_data_type.MDLB) { root.BackColor = System.Drawing.Color.PaleVioletRed; }
+                    if (item.type == File_Containers.item_data_type.Texture)
                     {
                         // set parent node color
                         root.BackColor = System.Drawing.Color.SandyBrown;
@@ -812,7 +805,7 @@ namespace JSRF_Tool_2
                     }
 
                     // if its a material we store it in the materials list
-                    if (item.type == JSRF_Containers.item_data_type.Material)
+                    if (item.type == File_Containers.item_data_type.Material)
                     {
                         root.BackColor = System.Drawing.Color.Linen;
                         // file_has_materials = true; 
@@ -842,7 +835,7 @@ namespace JSRF_Tool_2
             #region Indexed
 
            
-            if (file.type == JSRF_Containers.container_types.indexed)
+            if (file.type == File_Containers.container_types.indexed)
             {
                 TreeNode root = new TreeNode(file.type.ToString() + " [" + (file.INDX_root.items.Count) + "]");
                 trv_file.Nodes.Add(root);
@@ -852,7 +845,7 @@ namespace JSRF_Tool_2
                 // for each item in file.INDX_root
                 for (int m = 0; m < file.INDX_root.items.Count; m++)
                 {
-                    JSRF_Containers.item item = file.INDX_root.items[m];
+                    File_Containers.item item = file.INDX_root.items[m];
                     
                     TreeNode nChild = new TreeNode(String.Format("{0,4}",   item.type.ToString()));
                     nChild.Text = String.Format("{0,4} {1,-14}", m.ToString(), "   " + item.type.ToString());
@@ -1118,7 +1111,7 @@ namespace JSRF_Tool_2
             #endregion
         }
 
-
+        // when node is selected
         private void Trv_file_AfterSelect(object sender, TreeViewEventArgs e)
         {
             Load_TreeView_item(e.Node);
@@ -1126,67 +1119,65 @@ namespace JSRF_Tool_2
             last_selected_node = e.Node; //e.Node
         }
 
+        // load treeview item/data
         private void Load_TreeView_item(TreeNode node)
         {
-            // disable panels
-            panel_mat_editor.Enabled = false;
-            pictureBox_texture_editor.Enabled = false;
-            elementHost_model_editor.Enabled = false;
+            panel_mat_editor.Enabled = false; // clear material editor
             rtxtb_material.Clear();
+            pictureBox_texture_editor.Enabled = false; // clear texture editor
+            elementHost_model_editor.Enabled = false; // clear model editor
 
 
             if (node == null) { MessageBox.Show("Error: node is null."); return; }
             if (node.Nodes == null) { MessageBox.Show("Error: node.Nodes is null."); return; }
+            if (node.Nodes.Count > 0) { return; } // if node is an empty container, ignore
 
-            // if node is a container, ignore
-            if (node.Nodes.Count > 0) { return; }
+            // get item from 'jsrf_file'
+            File_Containers.item item = jsrf_file.get_item(node.Parent.Index, node.Index);
 
-            // get item from jsrf_file
-            JSRF_Containers.item item = jsrf_file.get_item(node.Parent.Index, node.Index);
-
-            lab_itemSel_length.Text = "(" + (item.data.Length.ToString("# ##0") + " bytes").PadRight(10) + ")";
-
-            // if empty
+            // if item is empty
             if (item.data.Length == 0)
             {
-                if (item.type != JSRF_Containers.item_data_type.empty && item.type != JSRF_Containers.item_data_type.unkown)
+                if (item.type != File_Containers.item_data_type.empty && item.type != File_Containers.item_data_type.unkown)
                 {
                     MessageBox.Show("Item data is empty.");
                     return;
                 }
             }
 
-            // item data and store in global variable 
-            data_block = item.data;
+            // set label defining item's size in bytes
+            lab_itemSel_length.Text = "(" + (item.data.Length.ToString("# ##0") + " bytes").PadRight(10) + ")";
+
+            // cope item.data to global variable
+            current_item_data = item.data;
 
             switch (item.type)
             {
                 // Texture
-                case JSRF_Containers.item_data_type.Texture:
-                    Load_block_Texture(data_block, false, false); //load_block_Texture(data_block, "tmp", false);
+                case File_Containers.item_data_type.Texture:
+                    Load_block_Texture(current_item_data, false, false);
                     pictureBox_texture_editor.Enabled = true;
                     tabControl1.SelectedIndex = 01;
                     break;
 
                 // MDLB Model
-                case JSRF_Containers.item_data_type.MDLB:
+                case File_Containers.item_data_type.MDLB:
                     mdlb_first_load = true;
-                    Load_block_MDLB(data_block, 21);
+                    Load_block_MDLB(current_item_data, 21);
                     elementHost_model_editor.Enabled = true;
                     tabControl1.SelectedIndex = 0;
                     break;
 
-                // MDLBL Model
-                case JSRF_Containers.item_data_type.MDLBL:
+                // Level Model
+                case File_Containers.item_data_type.MDLBL:
 
-                    load_level_model(data_block);
-                    //Load_block_MDLB(data_block, 21);
+                    load_level_model(current_item_data);
                     elementHost_model_editor.Enabled = true;
                     tabControl1.SelectedIndex = 0;
                     break;
 
                 // Material
-                case JSRF_Containers.item_data_type.Material:
+                case File_Containers.item_data_type.Material:
                     Load_block_Material_info(item.data);
                     panel_mat_editor.Enabled = true;
                     break;
@@ -1205,31 +1196,20 @@ namespace JSRF_Tool_2
             }
 
             // check if selected item is an MDLB
-            JSRF_Containers.item selected_item = jsrf_file.get_item(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index);
-            if (selected_item.type != JSRF_Containers.item_data_type.MDLB)
+            File_Containers.item selected_item = jsrf_file.get_item(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index);
+            if (selected_item.type != File_Containers.item_data_type.MDLB)
             {
                 MessageBox.Show("Selected item is not a MDLB.");
                 return false;
             }
 
-            if (model == null) { MessageBox.Show("Model is empty or no model selected."); return false; }
-            if (model.VertexBlock_header_List == null) { MessageBox.Show("Model header is null."); return false; }
-            if (model.VertexBlock_header_List.Count == 0) { MessageBox.Show("Model contains 0 model parts."); return false; }
+            if (current_model == null) { MessageBox.Show("Model is empty or no model selected."); return false; }
+            if (current_model.VertexBlock_header_List == null) { MessageBox.Show("Model header is null."); return false; }
+            if (current_model.VertexBlock_header_List.Count == 0) { MessageBox.Show("Model contains 0 model parts."); return false; }
 
             return true;
         }
 
-
-
-        /// <summary>
-        /// clear variables of current loaded file (file treeviez, MULT instance ...)
-        /// </summary>
-        private void Clear_file_view()
-        {
-            fdata = null;
-            trv_file.Nodes.Clear();
-            container_type = "null";
-        }
 
         #endregion
 
@@ -1237,29 +1217,9 @@ namespace JSRF_Tool_2
 
         private void load_level_model(byte[] data)
         {
-            Int32 tex_count = BitConverter.ToInt32(data, 16);
-            int tex_size = 4 * tex_count;
-
-            /*
-            int tex_count = BitConverter.ToInt32(data, 16);
-            int draw_dist_pos = 16 + 48 + tex_count * 4;
-
-            float draw_dist = BitConverter.ToSingle(data, draw_dist_pos);
-
-           double result = Convert.ToDouble(draw_dist);
-            long lVal = BitConverter.DoubleToInt64Bits(result);
-            string hex = lVal.ToString("X");
-
-            txtb_test.Text  = draw_dist.ToString();
-            */
+            Level_Model mdl = new Level_Model(data);
         }
-        /*
-        unsafe string ToHexString(float f)
-        {
-            var i = *((int*)&f);
-            return "0x" + i.ToString("X8");
-        }
-        */
+
         #endregion
 
 
@@ -1271,13 +1231,12 @@ namespace JSRF_Tool_2
         /// </summary>
         private void Load_block_MDLB(byte[] data, int mdl_partnum)
         {
-            model = new DataFormats.JSRF.MDLB(data);
-            lab_mdl_mat_typex.Text = "mat count: " + model.header.materials_count.ToString();
+            current_model = new DataFormats.JSRF.MDLB(data);
 
-            lab_mdl_mat_vtx.Text = "mat vtx count: ";
-            if (mdl_partnum == model.header.model_parts_count)
+            if (current_model.Model_Parts_header_List.Count == 0)
             {
-                lab_mdl_mat_vtx.Text = "mat vtx count: " + model.Model_Parts_header_List[mdl_partnum-1].materials_count;
+                System.Windows.MessageBox.Show("Error: MDLB has 0 model parts.");
+                return;
             }
 
             // gets material from the previous parent node or node that contains materials and has the same count of child items as the textures nodes
@@ -1286,24 +1245,21 @@ namespace JSRF_Tool_2
             List<GeometryModel3D> meshes = new List<GeometryModel3D>();
          
 
-            // to do materials
-            // how to load when no HB?
-            #region model part
+            #region selected model part
 
-            // model part we want to export (models have up to 20 parts)
-            // usually part 20 (or 19 since from 0 to 19) is the actual mesh
-            // lower number parts often are just cubes that seem to be the animation bones
-            // int part = model.VertexBlock_header_List.Count - 1;
+            // model part we want to export (models have up to 21 parts)
+            // usually part 21 (20, since 0 to 20) is the actual mesh
+            // lower number parts often are just cubes at the position of the bone
 
             // if its the first time its loaded from the treeview we load the last part
             // otherwise we let the user specify what part to load from the model viewer
             if (mdlb_first_load)
             {
                 // if part number higher than what the MDLB has, we load the last part
-                if (mdl_partnum > model.VertexBlock_header_List.Count - 1)
+                if (mdl_partnum > current_model.VertexBlock_header_List.Count - 1)
                 {
-                    mdl_partnum = model.VertexBlock_header_List.Count - 1;
-                    txtb_mdl_partnum.Text = (model.VertexBlock_header_List.Count - 1).ToString();
+                    mdl_partnum = current_model.VertexBlock_header_List.Count - 1;
+                    txtb_mdl_partnum.Text = (current_model.VertexBlock_header_List.Count - 1).ToString();
                 }
 
                 if (mdl_partnum < 0)
@@ -1312,50 +1268,51 @@ namespace JSRF_Tool_2
                 }
             }
 
-            lab_mdlb_parts_count.Text = model.VertexBlock_header_List.Count.ToString();
-
             #endregion
 
-
-            if (model.Model_Parts_header_List.Count == 0)
-            {
-                System.Windows.MessageBox.Show("Error: MDLB has 0 model parts.");
-                return;
-            }
 
             #region Load Header data
 
             // material clusters
-            int mat_cluster_count = model.Model_Parts_header_List[mdl_partnum].triangle_groups_count;
+            int mat_cluster_count = current_model.Model_Parts_header_List[mdl_partnum].triangle_groups_count;
 
             // HEADER DATA
-            int vert_size = model.VertexBlock_header_List[mdl_partnum].vertex_def_size;
-            int start_offset = model.VertexBlock_header_List[mdl_partnum].vertex_buffer_offset + 16;
-            int vert_count = model.VertexBlock_header_List[mdl_partnum].vertex_count;
+            int vert_size = current_model.VertexBlock_header_List[mdl_partnum].vertex_def_size;
+            int start_offset = current_model.VertexBlock_header_List[mdl_partnum].vertex_buffer_offset + 16;
+            int vert_count = current_model.VertexBlock_header_List[mdl_partnum].vertex_count;
 
-            lab_vtx_flag.Text = (model.VertexBlock_header_List[mdl_partnum].unk_flag).ToString();
+            lab_vtx_flag.Text = (current_model.VertexBlock_header_List[mdl_partnum].unk_flag).ToString();
 
             int end_offset = (vert_size * vert_count) + start_offset;
 
-            int tris_start = model.VertexBlock_header_List[mdl_partnum].triangles_buffer_offset + 16;
-            int tris_count = model.VertexBlock_header_List[mdl_partnum].triangles_count;
+            int tris_start = current_model.VertexBlock_header_List[mdl_partnum].triangles_buffer_offset + 16;
+            int tris_count = current_model.VertexBlock_header_List[mdl_partnum].triangles_count;
             end_offset = tris_start + (tris_count * 2);
 
             #endregion
 
             #region set model viewer info labels
 
+            // materials count
+            lab_mdl_mat_typex.Text = "mat count: " + current_model.header.materials_count.ToString();
+            // materials defined with 'Vertex_triangles_buffers_header'
+            lab_mdl_mat_vtx.Text = "mat vtx count: ";
+
+            if (mdl_partnum == current_model.header.model_parts_count)
+            {
+                lab_mdl_mat_vtx.Text = "mat vtx count: " + current_model.Model_Parts_header_List[mdl_partnum - 1].materials_count;
+            }
+            lab_mdlb_parts_count.Text = current_model.VertexBlock_header_List.Count.ToString();
+
             lab_vertBlockSize.Text = vert_size.ToString();
             lab_vert_count.Text = vert_count.ToString();
             lab_tris_count.Text = (tris_count / 3).ToString();
 
-            string is_stripped = "no";
-            if (model.VertexBlock_header_List[mdl_partnum].stripped_triangles == 1)
+            lab_triStrip.Text = "no";
+            if (current_model.VertexBlock_header_List[mdl_partnum].stripped_triangles == 1)
             {
-                is_stripped = "yes";
+                lab_triStrip.Text = "yes";
             }
-
-            lab_triStrip.Text = is_stripped;
 
             #endregion
 
@@ -1516,7 +1473,7 @@ namespace JSRF_Tool_2
             }
 
             // if stripped convert back to triangle list
-            if (model.VertexBlock_header_List[mdl_partnum].stripped_triangles == 1)
+            if (current_model.VertexBlock_header_List[mdl_partnum].stripped_triangles == 1)
             {
                 Int32Collection triangles_list = new Int32Collection();
 
@@ -1558,12 +1515,12 @@ namespace JSRF_Tool_2
             // model color
             System.Windows.Media.Color clr = System.Windows.Media.Color.FromRgb(128, 128, 128);
             // get first triangle group's material
-            if (model.Model_Parts_header_List[mdl_partnum].triangle_groups_List.Count > 0)
+            if (current_model.Model_Parts_header_List[mdl_partnum].triangle_groups_List.Count > 0)
             {
-                MDLB.triangle_group tg = model.Model_Parts_header_List[mdl_partnum].triangle_groups_List[0];
-                if(model.materials_List.Count > 0)
+                MDLB.triangle_group tg = current_model.Model_Parts_header_List[mdl_partnum].triangle_groups_List[0];
+                if(current_model.materials_List.Count > 0)
                 {       
-                    MDLB.color color = model.materials_List[tg.material_index].color;
+                    MDLB.color color = current_model.materials_List[tg.material_index].color;
                     clr.R = color.R; clr.G = color.G; clr.B = color.B;
                 }
             }
@@ -1666,16 +1623,16 @@ namespace JSRF_Tool_2
         /// <param name="mdl_partnum">model part number</param>
         private byte[] Collapse_model_vertices(byte[] data)
         {
-            model = new DataFormats.JSRF.MDLB(data);
+            current_model = new DataFormats.JSRF.MDLB(data);
 
             // for each model part
-            for (int i = 0; i < model.VertexBlock_header_List.Count; i++)
+            for (int i = 0; i < current_model.VertexBlock_header_List.Count; i++)
             {
                 #region get header data needed for model part
 
-                int vert_size = model.VertexBlock_header_List[i].vertex_def_size;
-                int start_offset = model.VertexBlock_header_List[i].vertex_buffer_offset + 16;
-                int vert_count = model.VertexBlock_header_List[i].vertex_count;
+                int vert_size = current_model.VertexBlock_header_List[i].vertex_def_size;
+                int start_offset = current_model.VertexBlock_header_List[i].vertex_buffer_offset + 16;
+                int vert_count = current_model.VertexBlock_header_List[i].vertex_count;
                 int end_offset = (vert_size * vert_count) + start_offset;
 
                 #endregion
@@ -1704,7 +1661,7 @@ namespace JSRF_Tool_2
         private byte[] Nullify_model(byte[] data, int mdl_partnum)
         {
 
-            model = new DataFormats.JSRF.MDLB(data);
+            current_model = new DataFormats.JSRF.MDLB(data);
             int part = mdl_partnum;
 
             // if its the first time its loaded from the treeview we load the last part
@@ -1712,9 +1669,9 @@ namespace JSRF_Tool_2
             if (mdlb_first_load)
             {
                 // if part number higher than what the MDLB has, we load the last part
-                if (mdl_partnum > model.VertexBlock_header_List.Count - 1)
+                if (mdl_partnum > current_model.VertexBlock_header_List.Count - 1)
                 {
-                    part = model.VertexBlock_header_List.Count - 1;
+                    part = current_model.VertexBlock_header_List.Count - 1;
                     //txtb_mdl_partnum.Text = (model.VertexBlock_header_List.Count - 1).ToString();
                 }
 
@@ -1748,7 +1705,7 @@ namespace JSRF_Tool_2
         private byte[] make_model_invisible(byte[] data, int mdl_partnum)
         {
 
-            model = new DataFormats.JSRF.MDLB(data);
+            current_model = new DataFormats.JSRF.MDLB(data);
             int part_num = mdl_partnum;
 
             // if its the first time its loaded from the treeview we load the last part
@@ -1756,9 +1713,9 @@ namespace JSRF_Tool_2
             if (mdlb_first_load)
             {
                 // if part number higher than what the MDLB has, we load the last part
-                if (mdl_partnum > model.VertexBlock_header_List.Count - 1)
+                if (mdl_partnum > current_model.VertexBlock_header_List.Count - 1)
                 {
-                    part_num = model.VertexBlock_header_List.Count - 1;
+                    part_num = current_model.VertexBlock_header_List.Count - 1;
                     //txtb_mdl_partnum.Text = (model.VertexBlock_header_List.Count - 1).ToString();
                 }
 
@@ -1769,12 +1726,12 @@ namespace JSRF_Tool_2
             }
 
 
-            int tris_group_count = model.Model_Parts_header_List[part_num].triangle_groups_count;
+            int tris_group_count = current_model.Model_Parts_header_List[part_num].triangle_groups_count;
 
             for (int i = 0; i < tris_group_count; i++)
             {
                 // make triangle group count = 0
-                int tris_group_offset = model.Model_Parts_header_List[part_num].triangle_groups_list_offset + i * 32;
+                int tris_group_offset = current_model.Model_Parts_header_List[part_num].triangle_groups_list_offset + i * 32;
 
                 Buffer.BlockCopy(new byte[4], 0, data, tris_group_offset + 16, 4);
 
@@ -1790,9 +1747,9 @@ namespace JSRF_Tool_2
         /// <returns></returns>
         private byte[] fix_mdl_draw_distance(byte[] data)
         {
-            model = new DataFormats.JSRF.MDLB(data);
+            current_model = new DataFormats.JSRF.MDLB(data);
 
-            int drawdistY_offset = 32 + ((model.VertexBlock_header_List.Count - 1) * 128) + 4;
+            int drawdistY_offset = 32 + ((current_model.VertexBlock_header_List.Count - 1) * 128) + 4;
 
             // set y draw distance to 8.5
             Buffer.BlockCopy(BitConverter.GetBytes(-1.1957052f), 0, data, drawdistY_offset, 4);
@@ -1884,7 +1841,7 @@ namespace JSRF_Tool_2
 
             txtb_mdl_partnum.Text = num.ToString();
 
-            Load_block_MDLB(data_block, num);
+            Load_block_MDLB(current_item_data, num);
         }
         // switch model part -=
         private void Btn_mdl_partMin_Click(object sender, EventArgs e)
@@ -1903,7 +1860,7 @@ namespace JSRF_Tool_2
 
                 txtb_mdl_partnum.Text = num.ToString();
 
-                Load_block_MDLB(data_block, num - 1);
+                Load_block_MDLB(current_item_data, num - 1);
             }
         }
 
@@ -1935,7 +1892,7 @@ namespace JSRF_Tool_2
             byte swizzled = data[26]; // if = 0 texture is swizzled (swizzle for xbox textures) // http:// fgiesen.wordpress.com/2011/01/17/texture-tiling-and-swizzling/ // http:// gtaforums.com/topic/213907-unswizzle-tool/#entry3172924 // http:// forum.xentax.com/viewtopic.php?t=2640
             // http:// en.wikipedia.org/wiki/Z-order_curve // morton order
             byte unk_27 = data[27];
-            Int16 mipmap_count = Convert.ToInt16(data_block[28]);
+            Int16 mipmap_count = Convert.ToInt16(current_item_data[28]);
 
             Int32 end_padding = BitConverter.ToInt32(data, 28); // mip map count if > 0 add 8 bytes of padding at the end of file
 
@@ -2404,7 +2361,7 @@ namespace JSRF_Tool_2
         /// </remarks>
         private void Extract_texture_by_id(Int32 texture_id)
         {
-            List<JSRF_Containers.item_match> matches = jsrf_file.find_items_ofType(JSRF_Containers.item_data_type.Texture);
+            List<File_Containers.item_match> matches = jsrf_file.find_items_ofType(File_Containers.item_data_type.Texture);
 
             foreach (var m in matches)
             {
@@ -2432,14 +2389,14 @@ namespace JSRF_Tool_2
         /// <remarks>
         /// TODO: add support for files that start with a NORM container.
         /// </remarks>
-        private List<DataFormats.JSRF.Material> Get_materials_to_list(JSRF_Containers file)
+        private List<DataFormats.JSRF.Material> Get_materials_to_list(File_Containers file)
         {
             if (!file.has_items()) { return new List<DataFormats.JSRF.Material>(); }
 
             List<DataFormats.JSRF.Material> materials_list = new List<DataFormats.JSRF.Material>();
 
             // find material items
-            List<JSRF_Containers.item_match> matches = file.find_items_ofType(JSRF_Containers.item_data_type.Material);
+            List<File_Containers.item_match> matches = file.find_items_ofType(File_Containers.item_data_type.Material);
 
             foreach (var item in matches)
             {
@@ -2509,7 +2466,7 @@ namespace JSRF_Tool_2
                 #endregion
 
                 // for each model part we export an SMD file
-                for (int i = 0; i < model.VertexBlock_header_List.Count; i++)
+                for (int i = 0; i < current_model.VertexBlock_header_List.Count; i++)
                 {
                     Export_model_part(save_dir, filename, i);
                 }
@@ -2530,7 +2487,7 @@ namespace JSRF_Tool_2
 
 #endif
 
-            if (model == null)
+            if (current_model == null)
             {
                 MessageBox.Show("export_model_part(" + part_num + ") Error, could not export model part (model is null)");
                 return;
@@ -2538,26 +2495,26 @@ namespace JSRF_Tool_2
 
             #region get & parse model data
 
-            byte[] data = data_block;
+            byte[] data = current_item_data;
 
             // TODO split mesh by material cluster
             // right now we only read the first cluster and get the material number (number for the texture_id_list)
-            int mat_cluster_count = model.Model_Parts_header_List[part_num].triangle_groups_count;
+            int mat_cluster_count = current_model.Model_Parts_header_List[part_num].triangle_groups_count;
 
             #region Load Header data
 
-            int vert_size = model.VertexBlock_header_List[part_num].vertex_def_size;
-            int start_offset = model.VertexBlock_header_List[part_num].vertex_buffer_offset + 16;
-            int vert_count = model.VertexBlock_header_List[part_num].vertex_count;
+            int vert_size = current_model.VertexBlock_header_List[part_num].vertex_def_size;
+            int start_offset = current_model.VertexBlock_header_List[part_num].vertex_buffer_offset + 16;
+            int vert_count = current_model.VertexBlock_header_List[part_num].vertex_count;
             int end_offset = (vert_size * vert_count) + start_offset;
 
-            int tris_start = model.VertexBlock_header_List[part_num].triangles_buffer_offset + 16;
-            int tris_count = model.VertexBlock_header_List[part_num].triangles_count;
+            int tris_start = current_model.VertexBlock_header_List[part_num].triangles_buffer_offset + 16;
+            int tris_count = current_model.VertexBlock_header_List[part_num].triangles_count;
             int tris_end = tris_start + (tris_count * 2);
 
             #endregion
 
-            lab_triStrip.Text = model.VertexBlock_header_List[part_num].stripped_triangles.ToString();
+            lab_triStrip.Text = current_model.VertexBlock_header_List[part_num].stripped_triangles.ToString();
 
             // read and store mesh data
             MeshData mesh_data = new MeshData();
@@ -2692,7 +2649,7 @@ namespace JSRF_Tool_2
             }
 
             // if stripped convert back to triangle list
-            if (model.VertexBlock_header_List[part_num].stripped_triangles == 1)
+            if (current_model.VertexBlock_header_List[part_num].stripped_triangles == 1)
             {
                 Int32Collection triangles_list = new Int32Collection();
 
@@ -2736,9 +2693,9 @@ namespace JSRF_Tool_2
 
 
             // for each model part
-            for (int i = 0; i < model.Model_Parts_header_List.Count -1; i++)
+            for (int i = 0; i < current_model.Model_Parts_header_List.Count -1; i++)
             {
-                MDLB.Model_Part_header mp = model.Model_Parts_header_List[i];
+                MDLB.Model_Part_header mp = current_model.Model_Parts_header_List[i];
                 // if first node
                 if (i == 0)
                 {
@@ -2758,7 +2715,7 @@ namespace JSRF_Tool_2
                     if (mp.real_parent_id > -1)
                     {
                         // get parent bone position
-                        Vector3 vpp = model.Model_Parts_header_List[mp.real_parent_id].bone_pos;
+                        Vector3 vpp = current_model.Model_Parts_header_List[mp.real_parent_id].bone_pos;
                         // substract parent position // invert X pos  *-1
                         pos = new Vector3((pos.X - vpp.X), pos.Y - vpp.Y, pos.Z - vpp.Z);
                     }
@@ -2768,16 +2725,16 @@ namespace JSRF_Tool_2
             }
 
             // if model only has one part (static mesh)
-            if (model.Model_Parts_header_List.Count == 1)
+            if (current_model.Model_Parts_header_List.Count == 1)
             {
-                Vector3 pos = model.Model_Parts_header_List[0].bone_pos;
+                Vector3 pos = current_model.Model_Parts_header_List[0].bone_pos;
                 nodes.Add(" " + 0 + " " + mdl_type_prefix + 0 + " " + -1);
                 skeleton.Add(" " + 0 + " " + pos.X + " " + pos.Y + " " + pos.Z + " " + 0 + " " + 0 + " " + 0);
             }
 
             string filepath = save_dir + filename + "_" + mdl_type_prefix + part_num + ".smd";
 
-            if (part_num == model.Model_Parts_header_List.Count - 1)
+            if (part_num == current_model.Model_Parts_header_List.Count - 1)
             {
                 filepath = save_dir + filename + ".smd";
             }
@@ -2830,9 +2787,9 @@ namespace JSRF_Tool_2
                     #region determine material group
 
 
-                    for (int g = 0; g < model.Model_Parts_header_List[part_num].triangle_groups_List.Count; g++)
+                    for (int g = 0; g < current_model.Model_Parts_header_List[part_num].triangle_groups_List.Count; g++)
                     {
-                        MDLB.triangle_group tg = model.Model_Parts_header_List[part_num].triangle_groups_List[g];
+                        MDLB.triangle_group tg = current_model.Model_Parts_header_List[part_num].triangle_groups_List[g];
 
                         // if triangle index is over this group's then go to next
                         if (i / 3 > tg.triangle_start_index + (tg.triangle_group_size - 1))
@@ -2937,7 +2894,7 @@ namespace JSRF_Tool_2
             string nodeName = Regex.Replace(current_node.Text, @"\s+", "_");
             string rootNodeName = "";
 
-            if (jsrf_file.type == JSRF_Containers.container_types.MULT)
+            if (jsrf_file.type == File_Containers.container_types.MULT)
             {
                 rootNodeName = "MULT_";
             }
@@ -2957,7 +2914,7 @@ namespace JSRF_Tool_2
                 }
                 string path = file.FileName;
 
-                File.WriteAllBytes(saveFileDialog1.FileName, data_block);
+                File.WriteAllBytes(saveFileDialog1.FileName, current_item_data);
             }
         }
 
@@ -3020,7 +2977,7 @@ namespace JSRF_Tool_2
 
             #region get texture id from last loaded node data
 
-            string selected_node_type = JSRF_Container.get_block_header_type(data_block);
+            string selected_node_type = File_Headers.get_block_header_type(current_item_data);
 
             if (selected_node_type != "Texture")
             {
@@ -3030,9 +2987,9 @@ namespace JSRF_Tool_2
 
             string texture_id = "";
 
-            if (JSRF_Container.get_block_header_type(data_block) == "Texture")
+            if (File_Headers.get_block_header_type(current_item_data) == "Texture")
             {
-                texture_id = Load_block_Texture(data_block, true, true);
+                texture_id = Load_block_Texture(current_item_data, true, true);
 
                 if (texture_id == "")
                 {
@@ -3097,7 +3054,7 @@ namespace JSRF_Tool_2
 
             #region get texture id from last loaded node data block
 
-            string selected_node_type = JSRF_Container.get_block_header_type(data_block);
+            string selected_node_type = File_Headers.get_block_header_type(current_item_data);
 
             if (selected_node_type != "Texture")
             {
@@ -3107,10 +3064,10 @@ namespace JSRF_Tool_2
 
             string texture_id = "";
 
-            if (JSRF_Container.get_block_header_type(data_block) == "Texture")
+            if (File_Headers.get_block_header_type(current_item_data) == "Texture")
             {
 
-                texture_id = BitConverter.ToInt32(data_block, 0).ToString();
+                texture_id = BitConverter.ToInt32(current_item_data, 0).ToString();
                 // texture_id = load_block_Texture(data_block, true, true);
 
                 if (texture_id == "")
@@ -3140,14 +3097,14 @@ namespace JSRF_Tool_2
             //Int32 unk_16 = BitConverter.ToInt32(data_block, 16);
             //Int32 resolution = BitConverter.ToInt32(data_block, 20);
 
-            byte dxt_format = data_block[24]; // 5 = dxt1 | 6 = dxt3 |
+            byte dxt_format = current_item_data[24]; // 5 = dxt1 | 6 = dxt3 |
             //byte unk_25 = data_block[25]; // has alpha? is a cube map? not sure, probably if has alpha
             //byte swizzled = data_block[26]; // if = 0 texture is swizzled (swizzle for xbox textures) // http:// fgiesen.wordpress.com/2011/01/17/texture-tiling-and-swizzling/ // http:// gtaforums.com/topic/213907-unswizzle-tool/#entry3172924 // http:// forum.xentax.com/viewtopic.php?t=2640
             // http:// en.wikipedia.org/wiki/Z-order_curve // morton order
             //byte unk_27 = data_block[27];
-            Int16 mipmap_count = Convert.ToInt16(data_block[28]);
+            Int16 mipmap_count = Convert.ToInt16(current_item_data[28]);
 
-            Int32 end_padding = BitConverter.ToInt32(data_block, 28); // mip map count if > 0 add 8 bytes of padding at the end of file
+            Int32 end_padding = BitConverter.ToInt32(current_item_data, 28); // mip map count if > 0 add 8 bytes of padding at the end of file
 
             switch (dxt_format)
             {
@@ -3243,7 +3200,7 @@ namespace JSRF_Tool_2
 
             // get original texture header
             byte[] texture_header = new Byte[32];
-            Array.Copy(data_block, 0, texture_header, 0, 32);
+            Array.Copy(current_item_data, 0, texture_header, 0, 32);
 
             // rewrite width value in JSRF texture header
             byte[] wb = BitConverter.GetBytes(width);
@@ -3290,15 +3247,6 @@ namespace JSRF_Tool_2
 
         private void Launch_image_editor(string args)
         {
-            /*
-            Process p = new Process();
-            p.StartInfo.FileName = GetShortPath(txtb_img_editor_path.Text);
-            p.StartInfo.Arguments = args;
-            p.StartInfo.WorkingDirectory = GetShortPath(Path.GetDirectoryName(txtb_img_editor_path.Text));
-            p.Start();
-            */
-
-            
             #region setup process
 
             proc_ImgEditor = new Process
@@ -3316,9 +3264,6 @@ namespace JSRF_Tool_2
 
             #endregion
         
-
-
-            //string test = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(Directory.GetCurrentDirectory());
             proc_ImgEditor.Start();
             
@@ -3352,7 +3297,7 @@ namespace JSRF_Tool_2
                 try
                 {
                     // if MULT container
-                    if (jsrf_file.type == JSRF_Containers.container_types.MULT)
+                    if (jsrf_file.type == File_Containers.container_types.MULT)
                     {
 
                         if (y >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
@@ -3363,7 +3308,7 @@ namespace JSRF_Tool_2
                         trv_file.SelectedNode = trv_file.Nodes[0].Nodes[x].Nodes[y];
                     }
                     // if NORM or indexed root type of container
-                    if (jsrf_file.type == JSRF_Containers.container_types.NORM || jsrf_file.type == JSRF_Containers.container_types.indexed)
+                    if (jsrf_file.type == File_Containers.container_types.NORM || jsrf_file.type == File_Containers.container_types.indexed)
                     {
                         if (x >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
                         {
@@ -3488,7 +3433,7 @@ namespace JSRF_Tool_2
                 return;
             }
 
-            jsrf_file.insert_item_after(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, JSRF_Containers.item_data_type.unkown, block_copy_clipboard);
+            jsrf_file.insert_item_after(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, File_Containers.item_data_type.unkown, block_copy_clipboard);
 
             Rebuild_file(true, true, true);
         }

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.Vector;
 using System.IO;
 
-namespace JSRF_Tool_2
+namespace JSRF_ModTool
 {
     class MDLB_builder
     {
@@ -254,7 +254,7 @@ namespace JSRF_Tool_2
                 for (int i = 0; i < mdl_parts_count; i++)
                 {
                     // only build triangle_groups array if the SMD has more than one material
-                    if (SMD_parts[i].mat_groups_list.Count > 1 || Main.model.Model_Parts_header_List[i].triangle_groups_count > 0)
+                    if (SMD_parts[i].mat_groups_list.Count > 1 || Main.current_model.Model_Parts_header_List[i].triangle_groups_count > 0)
                     {
 
                         // for each material group from the imported SMD file
@@ -280,9 +280,9 @@ namespace JSRF_Tool_2
 
                         
                             // if triangle group exists in original model, get original values for (mesh_type, material_index)
-                            if (Main.model.Model_Parts_header_List[i].triangle_groups_List.Count > 0 && m < Main.model.Model_Parts_header_List[i].triangle_groups_List.Count)
+                            if (Main.current_model.Model_Parts_header_List[i].triangle_groups_List.Count > 0 && m < Main.current_model.Model_Parts_header_List[i].triangle_groups_List.Count)
                             {
-                                DataFormats.JSRF.MDLB.triangle_group ori_tg = Main.model.Model_Parts_header_List[i].triangle_groups_List[m];
+                                DataFormats.JSRF.MDLB.triangle_group ori_tg = Main.current_model.Model_Parts_header_List[i].triangle_groups_List[m];
                                 tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) +1, SMD_parts[i].mat_groups_list[m].triangle_start_index, mesh_type, ori_tg.material_index);
                             }
                             
@@ -313,7 +313,7 @@ namespace JSRF_Tool_2
             }
 
             // if original model gave materials
-            if (Main.model.header.materials_count > 0)
+            if (Main.current_model.header.materials_count > 0)
             {
                 // add serialized material to list of byte arrays
                 bytes_materials_list.Add(new byte[calc_remainder_padding(bytes_materials_list.Count * 20)]);
@@ -331,7 +331,7 @@ namespace JSRF_Tool_2
 
             int verts_tris_buffers_start_offset = 0;
             // calculate start offset for vertex/triangles buffers
-            if (Main.model.header.materials_count > 0) //(Main.model.header.materials_count > 0)
+            if (Main.current_model.header.materials_count > 0) //(Main.model.header.materials_count > 0)
             {
                  verts_tris_buffers_start_offset = (mdl_parts_count * 128) + triangle_groups_list_bytes.Length + materials_list_bytes.Length;
             }
@@ -365,10 +365,10 @@ namespace JSRF_Tool_2
                 #region build vertex tris buffer materials list
 
                 // if from original model, materials = 0, it means materials are stored after the vertex_tris_header, (meaning there is no materials table after the triangle groups)
-                if (Main.model.header.materials_count == 0)
+                if (Main.current_model.header.materials_count == 0)
                 {
                     // lower part
-                    if (i < mdl_parts_count - 1 && Main.model.header.materials_count == 0) //materials.Count > 0
+                    if (i < mdl_parts_count - 1 && Main.current_model.header.materials_count == 0) //materials.Count > 0
                     {
                         //changed nor sure if this works
                         vtx_materials_count++;
@@ -520,7 +520,7 @@ namespace JSRF_Tool_2
 
                 vertex_tris_header.triangles_count = SMD_parts[i].triangles_list.Count; // + 1
 
-                if (Main.model.header.materials_count > 0)
+                if (Main.current_model.header.materials_count > 0)
                 {
                     vertex_tris_header.vertex_buffer_offset = vertex_blocks_offset + 32; //vtx_materials_list_bytes.Length;
                     vertex_tris_header.triangles_buffer_offset = vertex_tris_header.vertex_buffer_offset + vtx_buffer.Length;
@@ -561,7 +561,7 @@ namespace JSRF_Tool_2
 
                 int head_mat_offset = 0;
 
-                if (Main.model.header.materials_count != 0)
+                if (Main.current_model.header.materials_count != 0)
                 {
                     vertex_tris_buffers.Add(vertex_tris_header.serialize());
 
@@ -591,7 +591,7 @@ namespace JSRF_Tool_2
                 mdl_part_header = new MDLB_Import.MDLB_classes.Model_Part_header();
 
                 mdl_part_header.vertex_block_offset = vertex_blocks_offset; //head_mat_offset
-                if (Main.model.header.materials_count > 0)
+                if (Main.current_model.header.materials_count > 0)
                 {
                     mdl_part_header.materials_count = materials.Count;
                 }
@@ -625,7 +625,7 @@ namespace JSRF_Tool_2
                 // OR if the materials are defined after the vertex_triangles_buffer_header
                 // we base some of these parameters on the original model
 
-                if (Main.model.header.materials_count == 0) //materials.Count == 0
+                if (Main.current_model.header.materials_count == 0) //materials.Count == 0
                 {
 
 
@@ -650,7 +650,7 @@ namespace JSRF_Tool_2
                         mdl_part_header.triangle_groups_count = SMD_parts[i].mat_groups_list.Count;
                     }
 
-                    if (Main.model.Model_Parts_header_List[i].triangle_groups_list_offset == 0 && Main.model.Model_Parts_header_List[i].triangle_groups_count == 0)
+                    if (Main.current_model.Model_Parts_header_List[i].triangle_groups_list_offset == 0 && Main.current_model.Model_Parts_header_List[i].triangle_groups_count == 0)
                     {
                         mdl_part_header.triangle_groups_list_offset = (mdl_parts_count * 128)+ i*32;
                         mdl_part_header.triangle_groups_count = 1;
@@ -763,7 +763,7 @@ namespace JSRF_Tool_2
             file_bytes.Add(mdl_part_headers_Serialized_List.SelectMany(byteArr => byteArr).ToArray());
             file_bytes.Add(triangle_groups_list_bytes);
 
-            if (Main.model.header.materials_count != 0) //materials.Count
+            if (Main.current_model.header.materials_count != 0) //materials.Count
             {
                 file_bytes.Add(materials_list_bytes);
             }
@@ -829,11 +829,11 @@ namespace JSRF_Tool_2
         public class model_part_triangle_groups
         {
             //public int model_part_number { get; set; }
-            public List<JSRF_Tool_2.DataFormats.JSRF.MDLB.triangle_group> tri_groups { get; set; }
+            public List<JSRF_ModTool.DataFormats.JSRF.MDLB.triangle_group> tri_groups { get; set; }
 
             public model_part_triangle_groups()
             {
-                tri_groups = new List<JSRF_Tool_2.DataFormats.JSRF.MDLB.triangle_group>();
+                tri_groups = new List<JSRF_ModTool.DataFormats.JSRF.MDLB.triangle_group>();
             }
         }
         */
@@ -845,11 +845,11 @@ namespace JSRF_Tool_2
         /// </summary>
         public class vtx_buffer_materials
         {
-            public List<JSRF_Tool_2.DataFormats.JSRF.MDLB.material> materials { get; set; }
+            public List<JSRF_ModTool.DataFormats.JSRF.MDLB.material> materials { get; set; }
 
-            public vtx_buffer_materials(List<JSRF_Tool_2.DataFormats.JSRF.MDLB.material> _mats)
+            public vtx_buffer_materials(List<JSRF_ModTool.DataFormats.JSRF.MDLB.material> _mats)
             {
-                materials = new List<JSRF_Tool_2.DataFormats.JSRF.MDLB.material>();
+                materials = new List<JSRF_ModTool.DataFormats.JSRF.MDLB.material>();
                 this.materials = materials;
             }
         }

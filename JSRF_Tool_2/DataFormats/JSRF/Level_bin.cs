@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.Vector;
 using System.Runtime.InteropServices;
 using System.IO;
 
-namespace JSRF_Tool_2.DataFormats.JSRF
+namespace JSRF_ModTool.DataFormats.JSRF
 {
 
     /// <summary>

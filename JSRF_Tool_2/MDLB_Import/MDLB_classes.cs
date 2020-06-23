@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JSRF_Tool_2.Vector;
+using JSRF_ModTool.Vector;
 
-namespace JSRF_Tool_2.MDLB_Import
+namespace JSRF_ModTool.MDLB_Import
 {
     public class MDLB_classes
     {

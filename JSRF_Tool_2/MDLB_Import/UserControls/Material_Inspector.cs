@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using JSRF_Tool_2.MDLB_Import;
+using JSRF_ModTool.MDLB_Import;
 
-namespace JSRF_Tool_2.MDLB_Import
+namespace JSRF_ModTool.MDLB_Import
 {
     public partial class Material_Inspector : UserControl
     {

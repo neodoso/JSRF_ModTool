@@ -2,7 +2,7 @@
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Collections.Generic;
-namespace JSRF_Tool_2.DataFormats
+namespace JSRF_ModTool.DataFormats
 {
     /// <summary>
     /// custom XALM model class

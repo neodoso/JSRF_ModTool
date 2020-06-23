@@ -8,8 +8,8 @@
     <ProjectGuid>{883471F4-3330-4A25-B4E4-0463EEF09315}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JSRF_Tool_2</RootNamespace>
-    <AssemblyName>JSRF_Tool_2</AssemblyName>
+    <RootNamespace>JSRF_ModTool</RootNamespace>
+    <AssemblyName>JSRF_ModTool</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -76,8 +76,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataFormats\JSRF\JSRF_Containers.cs" />
-    <Compile Include="DataFormats\JSRF\Level_model.cs" />
+    <Compile Include="DataFormats\JSRF\File_Containers.cs" />
     <Compile Include="DataFormats\JSRF\mission_bin.cs" />
     <Compile Include="DataFormats\JSRF\mission_dat.cs" />
     <Compile Include="Functions\FTP.cs" />
@@ -94,7 +93,7 @@
     </Compile>
     <Compile Include="Functions\ByteConvert.cs" />
     <Compile Include="Functions\Parsing.cs" />
-    <Compile Include="DataFormats\JSRF\MDLBL.cs" />
+    <Compile Include="DataFormats\JSRF\Level_Model.cs" />
     <Compile Include="MDLB_Import\MDLB_classes.cs" />
     <Compile Include="MDLB_Import\Materials.cs" />
     <Compile Include="MDLB_Import\MDLB_builder.cs" />
@@ -174,12 +173,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon1.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Image1.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Graphics\jsrf_soul_icon.png" />
