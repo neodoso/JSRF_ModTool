@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
+using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
@@ -29,17 +30,111 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
         public bool root_node_is_NORM { get; }
 
+        #endregion
 
+        #region containers classes
+
+
+        public enum container_types
+        {
+            unknown,
+            indexed,
+            MULT,
+            NORM,
+        };
+
+        // NCAM is found in beat.bin 
+        public enum item_data_type
+        {
+            empty,
+            invalid,
+            unkown,
+            MDLB,
+            Level_MDLB,
+            Level_Model,
+            Material,
+            Texture,
+            NCAM,
+            Sound
+        };
+
+
+        // MULT container, contains list of NORM containers
+        public class MULT
+        {
+            public List<NORM> items { get; set; }
+
+            public MULT()
+            {
+                items = new List<NORM>();
+            }
+        }
+
+        // NORM container, contains list of item(s)
+        public class NORM
+        {
+            public List<item> items { get; set; }
+
+            public NORM()
+            {
+                items = new List<item>();
+            }
+        }
+
+        // indexed container, contains list of item(s)
+        public class INDEXED
+        {
+            public List<item> items { get; set; }
+
+            public INDEXED()
+            {
+                items = new List<item>();
+            }
+        }
+
+        //List<this.item> items = new List<this.item>();
+
+        
+        public class item_indx
+        {
+            public item_data_type type { get; set; }
+            public byte[] data { get; set; }
+
+            public item_indx(item_data_type _type, byte[] _data)
+            {
+                this.type = _type;
+                this.data = _data;
+            }
+        }
+        
+
+        public class item
+        {
+            public item_data_type type { get; set; }
+            public byte[] data { get; set; }
+            public File_Headers.Indexed_item indexed_item { get; set; }
+
+            public item(item_data_type _type, byte[] _data, File_Headers.Indexed_item _indexed_item = null)
+            {
+                this.type = _type;
+                this.data = _data;
+                this.indexed_item = _indexed_item;
+            }
+        }
+
+        #endregion
+
+        // load file and its contrainers into class: MULT | NORM | INDEXED
         public File_Containers(string filepath = "")
         {
             if (filepath == "") { return; }
             if (!File.Exists(filepath)) { return; }
-            
+
             this.filepath = filepath;
 
             this.file_data = Parsing.FileToByteArray(filepath, 0);
 
-            if(this.file_data.Length == 0)
+            if (this.file_data.Length == 0)
             {
                 MessageBox.Show("File is empty");
                 return;
@@ -116,38 +211,38 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 this.type = container_types.indexed;
 
                 File_Headers.Indexed_container indexed_items = new File_Headers.Indexed_container();
-                indexed_items.get_Indexed(file_data, 0, file_data.Length);
+                indexed_items.get_Indexed(file_data);
 
                 INDX_root = new INDEXED();
                 INDX_root.items = new List<item>();
 
-                for (int i = 0; i < indexed_items.childs.Count; i++)
+                Int32 offset = 0;
+
+                try
                 {
-                    item indx_item;
-                    if (indexed_items.childs[i].block_end < 0) { MessageBox.Show("Error: invalid file structure."); break; }
-                    byte[] childs_buffer = new byte[indexed_items.childs[i].block_end - indexed_items.childs[i].block_start];
-                    Array.Copy(file_data, indexed_items.childs[i].block_start, childs_buffer, 0, indexed_items.childs[i].block_end - indexed_items.childs[i].block_start);
 
-                    item_data_type t = get_item_data_type(childs_buffer);
 
-                    if (t == item_data_type.Texture)
+                    for (int i = 0; i < indexed_items.childs.Count; i++)
                     {
-                       // byte[] tex_buff = new byte[indexed_items.childs[i].block_end - indexed_items.childs[i].block_start];
-                        Array.Copy(file_data, indexed_items.childs[i].block_start+8, childs_buffer, 0, indexed_items.childs[i].block_end - indexed_items.childs[i].block_start);
+                        item indx_item;
+                        if (indexed_items.childs[i].block_end < 0) { MessageBox.Show("Error: invalid file structure."); break; }
+                        byte[] childs_buffer = new byte[indexed_items.childs[i].block_size]; // 
 
-                        indx_item = new item(t, childs_buffer);
-                    } else {
-                         indx_item = new item(t, childs_buffer);
+                        // copy block of data from 'file_data' to 'childs_buffer'
+                        Array.Copy(file_data, indexed_items.childs[i].block_start, childs_buffer, 0, indexed_items.childs[i].block_size);
+
+                        indx_item = new item(indexed_items.childs[i].item_type, childs_buffer, indexed_items.childs[i]);
+                        INDX_root.items.Add(indx_item);
+
+                        offset += indexed_items.childs[i].block_size + indexed_items.childs[i].block_start;
                     }
-                   
+                } catch { 
 
-
-                    INDX_root.items.Add(indx_item);
                 }
             }
         }
 
-        #endregion
+
 
 
         /// <summary>
@@ -224,17 +319,17 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             if (this.type == container_types.MULT)
             {
-                if (this.MULT_root.items.Count > 1) { return true; }
+                if (this.MULT_root.items.Count > 0) { return true; }
             }
 
             if (this.type == container_types.NORM)
             {
-                if (this.NORM_root.items.Count > 1) { return true; }
+                if (this.NORM_root.items.Count > 0) { return true; }
             }
 
             if (this.type == container_types.indexed)
             {
-                if (this.INDX_root.items.Count > 1) { return true; }
+                if (this.INDX_root.items.Count > 0) { return true; }
             }
 
             return false;
@@ -247,7 +342,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             if (this.type == container_types.MULT)
             {
-                if (y == this.MULT_root.items[x].items.Count) { return this.MULT_root.items[x].items[y-1]; } // quickfix of bug in file in : Media\StgObj\CarObj01.dat
+                if (this.MULT_root.items[x].items.Count == 0) { return new item(item_data_type.empty, new byte[0]); }
+                if (y > this.MULT_root.items[x].items.Count) { return this.MULT_root.items[x].items[this.MULT_root.items[x].items.Count-1]; }
                 return this.MULT_root.items[x].items[y];
             }
 
@@ -599,7 +695,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// 
         /// TODO: research to figure out if NORM headers have a flag defines what type child of data blocks it contains? instead of doing this?
         /// </remarks>
-        public item_data_type get_item_data_type(byte[] buff)
+        public static item_data_type get_item_data_type(byte[] buff, Int32 offset = 0)
         {
             if (buff == null) { return item_data_type.invalid; }
             Int32 size = buff.Length;
@@ -610,12 +706,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // texture resolutions
             int[] texture_resolutions = new int[] { 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
 
-            Int32 head = BitConverter.ToInt32(buff, 0);
-            Int32 head_8 = BitConverter.ToInt32(buff, 8);
-            Int16 head_20 = BitConverter.ToInt16(buff, 20);
-            Int16 head_22 = BitConverter.ToInt16(buff, 22);
-            Int32 head_24 = BitConverter.ToInt32(buff, 24);
-            Int32 head_28 = BitConverter.ToInt32(buff, 28);
+            Int32 head = BitConverter.ToInt32(buff, offset + 0);
+            Int32 head_4 = BitConverter.ToInt32(buff, offset + 4);
+            Int32 head_8 = BitConverter.ToInt32(buff, offset + 8);
+            Int16 head_20 = BitConverter.ToInt16(buff, offset + 20);
+            Int16 head_22 = BitConverter.ToInt16(buff, offset + 22);
+            Int32 head_24 = BitConverter.ToInt32(buff, offset + 24);
+            Int32 head_28 = BitConverter.ToInt32(buff, offset + 28);
 
             /*
             // if file is indexed, the texture headers position are shifted!
@@ -643,7 +740,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // check if  multiple of 8 (for textures resolution 8 16 32 64 128 256 512 1024 ...)
             // else if ((head > 100000000) || (head_8 > 100000000) && ((head_20 % 8) == 0) && (size > 32))
             // if resolution value is multiple of 8
-            else if (texture_resolutions.Contains(head_20) || (texture_resolutions.Contains(head_28)))
+            else if ((head != 0) && (head_4 != 1) && texture_resolutions.Contains(head_20) || (texture_resolutions.Contains(head_28)))
             {
                 // make sure DXT compression type is within range
                 //if ((head_28 < 128) && (head_28 >= 0))
@@ -651,14 +748,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             // generally material = 16 bytes data block
-            else if ((size < 256) & (head < 100) & (head > 0)) // Material
+            else if ((head < 100) && (head > 0)) // Material
             {
                 return item_data_type.Material;
             }
 
-            else if ((head == 1) && (head_24 != 1112294477)) // not MDLB
+            else if ((head == 0) && (head_4 == 1)) // not MDLB
             {
-                return item_data_type.MDLBL;
+                return item_data_type.Level_Model;
             }
 
             // else
@@ -776,22 +873,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             if (this.type == container_types.indexed)
             {
-                //NORM nNORM = this.NORM_root;
-                INDEXED nIndexed = this.INDX_root;
-
-                // merge item data
-                byte[] item_data = build_Indexed_children(nIndexed);
-
-                #region build NORM header
-
-                // build MULT header (16 bytes)
-               // file_buffer.Add(Encoding.ASCII.GetBytes("NORM"));
-                // number of children (NORMs)
-                file_buffer.Add(BitConverter.GetBytes((Int32)nIndexed.items.Count));
-                // padding
-                file_buffer.Add(new byte[] { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 });
-
-                #endregion
+                // get byte array of each item
+                byte[] item_data = build_Indexed_children(this.INDX_root);
 
                 // write item data
                 file_buffer.Add(item_data);
@@ -809,52 +892,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// </summary>
         /// <param name="nNORM"></param>
         /// <returns></returns>
-        private byte[] build_Indexed_children(INDEXED nIndexed)
-        {
-            List<byte[]> item_data_list = new List<byte[]>();
-            int item_data_offset = 32;
-            // for each child item inside nNORM
-            for (int c = 0; c < nIndexed.items.Count; c++)
-            {
-                item cItem = nIndexed.items[c];
-
-                #region build item header
-
-                // start offset // headers size + data length of previous items
-                item_data_list.Add(BitConverter.GetBytes((Int32)item_data_offset)); //(c+1) * 16
-                                                                                    // end offset
-                item_data_list.Add(BitConverter.GetBytes((Int32)item_data_offset + cItem.data.Length));
-                // size??
-                item_data_list.Add(BitConverter.GetBytes((Int32)cItem.data.Length));
-                // flag
-                if (cItem.data.Length > 0)
-                {
-                    item_data_list.Add(BitConverter.GetBytes((Int32)0));
-                }
-                else // if empty set this to 1
-                {
-                    item_data_list.Add(BitConverter.GetBytes((Int32)1));
-                }
-
-                #endregion
-
-                // add dataa
-                item_data_list.Add(cItem.data);
-
-                // increase position (header size + data size)
-                item_data_offset += 16 + cItem.data.Length;
-            }
-
-            // merge list items into array and return
-            return item_data_list.SelectMany(a => a).ToArray();
-        }
-
-        /// <summary>
-        /// takes in list of items contained in a NORM node and builds JSRF binary of NORM children
-        /// </summary>
-        /// <param name="nNORM"></param>
-        /// <returns></returns>
-        private byte[] build_NORM_children(NORM nNORM)
+        public byte[] build_NORM_children(NORM nNORM)
         {
             List<byte[]> item_data_list = new List<byte[]>();
             int item_data_offset = 32;
@@ -894,87 +932,131 @@ namespace JSRF_ModTool.DataFormats.JSRF
             return item_data_list.SelectMany(a => a).ToArray();
         }
 
+        /// <summary>
+        /// takes in list of items contained in a NORM node and builds JSRF binary of NORM children
+        /// </summary>
+        /// <param name="nNORM"></param>
+        /// <returns></returns>
+        public byte[] build_Indexed_children(INDEXED nIndexed)
+        {
+            List<byte[]> item_data_list = new List<byte[]>();
+
+            // for each child item inside nNORM
+            for (int c = 0; c < nIndexed.items.Count; c++)
+            {
+                item item = nIndexed.items[c];
+               
+                #region header
+
+                // TODO support MDLB
+
+                // Level model
+                if (item.indexed_item.block_type == 1)
+                {    
+                    item_data_list.Add(BitConverter.GetBytes((Int32)1)); // Int32 : item_type // item.indexed_item.type
+                    item_data_list.Add(BitConverter.GetBytes((Int32)c)); // Int32 : item ID
+
+                    // get texture ids count from item data
+                    int textures_ids_count = BitConverter.ToInt32(item.data, 0);
+                    // Int32 : data block size 
+                    // data block size minus length of header [texture_ids_counts + texture_ids_list]
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length - ( 4 + textures_ids_count * 4))); 
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.indexed_item.unk_ID)); // unk_ID
+                    /*
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.indexed_item.textures_IDs_count)); // texture ids count
+
+                    //  add each texture ID (of list) to item_data_list
+                    for (int i = 0; i < item.indexed_item.textures_IDs_count; i++)
+                    {
+                        //item_data_list.Add(BitConverter.GetBytes((Int32)item.indexed_item.textures_IDs[i]));
+                        item_data_list.Add(BitConverter.GetBytes(BitConverter.ToInt32(item.data, 4 + 4 * i)));
+                    }
+                    */
+                }
+                // Texture: if child.type == 0  then this is the start of a list of textures
+                // the first block has a different (8 bytes) header: [int32 = 0]  [int32 = block_size]
+                else if (item.indexed_item.block_type == 0)
+                {
+                    item_data_list.Add(BitConverter.GetBytes((Int32)0)); // Int32 : item_type
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
+                }
+
+                // Texture: 4 byte header defining block_size
+                else if (item.indexed_item.block_type == 2)
+                {
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
+                }
+
+                #endregion
+
+                // add item data
+                item_data_list.Add(item.data);
+            }
+
+            // merge list of byte arrays into a single array and return it
+            return item_data_list.SelectMany(a => a).ToArray();
+        }
+
+
+        public byte[] build_Indexed_file(INDEXED nIndexed)
+        {
+            List<byte[]> item_data_list = new List<byte[]>();
+
+            bool first_texture = true;
+
+            // for each child item inside nNORM
+            for (int c = 0; c < nIndexed.items.Count; c++)
+            {
+                item item = nIndexed.items[c];
+
+                #region header
+
+                // TODO support MDLB
+
+                // Level model
+                if (item.type == File_Containers.item_data_type.Level_Model)
+                {
+                    item_data_list.Add(BitConverter.GetBytes((Int32)1)); // Int32 : item_type // item.indexed_item.type
+                    item_data_list.Add(BitConverter.GetBytes((Int32)c)); // Int32 : item ID
+
+                    // get texture ids count from item data
+                    int textures_ids_count = BitConverter.ToInt32(item.data, 0);
+                    // Int32 : data block size 
+                    // data block size minus length of header [texture_ids_counts + texture_ids_list]
+                    item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length - (4 + textures_ids_count * 4)));
+                    item_data_list.Add(BitConverter.GetBytes(0)); // unk_ID
+
+                }
+                // Texture: if child.type == 0  then this is the start of a list of textures
+                // the first block has a different (8 bytes) header: [int32 = 0]  [int32 = block_size]
+                else if (item.type == File_Containers.item_data_type.Texture)
+                {
+                    if (first_texture)
+                    {
+                        item_data_list.Add(BitConverter.GetBytes((Int32)0)); // Int32 : item_type
+                        item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
+                        first_texture = false;
+                    } 
+                    else
+                    {   // Texture: 4 byte header defining block_size
+                        item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
+                    }
+                }
+
+
+
+                #endregion
+
+                // add item data
+                item_data_list.Add(item.data);
+            }
+
+            // merge list of byte arrays into a single array and return it
+            return item_data_list.SelectMany(a => a).ToArray();
+        }
 
         #endregion
 
-
-        #region containers classes
-
-
-        public enum container_types
-        {
-            unknown,
-            indexed,
-            MULT,
-            NORM,
-        };
-
-       
-  
-
-        // NCAM is found in beat.bin 
-        public enum item_data_type
-        {
-            empty,
-            invalid,
-            unkown,
-            MDLB,
-            MDLBL,
-            Material,
-            Texture,
-            NCAM,
-            Sound
-        };
-
-
-        // MULT container, contains list of NORM containers
-        public class MULT
-        {
-            public List<NORM> items { get; set; }
-
-            public MULT()
-            {
-                items = new List<NORM>();
-            }
-        }
-
-        // NORM container, contains list of item(s)
-        public class NORM
-        {
-            public List<item> items { get; set; }
-
-            public NORM()
-            {
-                items = new List<item>();
-            }
-        }
-
-        // indexed container, contains list of item(s)
-        public class INDEXED
-        {
-            public List<item> items { get; set; }
-
-            public INDEXED()
-            {
-                items = new List<item>();
-            }
-        }
-
-        //List<this.item> items = new List<this.item>();
-
-        public class item
-        {
-            public item_data_type type { get; set; }
-            public byte[] data { get; set; }
-
-            public item(item_data_type _type, byte[] _data)
-            {
-                this.type = _type;
-                this.data = _data;
-            }
-        }
-
-        #endregion
 
     }
 }

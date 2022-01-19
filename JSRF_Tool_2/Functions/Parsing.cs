@@ -1,16 +1,44 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using JSRF_ModTool.Vector;
 
 using System.Windows.Media.Media3D;
 
-namespace JSRF_ModTool
+namespace JSRF_ModTool.Functions
 {
 
     public class Parsing 
     {
+
+        public static Int32 calc_length_bytes_list(List<byte[]> buff)
+        {
+            Int32 length = 0;
+            foreach (var b in buff)
+            {
+                length += b.Length;
+            }
+
+            return length;
+        }
+
+
+        public static Int32 calc_length_bytes_list(List<List<byte[]>> bufflist)
+        {
+            Int32 length = 0;
+            foreach (var l in bufflist)
+            {
+                foreach (var b in l)
+                {
+                    length += b.Length;
+                }
+            }
+
+            return length;
+        }
 
         /// <summary>
         /// Goes through a class/struct's properties and reads a byte array as typeof, for each property in the class/struct.

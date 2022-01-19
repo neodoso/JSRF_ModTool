@@ -46,9 +46,6 @@
             this.panel5 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.txtb_drawDist_w = new System.Windows.Forms.TextBox();
-            this.txtb_drawDist_z = new System.Windows.Forms.TextBox();
-            this.txtb_drawDist_x = new System.Windows.Forms.TextBox();
-            this.txtb_drawDist_y = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel5.SuspendLayout();
@@ -190,9 +187,9 @@
             this.panel3.BackColor = System.Drawing.SystemColors.ControlDark;
             this.panel3.Controls.Add(this.btn_add_material);
             this.panel3.Controls.Add(this.label1);
-            this.panel3.Location = new System.Drawing.Point(479, 8);
+            this.panel3.Location = new System.Drawing.Point(479, 7);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(608, 52);
+            this.panel3.Size = new System.Drawing.Size(608, 51);
             this.panel3.TabIndex = 4;
             // 
             // btn_add_material
@@ -201,7 +198,7 @@
             this.btn_add_material.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.btn_add_material.Location = new System.Drawing.Point(532, 0);
             this.btn_add_material.Name = "btn_add_material";
-            this.btn_add_material.Size = new System.Drawing.Size(76, 52);
+            this.btn_add_material.Size = new System.Drawing.Size(76, 51);
             this.btn_add_material.TabIndex = 4;
             this.btn_add_material.Text = "Add material";
             this.btn_add_material.UseVisualStyleBackColor = true;
@@ -222,9 +219,9 @@
             // 
             this.panel_materials.AutoScroll = true;
             this.panel_materials.BackColor = System.Drawing.SystemColors.Control;
-            this.panel_materials.Location = new System.Drawing.Point(479, 64);
+            this.panel_materials.Location = new System.Drawing.Point(479, 66);
             this.panel_materials.Name = "panel_materials";
-            this.panel_materials.Size = new System.Drawing.Size(635, 603);
+            this.panel_materials.Size = new System.Drawing.Size(635, 601);
             this.panel_materials.TabIndex = 2;
             // 
             // panel5
@@ -232,9 +229,6 @@
             this.panel5.BackColor = System.Drawing.SystemColors.ControlDark;
             this.panel5.Controls.Add(this.label3);
             this.panel5.Controls.Add(this.txtb_drawDist_w);
-            this.panel5.Controls.Add(this.txtb_drawDist_z);
-            this.panel5.Controls.Add(this.txtb_drawDist_x);
-            this.panel5.Controls.Add(this.txtb_drawDist_y);
             this.panel5.Controls.Add(this.btn_import);
             this.panel5.Controls.Add(this.btn_cancel);
             this.panel5.Location = new System.Drawing.Point(0, 673);
@@ -247,55 +241,22 @@
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(6, 11);
+            this.label3.Location = new System.Drawing.Point(12, 22);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(190, 13);
+            this.label3.Size = new System.Drawing.Size(94, 13);
             this.label3.TabIndex = 3;
-            this.label3.Text = "Global draw distance [ X Y Z W]";
+            this.label3.Text = "Draw Distance:";
             // 
             // txtb_drawDist_w
             // 
             this.txtb_drawDist_w.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtb_drawDist_w.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtb_drawDist_w.Location = new System.Drawing.Point(228, 31);
+            this.txtb_drawDist_w.Location = new System.Drawing.Point(112, 19);
             this.txtb_drawDist_w.Name = "txtb_drawDist_w";
             this.txtb_drawDist_w.Size = new System.Drawing.Size(67, 20);
             this.txtb_drawDist_w.TabIndex = 2;
             this.txtb_drawDist_w.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtb_drawDist_w.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_numeric_KeyPress);
-            // 
-            // txtb_drawDist_z
-            // 
-            this.txtb_drawDist_z.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtb_drawDist_z.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtb_drawDist_z.Location = new System.Drawing.Point(155, 31);
-            this.txtb_drawDist_z.Name = "txtb_drawDist_z";
-            this.txtb_drawDist_z.Size = new System.Drawing.Size(67, 20);
-            this.txtb_drawDist_z.TabIndex = 2;
-            this.txtb_drawDist_z.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtb_drawDist_z.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_numeric_KeyPress);
-            // 
-            // txtb_drawDist_x
-            // 
-            this.txtb_drawDist_x.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtb_drawDist_x.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtb_drawDist_x.Location = new System.Drawing.Point(9, 31);
-            this.txtb_drawDist_x.Name = "txtb_drawDist_x";
-            this.txtb_drawDist_x.Size = new System.Drawing.Size(67, 20);
-            this.txtb_drawDist_x.TabIndex = 2;
-            this.txtb_drawDist_x.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtb_drawDist_x.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_numeric_KeyPress);
-            // 
-            // txtb_drawDist_y
-            // 
-            this.txtb_drawDist_y.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtb_drawDist_y.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtb_drawDist_y.Location = new System.Drawing.Point(82, 31);
-            this.txtb_drawDist_y.Name = "txtb_drawDist_y";
-            this.txtb_drawDist_y.Size = new System.Drawing.Size(67, 20);
-            this.txtb_drawDist_y.TabIndex = 2;
-            this.txtb_drawDist_y.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtb_drawDist_y.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_numeric_KeyPress);
             // 
             // MDLB_import_options_Form
             // 
@@ -341,8 +302,5 @@
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtb_drawDist_w;
-        private System.Windows.Forms.TextBox txtb_drawDist_y;
-        private System.Windows.Forms.TextBox txtb_drawDist_z;
-        private System.Windows.Forms.TextBox txtb_drawDist_x;
     }
 }

@@ -37,6 +37,23 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tab_ModelViewer = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.panel_lvl_mdl_info = new System.Windows.Forms.Panel();
+            this.lab_lvlmdl_drawdist = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_vtx_flag = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_tex_ids = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_tri_stripped = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_tri_count = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_vtx_def_size = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_triGroup_count = new System.Windows.Forms.Label();
+            this.lab_lvlmdl_mat_count = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.panel_adv_mdl_nfo = new System.Windows.Forms.Panel();
             this.lab_mdl_mat_vtx = new System.Windows.Forms.Label();
             this.lab_mdl_mat_typex = new System.Windows.Forms.Label();
@@ -61,6 +78,8 @@
             this.btn_null_model = new System.Windows.Forms.Button();
             this.elementHost_model_editor = new System.Windows.Forms.Integration.ElementHost();
             this.tab_TextureViewer = new System.Windows.Forms.TabPage();
+            this.numupDown_tex_bitCount = new System.Windows.Forms.NumericUpDown();
+            this.numupDown_tex_depth = new System.Windows.Forms.NumericUpDown();
             this.btn_save_texture_edits = new System.Windows.Forms.Button();
             this.btn_edit_texture = new System.Windows.Forms.Button();
             this.rtxtb_textureinfo = new System.Windows.Forms.RichTextBox();
@@ -113,12 +132,17 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lab_mdl_DrawDist = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel_lvl_mdl_info.SuspendLayout();
             this.panel_adv_mdl_nfo.SuspendLayout();
             this.tab_TextureViewer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_bitCount)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_depth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).BeginInit();
             this.tab_mat_editor.SuspendLayout();
             this.panel_mat_editor.SuspendLayout();
@@ -194,6 +218,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Silver;
+            this.panel1.Controls.Add(this.panel_lvl_mdl_info);
             this.panel1.Controls.Add(this.panel_adv_mdl_nfo);
             this.panel1.Controls.Add(this.txtb_mdl_partnum);
             this.panel1.Controls.Add(this.lab_mdlb_parts_count);
@@ -210,9 +235,212 @@
             this.panel1.Size = new System.Drawing.Size(740, 684);
             this.panel1.TabIndex = 7;
             // 
+            // panel_lvl_mdl_info
+            // 
+            this.panel_lvl_mdl_info.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_drawdist);
+            this.panel_lvl_mdl_info.Controls.Add(this.label22);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_vtx_flag);
+            this.panel_lvl_mdl_info.Controls.Add(this.label21);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_tex_ids);
+            this.panel_lvl_mdl_info.Controls.Add(this.label20);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_tri_stripped);
+            this.panel_lvl_mdl_info.Controls.Add(this.label19);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_tri_count);
+            this.panel_lvl_mdl_info.Controls.Add(this.label18);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_vtx_def_size);
+            this.panel_lvl_mdl_info.Controls.Add(this.label17);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_triGroup_count);
+            this.panel_lvl_mdl_info.Controls.Add(this.lab_lvlmdl_mat_count);
+            this.panel_lvl_mdl_info.Controls.Add(this.label3);
+            this.panel_lvl_mdl_info.Controls.Add(this.label2);
+            this.panel_lvl_mdl_info.Location = new System.Drawing.Point(609, 557);
+            this.panel_lvl_mdl_info.Name = "panel_lvl_mdl_info";
+            this.panel_lvl_mdl_info.Size = new System.Drawing.Size(131, 127);
+            this.panel_lvl_mdl_info.TabIndex = 12;
+            this.panel_lvl_mdl_info.Visible = false;
+            // 
+            // lab_lvlmdl_drawdist
+            // 
+            this.lab_lvlmdl_drawdist.AutoSize = true;
+            this.lab_lvlmdl_drawdist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_drawdist.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_drawdist.Location = new System.Drawing.Point(89, 84);
+            this.lab_lvlmdl_drawdist.Name = "lab_lvlmdl_drawdist";
+            this.lab_lvlmdl_drawdist.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_drawdist.TabIndex = 19;
+            this.lab_lvlmdl_drawdist.Text = "0";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label22.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label22.Location = new System.Drawing.Point(4, 84);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(75, 12);
+            this.label22.TabIndex = 18;
+            this.label22.Text = "draw distance:";
+            // 
+            // lab_lvlmdl_vtx_flag
+            // 
+            this.lab_lvlmdl_vtx_flag.AutoSize = true;
+            this.lab_lvlmdl_vtx_flag.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_vtx_flag.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_vtx_flag.Location = new System.Drawing.Point(88, 70);
+            this.lab_lvlmdl_vtx_flag.Name = "lab_lvlmdl_vtx_flag";
+            this.lab_lvlmdl_vtx_flag.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_vtx_flag.TabIndex = 17;
+            this.lab_lvlmdl_vtx_flag.Text = "0";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label21.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label21.Location = new System.Drawing.Point(3, 70);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(65, 12);
+            this.label21.TabIndex = 16;
+            this.label21.Text = "vertex flag:";
+            // 
+            // lab_lvlmdl_tex_ids
+            // 
+            this.lab_lvlmdl_tex_ids.AutoSize = true;
+            this.lab_lvlmdl_tex_ids.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_tex_ids.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_tex_ids.Location = new System.Drawing.Point(77, 8);
+            this.lab_lvlmdl_tex_ids.Name = "lab_lvlmdl_tex_ids";
+            this.lab_lvlmdl_tex_ids.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_tex_ids.TabIndex = 15;
+            this.lab_lvlmdl_tex_ids.Text = "0";
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label20.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label20.Location = new System.Drawing.Point(5, 8);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(70, 12);
+            this.label20.TabIndex = 14;
+            this.label20.Text = "textures ids:";
+            // 
+            // lab_lvlmdl_tri_stripped
+            // 
+            this.lab_lvlmdl_tri_stripped.AutoSize = true;
+            this.lab_lvlmdl_tri_stripped.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_tri_stripped.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_tri_stripped.Location = new System.Drawing.Point(106, 112);
+            this.lab_lvlmdl_tri_stripped.Name = "lab_lvlmdl_tri_stripped";
+            this.lab_lvlmdl_tri_stripped.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_tri_stripped.TabIndex = 13;
+            this.lab_lvlmdl_tri_stripped.Text = "0";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label19.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label19.Location = new System.Drawing.Point(5, 112);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(105, 12);
+            this.label19.TabIndex = 12;
+            this.label19.Text = "triangles stripped: ";
+            // 
+            // lab_lvlmdl_tri_count
+            // 
+            this.lab_lvlmdl_tri_count.AutoSize = true;
+            this.lab_lvlmdl_tri_count.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_tri_count.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_tri_count.Location = new System.Drawing.Point(87, 98);
+            this.lab_lvlmdl_tri_count.Name = "lab_lvlmdl_tri_count";
+            this.lab_lvlmdl_tri_count.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_tri_count.TabIndex = 11;
+            this.lab_lvlmdl_tri_count.Text = "0";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label18.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label18.Location = new System.Drawing.Point(2, 98);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(90, 12);
+            this.label18.TabIndex = 10;
+            this.label18.Text = "triangles count: ";
+            // 
+            // lab_lvlmdl_vtx_def_size
+            // 
+            this.lab_lvlmdl_vtx_def_size.AutoSize = true;
+            this.lab_lvlmdl_vtx_def_size.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_vtx_def_size.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_vtx_def_size.Location = new System.Drawing.Point(88, 57);
+            this.lab_lvlmdl_vtx_def_size.Name = "lab_lvlmdl_vtx_def_size";
+            this.lab_lvlmdl_vtx_def_size.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_vtx_def_size.TabIndex = 9;
+            this.lab_lvlmdl_vtx_def_size.Text = "0";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label17.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label17.Location = new System.Drawing.Point(3, 57);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(75, 12);
+            this.label17.TabIndex = 8;
+            this.label17.Text = "vtx def size: ";
+            // 
+            // lab_lvlmdl_triGroup_count
+            // 
+            this.lab_lvlmdl_triGroup_count.AutoSize = true;
+            this.lab_lvlmdl_triGroup_count.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_triGroup_count.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_triGroup_count.Location = new System.Drawing.Point(88, 40);
+            this.lab_lvlmdl_triGroup_count.Name = "lab_lvlmdl_triGroup_count";
+            this.lab_lvlmdl_triGroup_count.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_triGroup_count.TabIndex = 7;
+            this.lab_lvlmdl_triGroup_count.Text = "0";
+            // 
+            // lab_lvlmdl_mat_count
+            // 
+            this.lab_lvlmdl_mat_count.AutoSize = true;
+            this.lab_lvlmdl_mat_count.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_lvlmdl_mat_count.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_lvlmdl_mat_count.Location = new System.Drawing.Point(59, 24);
+            this.lab_lvlmdl_mat_count.Name = "lab_lvlmdl_mat_count";
+            this.lab_lvlmdl_mat_count.Size = new System.Drawing.Size(10, 12);
+            this.lab_lvlmdl_mat_count.TabIndex = 6;
+            this.lab_lvlmdl_mat_count.Text = "0";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label3.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label3.Location = new System.Drawing.Point(3, 40);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(90, 12);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "tri group count: ";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label2.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label2.Location = new System.Drawing.Point(3, 24);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(55, 12);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "mat count:";
+            // 
             // panel_adv_mdl_nfo
             // 
             this.panel_adv_mdl_nfo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.panel_adv_mdl_nfo.Controls.Add(this.label16);
+            this.panel_adv_mdl_nfo.Controls.Add(this.lab_mdl_DrawDist);
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_mdl_mat_vtx);
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_mdl_mat_typex);
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_vtx_cnt);
@@ -225,11 +453,10 @@
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_triStrip);
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_tris_count);
             this.panel_adv_mdl_nfo.Controls.Add(this.lab_vertBlockSize);
-            this.panel_adv_mdl_nfo.Location = new System.Drawing.Point(0, 568);
+            this.panel_adv_mdl_nfo.Location = new System.Drawing.Point(0, 548);
             this.panel_adv_mdl_nfo.Name = "panel_adv_mdl_nfo";
-            this.panel_adv_mdl_nfo.Size = new System.Drawing.Size(120, 116);
+            this.panel_adv_mdl_nfo.Size = new System.Drawing.Size(120, 136);
             this.panel_adv_mdl_nfo.TabIndex = 11;
-            this.panel_adv_mdl_nfo.Visible = false;
             // 
             // lab_mdl_mat_vtx
             // 
@@ -237,9 +464,9 @@
             this.lab_mdl_mat_vtx.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
             this.lab_mdl_mat_vtx.Location = new System.Drawing.Point(3, 101);
             this.lab_mdl_mat_vtx.Name = "lab_mdl_mat_vtx";
-            this.lab_mdl_mat_vtx.Size = new System.Drawing.Size(50, 12);
+            this.lab_mdl_mat_vtx.Size = new System.Drawing.Size(70, 12);
             this.lab_mdl_mat_vtx.TabIndex = 13;
-            this.lab_mdl_mat_vtx.Text = "Mat count";
+            this.lab_mdl_mat_vtx.Text = "Mat vtx count";
             // 
             // lab_mdl_mat_typex
             // 
@@ -447,6 +674,7 @@
             this.btn_fix_drawdist.TabIndex = 9;
             this.btn_fix_drawdist.Text = "fix draw distance";
             this.btn_fix_drawdist.UseVisualStyleBackColor = true;
+            this.btn_fix_drawdist.Visible = false;
             this.btn_fix_drawdist.Click += new System.EventHandler(this.btn_fix_drawdist_Click);
             // 
             // btn_null_model
@@ -473,6 +701,8 @@
             // tab_TextureViewer
             // 
             this.tab_TextureViewer.BackColor = System.Drawing.Color.Gainsboro;
+            this.tab_TextureViewer.Controls.Add(this.numupDown_tex_bitCount);
+            this.tab_TextureViewer.Controls.Add(this.numupDown_tex_depth);
             this.tab_TextureViewer.Controls.Add(this.btn_save_texture_edits);
             this.tab_TextureViewer.Controls.Add(this.btn_edit_texture);
             this.tab_TextureViewer.Controls.Add(this.rtxtb_textureinfo);
@@ -483,6 +713,32 @@
             this.tab_TextureViewer.Size = new System.Drawing.Size(742, 686);
             this.tab_TextureViewer.TabIndex = 3;
             this.tab_TextureViewer.Text = "Texture Viewer";
+            // 
+            // numupDown_tex_bitCount
+            // 
+            this.numupDown_tex_bitCount.Location = new System.Drawing.Point(482, 628);
+            this.numupDown_tex_bitCount.Name = "numupDown_tex_bitCount";
+            this.numupDown_tex_bitCount.Size = new System.Drawing.Size(45, 20);
+            this.numupDown_tex_bitCount.TabIndex = 5;
+            this.numupDown_tex_bitCount.Value = new decimal(new int[] {
+            32,
+            0,
+            0,
+            0});
+            this.numupDown_tex_bitCount.ValueChanged += new System.EventHandler(this.numupDown_tex_bitCount_ValueChanged);
+            // 
+            // numupDown_tex_depth
+            // 
+            this.numupDown_tex_depth.Location = new System.Drawing.Point(431, 628);
+            this.numupDown_tex_depth.Name = "numupDown_tex_depth";
+            this.numupDown_tex_depth.Size = new System.Drawing.Size(45, 20);
+            this.numupDown_tex_depth.TabIndex = 5;
+            this.numupDown_tex_depth.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numupDown_tex_depth.ValueChanged += new System.EventHandler(this.numupDown_tex_depth_ValueChanged);
             // 
             // btn_save_texture_edits
             // 
@@ -879,7 +1135,7 @@
             this.btn_extract_block.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.5F);
             this.btn_extract_block.Location = new System.Drawing.Point(389, 54);
             this.btn_extract_block.Name = "btn_extract_block";
-            this.btn_extract_block.Size = new System.Drawing.Size(40, 25);
+            this.btn_extract_block.Size = new System.Drawing.Size(41, 25);
             this.btn_extract_block.TabIndex = 7;
             this.btn_extract_block.Text = "Expt.";
             this.btn_extract_block.UseVisualStyleBackColor = true;
@@ -959,7 +1215,7 @@
             // 
             this.btn_paste_block.Location = new System.Drawing.Point(216, 82);
             this.btn_paste_block.Name = "btn_paste_block";
-            this.btn_paste_block.Size = new System.Drawing.Size(83, 25);
+            this.btn_paste_block.Size = new System.Drawing.Size(82, 25);
             this.btn_paste_block.TabIndex = 10;
             this.btn_paste_block.Text = "paste";
             this.btn_paste_block.UseVisualStyleBackColor = true;
@@ -969,7 +1225,7 @@
             // 
             this.btn_empty_block.Location = new System.Drawing.Point(389, 82);
             this.btn_empty_block.Name = "btn_empty_block";
-            this.btn_empty_block.Size = new System.Drawing.Size(83, 25);
+            this.btn_empty_block.Size = new System.Drawing.Size(84, 25);
             this.btn_empty_block.TabIndex = 12;
             this.btn_empty_block.Text = "empty";
             this.btn_empty_block.UseVisualStyleBackColor = true;
@@ -989,7 +1245,7 @@
             // 
             this.btn_insert_block.Location = new System.Drawing.Point(303, 82);
             this.btn_insert_block.Name = "btn_insert_block";
-            this.btn_insert_block.Size = new System.Drawing.Size(83, 25);
+            this.btn_insert_block.Size = new System.Drawing.Size(82, 25);
             this.btn_insert_block.TabIndex = 12;
             this.btn_insert_block.Text = "insert";
             this.btn_insert_block.UseVisualStyleBackColor = true;
@@ -997,6 +1253,7 @@
             // 
             // lab_itemSel_length
             // 
+            this.lab_itemSel_length.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lab_itemSel_length.AutoSize = true;
             this.lab_itemSel_length.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lab_itemSel_length.ForeColor = System.Drawing.SystemColors.ControlLight;
@@ -1005,7 +1262,7 @@
             this.lab_itemSel_length.Size = new System.Drawing.Size(140, 15);
             this.lab_itemSel_length.TabIndex = 13;
             this.lab_itemSel_length.Text = "itemdata size (bytes)";
-            this.lab_itemSel_length.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.lab_itemSel_length.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // panel4
             // 
@@ -1020,13 +1277,35 @@
             // btn_import_block
             // 
             this.btn_import_block.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.5F);
-            this.btn_import_block.Location = new System.Drawing.Point(432, 54);
+            this.btn_import_block.Location = new System.Drawing.Point(433, 54);
             this.btn_import_block.Name = "btn_import_block";
             this.btn_import_block.Size = new System.Drawing.Size(40, 25);
             this.btn_import_block.TabIndex = 7;
             this.btn_import_block.Text = "Impt.";
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label16.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label16.Location = new System.Drawing.Point(5, 117);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(75, 12);
+            this.label16.TabIndex = 14;
+            this.label16.Text = "Draw distance:";
+            // 
+            // lab_mdl_DrawDist
+            // 
+            this.lab_mdl_DrawDist.AutoSize = true;
+            this.lab_mdl_DrawDist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_mdl_DrawDist.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_mdl_DrawDist.Location = new System.Drawing.Point(88, 117);
+            this.lab_mdl_DrawDist.Name = "lab_mdl_DrawDist";
+            this.lab_mdl_DrawDist.Size = new System.Drawing.Size(10, 12);
+            this.lab_mdl_DrawDist.TabIndex = 15;
+            this.lab_mdl_DrawDist.Text = "0";
             // 
             // Main
             // 
@@ -1061,10 +1340,14 @@
             this.tab_ModelViewer.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel_lvl_mdl_info.ResumeLayout(false);
+            this.panel_lvl_mdl_info.PerformLayout();
             this.panel_adv_mdl_nfo.ResumeLayout(false);
             this.panel_adv_mdl_nfo.PerformLayout();
             this.tab_TextureViewer.ResumeLayout(false);
             this.tab_TextureViewer.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_bitCount)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_depth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).EndInit();
             this.tab_mat_editor.ResumeLayout(false);
             this.panel_mat_editor.ResumeLayout(false);
@@ -1173,6 +1456,27 @@
         private System.Windows.Forms.RichTextBox rtxtb_material;
         private System.Windows.Forms.Button btn_save_mat_data;
         private System.Windows.Forms.Label lab_mdl_mat_vtx;
+        private System.Windows.Forms.NumericUpDown numupDown_tex_depth;
+        private System.Windows.Forms.NumericUpDown numupDown_tex_bitCount;
+        private System.Windows.Forms.Panel panel_lvl_mdl_info;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lab_lvlmdl_vtx_def_size;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label lab_lvlmdl_triGroup_count;
+        private System.Windows.Forms.Label lab_lvlmdl_mat_count;
+        private System.Windows.Forms.Label lab_lvlmdl_tri_count;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label lab_lvlmdl_tri_stripped;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label lab_lvlmdl_tex_ids;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label lab_lvlmdl_vtx_flag;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label lab_lvlmdl_drawdist;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label lab_mdl_DrawDist;
     }
 }
 

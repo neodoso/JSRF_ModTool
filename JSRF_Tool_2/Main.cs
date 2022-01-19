@@ -17,6 +17,7 @@ using System.Windows.Media.Media3D;
 using JSRF_ModTool.DataFormats;
 using JSRF_ModTool.DataFormats.JSRF;
 using JSRF_ModTool.Vector;
+using JSRF_ModTool.Functions;
 
 using System.Threading;
 
@@ -69,6 +70,7 @@ namespace JSRF_ModTool
 
         #endregion
 
+
         public Main()
         {
             InitializeComponent();
@@ -76,6 +78,7 @@ namespace JSRF_ModTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            #region setup
             Settings_load();
 
             // set file explorer directory
@@ -85,26 +88,135 @@ namespace JSRF_ModTool
             // clear temporary directory
             Functions.IO.DeleteDirectoryContent(tmp_dir);
 
-            if(cb_show_adv_mdlb_nfo.Checked)
+            if (cb_show_adv_mdlb_nfo.Checked)
             {
                 panel_adv_mdl_nfo.Visible = true;
             }
 
+            #endregion
+
 #if DEBUG
+            btn_fix_drawdist.Visible = true;
+            panel_lvl_mdl_info.Visible = true;
+            label5.Visible = true;
 
-                label5.Visible = true;
+            #region DEV - load file automatically
 
-            string game_dir = @"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\";
+            //string game_dir = @"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\";
+            //Level_bin stgBin_00 = new Level_bin(game_dir + "Stage\\stg00_.bin");
 
-            // automatically load file
-            //Load_file(game_dir + @"Stage\stg00_00.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
+            /*
+            
+            Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
+            lvl_bin_Compiler.header.Level_Models_count = 28; //level_models_count  // if set to low numbers it will crash on load (maybe this number is also defined and dependent on another file)
+            lvl_bin_Compiler.header.set_stg_dat_count(1);
+            lvl_bin_Compiler.build(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Coll_test\");
 
-            //Load_file(game_dir + @"Player\Bis.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
+            */
+
+
+            /*
+            Level_bin stgBin_00 = new Level_bin(game_dir + "Stage\\stg10_.bin");
+            Application.Exit();
+            */
+
+            /*
+            Level_Compiler lvl_comp = new Level_Compiler();
+            lvl_comp.compile();
+            Application.Exit();
+            */
+
+            /*
+            // load stages_.bin to test collision triangles
+            string[] stage_bins = Directory.GetFiles(@"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\Stage\", "*_.bin");
+            for (int i = 0; i < stage_bins.Length; i++)
+            {
+                if (i == 15 || i == 16 || i == 17) { continue; }
+                Level_bin stgBin_00 = new Level_bin(stage_bins[i]);
+            }
+            */
+
+
+
+
+
+
+            //Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
+            //lvl_bin_Compiler.compile_single_model_vtx_tri_buffers();
+
+            /*
+            Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
+            lvl_bin_Compiler.header.Level_Models_count = 28; //level_models_count  // if set to low numbers it will crash on load (maybe this number is also defined and dependent on another file)
+            lvl_bin_Compiler.header.set_stg_dat_count(1);
+            lvl_bin_Compiler.build(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_SkatePark\");
+            */
+            #endregion
+
+            #region other file loading methods
+
+
+            // DataFormats.JSRF.Level_Model_Builder lvl_mdl_builder = new DataFormats.JSRF.Level_Model_Builder();
+            // lvl_mdl_builder.build(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
+
+            //DataFormats._3D_Model_Formats.OBJ obj = new DataFormats._3D_Model_Formats.OBJ(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
+
+
+            //mission_dat msndat = new mission_dat(@"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\Mission\mssn0965.dat");
+
+
+            //Load_file(game_dir + @"Event\Event\e291.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
+
+
+            //Load_file(game_dir + @"Stage\stg00_00.dat", false);
+            /*
+            Level_Model_Compiler lvlmdl_comp = new Level_Model_Compiler();
+            byte[] item_data = lvlmdl_comp.build(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
+            if(item_data.Length > 0)
+            {
+                jsrf_file.INDX_root.items[20].data = item_data;
+                jsrf_file.rebuild_file(jsrf_file.filepath);
+            }
+           // Application.Exit();
+           */
+
+            /*
+            //Load_file(game_dir + @"Stage\stg33_01.dat"); // stg22_01 - 0
+            Load_file(game_dir + @"Stage\stg00_00.dat", false);
+            File_Containers.item item = jsrf_file.get_item(0, 20); 
+            Level_Model mdl = new Level_Model(item.data);
+            mdl.export_model(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\model.obj");
+            Application.Exit();
+            */
+
+
+            //mass_search_texture_by_ID("855694150");
+
+
+            /*
+            Load_file(game_dir + @"Stage\stg00_00.dat");
+            for (int i = 0; i < trv_file.Nodes[0].Nodes.Count; i++)
+            {
+                // get item from 'jsrf_file'
+                File_Containers.item item = jsrf_file.get_item(0, i);
+
+                if(item.type == File_Containers.item_data_type.Level_Model)
+                {
+                    Level_Model mdl = new Level_Model(item.data);
+
+                   //if(mdl.vtx_tri_buff_head.is_stripped == 0)
+                  // {
+                        mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Level_Model_" + i + ".obj");
+                  // }
+                   
+                }
+            }
+            Application.Exit();
+            */
+
 
             //Load_file(game_dir + @"StgObj\StgObj00.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[0];
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[1];
 
             //Load_file(game_dir + @"People\People01.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
@@ -112,8 +224,8 @@ namespace JSRF_ModTool
             //Load_file(game_dir + @"\Progress\Progress.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
 
-            //Load_file(game_dir + @"Player\Yoyo.dat");
-            // trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
+            //Load_file(game_dir + @"Player\Beat.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[5];
 
             //Load_file(game_dir + @"Disp\SprNorm.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0].Nodes[0];
@@ -124,11 +236,74 @@ namespace JSRF_ModTool
             // Load_file(folder + @"People\People01.dat");
             //  trv_file.SelectedNode =trv_file.Nodes[0].Nodes[1].Nodes[44];
 
+            //Load_file(game_dir + @"Event\Event\e000.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[0];
 
-            //Load_level_bin(Parsing.FileToByteArray(game_dir + "Stage\\stg00_.bin", 0) );
 
+
+            //   Level_bin lvl = new Level_bin(game_dir + "Stage\\stg10_.bin");
+            #endregion
 
 #endif
+        }
+
+
+        // searches textures by ids on ALL the files of the game
+        public void mass_search_texture_by_ID(string texture_id)
+        {
+            List<string> matches = new List<string>();
+
+            foreach (string file in Directory.EnumerateFiles(txtb_jsrf_mod_dir.Text, "*.dat", SearchOption.AllDirectories))
+            {
+                if (!file.Contains(".dat")) { continue; }
+                // ignore mission files (because they give out block nodes reading errors)
+                if(file.Contains("mssn")) { continue; }
+                Load_file(file, false);
+                if(jsrf_file.type == File_Containers.container_types.MULT)
+                {
+                    for (int i = 0; i < jsrf_file.MULT_root.items.Count; i++)
+                    {
+                        File_Containers.NORM norm = jsrf_file.MULT_root.items[i];
+                        for (int e = 0; e < norm.items.Count; e++)
+                        {
+                            if(norm.items[e].type == File_Containers.item_data_type.Texture)
+                            {
+                                int id = BitConverter.ToInt32(norm.items[e].data, 0);
+
+                                if(id.ToString() == texture_id)
+                                {
+                                    matches.Add(Path.GetFileName(file) + "   MULT:NORM[" + i + "] Item[" + e + "]");
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                
+                if (jsrf_file.type == File_Containers.container_types.NORM)
+                {
+                   
+                    for (int e = 0; e < jsrf_file.NORM_root.items.Count; e++)
+                    {
+                        if (jsrf_file.NORM_root.items[e].type == File_Containers.item_data_type.Texture)
+                        {
+                            int id = BitConverter.ToInt32(jsrf_file.NORM_root.items[e].data, 0);
+
+                            if (id.ToString() == texture_id)
+                            {
+                                matches.Add(Path.GetFileName(file) + "   NORM: Item[" + e + "]");
+                            }
+                        }
+
+                    }
+                }
+
+                if (jsrf_file.type == File_Containers.container_types.indexed)
+                {
+
+                }
+            }
         }
 
         /// <summary>
@@ -157,6 +332,7 @@ namespace JSRF_ModTool
             txtb_mdl_partnum.Text = "0";
             lab_vertBlockSize.Text = "0";
             lab_triStrip.Text = "no";
+            lab_mdl_DrawDist.Text = "";
 
             HelixModelViewer ModelViewer = new HelixModelViewer();
             HelixViewport3D view = ModelViewer.view1;
@@ -175,14 +351,14 @@ namespace JSRF_ModTool
         /// <summary>
         /// loads JSRF file into corresponding file structure type and returns the load file as a class object
         /// </summary>
-        private object Load_file(string filepath)
+        private object Load_file(string filepath, bool load_bin_materials = false)
         {
             Reset_vars();
 
             jsrf_file = new File_Containers(filepath);
 
 
-            if (filepath.Contains(".dat"))
+            if (filepath.Contains(".dat") && load_bin_materials)
             {
                 string filepath_bin = filepath.Replace(".dat", ".bin");
                 // get corresponding .bin file and load materials list from it
@@ -202,12 +378,93 @@ namespace JSRF_ModTool
         }
 
 
-        /// <summary>
-        /// load level binary files (i.e: Media\Stage\stg00_.bin or  Stg10_.bin  or Stg11_.bin etc)
-        /// </summary>
-        private void Load_level_bin(byte[] data)
+
+        // load level model
+        private void load_level_model(byte[] data)
         {
-            DataFormats.JSRF.Level_bin level_bin = new DataFormats.JSRF.Level_bin(data);
+            Level_Model mdl = new Level_Model(data);
+
+            ///mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Level_Model_0.obj");
+            // setup labels giving model info
+            lab_lvlmdl_tex_ids.Text = mdl.texture_ids.Count.ToString();
+            lab_lvlmdl_mat_count.Text = mdl.header.x124_mat_count.ToString();
+            lab_lvlmdl_triGroup_count.Text = mdl.header.x132_tri_groups_count.ToString();
+            lab_lvlmdl_vtx_def_size.Text = mdl.vtx_tri_buff_head.vertex_def_size.ToString();
+            lab_lvlmdl_vtx_flag.Text = mdl.vtx_tri_buff_head.vertex_struct.ToString();
+            lab_lvlmdl_tri_count.Text = ( mdl.vtx_tri_buff_head.triangle_buffer_size / 3).ToString();
+            lab_lvlmdl_tri_stripped.Text = mdl.vtx_tri_buff_head.is_stripped.ToString();
+            lab_lvlmdl_drawdist.Text = mdl.header.model_radius.ToString();
+                
+
+            // setup level model for model viewer
+            MeshData mesh_data = new MeshData();
+            Point3D mesh_center = new Point3D(0, 0, 0);
+            double maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
+
+
+            for (int i = 0; i < mdl.vertices_list.Count; i++)
+            {
+                Vector3 vert = mdl.vertices_list[i];
+                
+                mesh_data.vertices.Add(new Point3D(vert.X, vert.Y, vert.Z));
+
+                #region calculate mesh center and bounds
+
+                // calculate mesh center
+                mesh_center.X += vert.X;
+                mesh_center.Y += vert.Y;
+                mesh_center.Z += vert.Z;
+
+                // get max/min vertice distances
+                if (vert.X > maxX) { maxX = vert.X; }
+                if (vert.Y > maxY) { maxY = vert.Y; }
+                if (vert.Z > maxZ) { maxZ = vert.Z; }
+
+                if (vert.X < minX) { minX = vert.X; }
+                if (vert.Y < minY) { minY = vert.Y; }
+                if (vert.Z < minZ) { minZ = vert.Z; }
+
+                #endregion
+            }
+
+            for (int i = 0; i < mdl.triangles_list.Count; i++)
+            {
+                mesh_data.triangles.Add(mdl.triangles_list[i].a - 1);
+                mesh_data.triangles.Add(mdl.triangles_list[i].b - 1);
+                mesh_data.triangles.Add(mdl.triangles_list[i].c - 1);
+            }
+
+
+
+            #region calculate mesh center, bounds, average distance
+            // calculate mesh center
+            mesh_center.X = mesh_center.X / mesh_data.vertices.Count;
+            mesh_center.Y = mesh_center.Y / mesh_data.vertices.Count;
+            mesh_center.Z = mesh_center.Z / mesh_data.vertices.Count;
+
+            // mesh_center = new Point3D(BitConverter.ToSingle(data, start_offset), -BitConverter.ToSingle(data, start_offset + 8), BitConverter.ToSingle(data, start_offset + 4));
+
+            mesh_data.mesh_center = mesh_center;
+            mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(minX) + maxX)), Math.Abs((Math.Abs(minY) + maxY)), Math.Abs((Math.Abs(minZ) + maxZ)));// Math.Abs((Math.Abs(minX) + maxX)) + Math.Abs((Math.Abs(minY) + maxY)) + Math.Abs((Math.Abs(minZ) + maxZ));
+            mesh_data.mesh_bounds = new Point3D(minX + maxX, minY + maxY, minZ + maxZ);
+
+            #endregion
+
+
+            #region load full mesh with one material (no clusters nor splititng the mesh)          
+
+            List<GeometryModel3D>  meshes = new List<GeometryModel3D>();
+
+            // model color
+            System.Windows.Media.Color clr = System.Windows.Media.Color.FromRgb(128, 128, 128);
+
+            meshes.Add(Get_WPF_model(mesh_data, clr));
+            Load_model_to_HelixModelViewer(meshes, mesh_data.mesh_center, mesh_data.mesh_bounds, mesh_data.avg_distance);
+
+            #endregion
+
+
+
         }
 
         #endregion
@@ -219,7 +476,7 @@ namespace JSRF_ModTool
         {
             if (File.Exists(e.Node.FullPath.ToString()))
             {
-                Load_file(e.Node.FullPath.ToString());
+                Load_file(e.Node.FullPath.ToString(), true);
             }
         }
 
@@ -357,10 +614,11 @@ namespace JSRF_ModTool
             TreeNode selected_node = trv_file.SelectedNode;
 
             // reload file
-            Load_file(current_filepath);
+            Load_file(current_filepath, true);
 
             // select the node that was select before resetting the file to its original state
-            try
+
+            if(selected_node != null)
             {
                 if (selected_node.Level == 0)
                 {
@@ -376,10 +634,6 @@ namespace JSRF_ModTool
                 {
                     trv_file.SelectedNode = trv_file.Nodes[selected_node.Parent.Parent.Index].Nodes[selected_node.Parent.Index].Nodes[selected_node.Index];
                 }
-
-            } catch
-            {
-
             }
 
             System.Media.SystemSounds.Beep.Play();
@@ -389,7 +643,7 @@ namespace JSRF_ModTool
         private void Btn_null_model_Click(object sender, EventArgs e)
         {
             // check selected item is valid
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -413,7 +667,7 @@ namespace JSRF_ModTool
         private void Btn_import_mdl_Click(object sender, EventArgs e)
         {
             // check selected item is valid
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -438,24 +692,24 @@ namespace JSRF_ModTool
             #endregion
 
 
-            byte[] MDLB_import = new byte[0];
+            byte[] imported_MDLB_data = new byte[0];
 
             #region import Form with "using"
 
             // setup import form // "using {}" is employed here because the form and its variables (such as the heavy data SMD-model)
             // will be disposed/cleared of once we exit the 'using' {} space
-            using (var f = new MDLB_Import.MDLB_import_options_Form())
+            using (var MDLB_Import_Form = new MDLB_Import.MDLB_import_options_Form())
             {
                 //MDLB_Import.MDLB_import_options_Form import_Form = new MDLB_Import.MDLB_import_options_Form();
-                f.main_SMD_filepath = filepath;
+                MDLB_Import_Form.main_SMD_filepath = filepath;
+                
 
                 DialogResult dr = new DialogResult();
-                dr = f.ShowDialog();
+                dr = MDLB_Import_Form.ShowDialog();
                 if (dr == DialogResult.OK)
                 {
-                    // model = f.SMD_model;
-                    MDLB_import = f.MDLB_import;
-                    f.Close();
+                    imported_MDLB_data = MDLB_Import_Form.MDLB_import;
+                    MDLB_Import_Form.Close();
                 }
                 else if (dr == DialogResult.Cancel)
                 {
@@ -467,19 +721,15 @@ namespace JSRF_ModTool
             #endregion
 
 
-            if ((MDLB_import == null) || (MDLB_import.Length == 0))
+            if ((imported_MDLB_data == null) || (imported_MDLB_data.Length == 0))
             {
                 MessageBox.Show("Error could not import model");
                 return;
             }
 
-            jsrf_file.set_item_data(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, MDLB_import);
+            jsrf_file.set_item_data(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, imported_MDLB_data);
             Rebuild_file(true, true, true);
 
-#if DEBUG
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
-            //Clear_game_cache();
-#endif
         }
 
         private void cb_show_adv_mdlb_nfo_CheckStateChanged(object sender, EventArgs e)
@@ -504,7 +754,7 @@ namespace JSRF_ModTool
         private void btn_fix_drawdist_Click(object sender, EventArgs e)
         {
             // check selected item is valid
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -865,250 +1115,7 @@ namespace JSRF_ModTool
             
             #endregion
 
-            #region old methods
-            /*
-#region MULT
-            if (container_type == "MULT")
-            {
-                // cast object as MULT class
-                JSRF_Container.MULT_list MULT = (JSRF_Container.MULT_list)file_struct;
 
-                TreeNode nMULT = new TreeNode(container_type + " [" + (MULT.Count) + "]");
-                trv_file.Nodes.Add(nMULT);
-                // MULTs
-                for (int m = 0; m < MULT.Count; m++)
-                {
-
-                    TreeNode nNORM = new TreeNode("NORM st:" + MULT[m].start.ToString() + " s:" + MULT[m].size.ToString() + " [" + (MULT[m].NORM.child_count) + "]");
-
-                    // add NORM node to treview
-                    nMULT.Nodes.Add(nNORM);
-
-                    // loop through NORMs child
-                    for (int n = 0; n < MULT[m].NORM.child_count; n++)
-                    {
-
-                        int startoffset = JSRF_Container.get_real_offset(MULT, m, n, false, container_type);
-                        int endoffset = JSRF_Container.get_real_offset(MULT, m, n, true, container_type);
-
-                        string header = "";
-
-                        // if empty
-                        if (endoffset - startoffset == 0)
-                        {
-                            header = "empty";
-
-                            // if not empty
-                        } else {
-
-                            byte[] block = new byte[endoffset - startoffset];
-                            Buffer.BlockCopy(fdata, startoffset, block, 0, endoffset - startoffset);
-
-                            // get block header type
-                            header = JSRF_Container.get_block_header_type(block);
-
-
-                            // set parent node (NORM) color to define what type of blocks it contains
-                            if (header == "Texture") { nMULT.Nodes[m].BackColor = System.Drawing.Color.SandyBrown; }
-                            if (header == "MDLB") { nMULT.Nodes[m].BackColor = System.Drawing.Color.PaleVioletRed; }
-                            if (header == "Material") { nMULT.Nodes[m].BackColor = System.Drawing.Color.Linen; }
-
-
-                            if (header == "Texture")
-                            {
-                                // get texture id and add it to the list (so when loading materials we can check if an ID corresponds to a texture id)
-                                textures_id_list.Add((BitConverter.ToInt32(block, 0)).ToString());
-                            }
-
-                            // if its a material we store it in the materials list
-                            if (header == "Material")
-                            {
-                                // file_has_materials = true; 
-                                materials_dat_list.Add(new DataFormats.JSRF.Material(block));
-                            }
-
-                        }
-
-                        int size = (MULT[m].NORM.childs[n].end - MULT[m].NORM.childs[n].start);
-                        //TreeNode nChild = new TreeNode(header + " " + MULT[m].NORM.childs[n].start.ToString() + " s:" + size.ToString());
-
-                        TreeNode nChild = new TreeNode(String.Format("{0,4} {1,-14} {2, 20}", n.ToString(), "   " + header, "[" + size.ToString() + "]"));
-
-                        // if empty don't add it but also remove it from the MULT.NORM.Child array
-                        if (size == 0)
-                        {
-                            MULT[m].NORM.childs.RemoveAt(n);
-                            MULT[m].NORM.child_count -= 1;
-                            n -= 1;
-                        }
-                        else
-                        {
-                            nNORM.Nodes.Add(nChild);
-                        }
-                        // trv_file.Nodes.Add(nChild);
-                    }
-
-
-                }
-
-                nMULT.Expand();
-            }
-
-#endregion
-
-#region NORM
-            if (container_type == "NORM")
-            {
-                // cast object as NORM class
-                JSRF_Container.NORM_head NORM = (JSRF_Container.NORM_head)file_struct;
-
-                TreeNode nNORM = new TreeNode(container_type + " [" + (NORM.child_count) + "]");
-                trv_file.Nodes.Add(nNORM);
-
-                // MULTs
-                for (int n = 0; n < NORM.child_count; n++)
-                {
-                    int startoffset = JSRF_Container.get_real_offset(NORM, 0, n, false, container_type);
-                    int endoffset = JSRF_Container.get_real_offset(NORM, 0, n, true, container_type);
-
-                    string header = "";
-
-                    // if empty
-                    if (endoffset - startoffset == 0)
-                    {
-                        header = "empty";
-                    }
-                    else // if not empt, get block and check get header type
-                    {
-                        byte[] block = new byte[endoffset - startoffset];
-                        Buffer.BlockCopy(fdata, startoffset, block, 0, endoffset - startoffset);
-
-                        header = JSRF_Container.get_block_header_type(block);
-
-                        // if its a material we store it in the materials list
-                        if (header == "Material")
-                        {
-                            // file_has_materials = true;
-                            materials_dat_list.Add(new DataFormats.JSRF.Material(block));
-                        }
-
-                    }
-
-                    int size = (NORM.childs[n].end - NORM.childs[n].start);
-                    // TreeNode nChild = new TreeNode(header + " " + NORM.childs[n].start.ToString() + " s:" + size.ToString());
-                    //TreeNode nChild = new TreeNode(header + " " + n.ToString() + " [" + size.ToString() + "]");
-                    TreeNode nChild = new TreeNode(String.Format("{0,4} {1,-14} {2, 20}", n.ToString(), "   " + header, "[" + size.ToString() + "]"));
-
-                    // if empty don't add it but also remove it from the MULT.NORM.Child array
-                    if (size == 0)
-                    {
-                        NORM.childs.RemoveAt(n);
-                        NORM.child_count -= 1;
-                        n -= 1;
-                    }
-                    else
-                    {
-                        nNORM.Nodes.Add(nChild);
-                    }
-                    // trv_file.Nodes.Add(nChild);
-                }
-
-                nNORM.Expand();
-            }
-#endregion
-
-#region Indexed
-
-            if (container_type == "Indexed")
-            {
-                // cast object as Indexed class
-                JSRF_Container.Indexed_head Indexed = (JSRF_Container.Indexed_head)file_struct;
-
-                TreeNode nIndexed = new TreeNode(container_type + " [" + (Indexed.childs.Count) + "]");
-                trv_file.Nodes.Add(nIndexed);
-
-                for (int n = 0; n < Indexed.childs.Count; n++)
-                {
-                    // Indexed.childs[n].
-                    int startoffset = Indexed.childs[n].block_start;
-                    int endoffset = Indexed.childs[n].block_end;
-
-                    if ((endoffset < 0) || (startoffset < 0))
-                    {
-                        MessageBox.Show("Error while loading child block " + n + ", negative offset.");
-                        return;
-                    }
-                    string header = "";
-
-                    // if empty
-                    if (endoffset - startoffset == 0)
-                    {
-                        header = "empty";
-                    }
-                    else  // if not empt, get block and check get header type
-                    {
-
-                        byte[] block = new byte[endoffset - startoffset];
-                        Buffer.BlockCopy(fdata, startoffset, block, 0, endoffset - startoffset);
-
-                        header = JSRF_Container.get_block_header_type(block);
-                        // if its a material we store it in the materials list
-                        if (header == "Material")
-                        {
-                            // file_has_materials = true;
-                            materials_dat_list.Add(new DataFormats.JSRF.Material(block));
-                        }
-                    }
-
-                    // string header = JSRF_Container.get_block_header_type(fdata, Indexed.childs[n].block_start, Indexed.childs[n].block_end);
-                    // string header = "h";
-                    int size = (Indexed.childs[n].block_end - Indexed.childs[n].block_start);
-
-                    //TreeNode nChild = new TreeNode(header + " " + Indexed.childs[n].block_start.ToString() + " : " + Indexed.childs[n].block_end.ToString() + " s:" + size.ToString());
-                    //TreeNode nChild = new TreeNode(header + " " + n.ToString() + " [" + size.ToString() + "]");
-                    // TreeNode nChild = new TreeNode(String.Format("{0,6} {1,-14} {2, 10}",  n.ToString(), "   " +  header, "[" + size.ToString() + "]"));
-
-                    TreeNode nChild = new TreeNode(String.Format("{0,4} {1,-14} {2, 20}", n.ToString(), "   " + header, "[" + size.ToString() + "]"));
-
-
-
-                    if (n % 2 == 0)
-                    {
-                        nChild.BackColor = System.Drawing.Color.Silver;
-                    }
-
-                    // if empty don't add it but also remove it from the MULT.NORM.Child array
-                    if (size == 0)
-                    {
-                        Indexed.childs.RemoveAt(n);
-                        //  Indexed.childs.Count -= 1;
-                        n -= 1;
-                    }
-                    else
-                    {
-                        nIndexed.Nodes.Add(nChild);
-                    }
-                }
-
-
-
-                nIndexed.Expand();
-            }
-
-#endregion
-
-#region Level bin
-
-            if (container_type == "Level")
-            {
-                TreeNode nNORM = new TreeNode(container_type);
-                trv_file.Nodes.Add(nNORM);
-            }
-
-#endregion
-
-            */
-            #endregion
         }
 
         // when node is selected
@@ -1131,6 +1138,7 @@ namespace JSRF_ModTool
             if (node == null) { MessageBox.Show("Error: node is null."); return; }
             if (node.Nodes == null) { MessageBox.Show("Error: node.Nodes is null."); return; }
             if (node.Nodes.Count > 0) { return; } // if node is an empty container, ignore
+            if (node.Text.Contains("NORM") || node.Text.Contains("MULT")) { return; } // return if node is a container
 
             // get item from 'jsrf_file'
             File_Containers.item item = jsrf_file.get_item(node.Parent.Index, node.Index);
@@ -1155,6 +1163,7 @@ namespace JSRF_ModTool
             {
                 // Texture
                 case File_Containers.item_data_type.Texture:
+                    pictureBox_texture_editor.Image = null;
                     Load_block_Texture(current_item_data, false, false);
                     pictureBox_texture_editor.Enabled = true;
                     tabControl1.SelectedIndex = 01;
@@ -1168,9 +1177,23 @@ namespace JSRF_ModTool
                     tabControl1.SelectedIndex = 0;
                     break;
 
-                // Level Model
-                case File_Containers.item_data_type.MDLBL:
+                // Level MDLB
+                case File_Containers.item_data_type.Level_MDLB:
+                    // MDLB in Level (Stg00_00.dat) have a header starting with extra data
+                    // int32 texture ids count -- and the list of int32s for each id
+                    Int32 texture_ids_count = BitConverter.ToInt32(current_item_data, 0);
+                    // remove texture_ids_count and list of texture ids from array
+                    byte[] headerless_item_data = new byte[current_item_data.Length - ( 4 + texture_ids_count * 4)];
+                    Array.Copy(current_item_data, 4 + texture_ids_count * 4, headerless_item_data, 0, headerless_item_data.Length); // - (4 + texture_ids_count * 4)
 
+                    mdlb_first_load = true;
+                    Load_block_MDLB(headerless_item_data, 21);
+                    elementHost_model_editor.Enabled = true;
+                    tabControl1.SelectedIndex = 0;
+                    break;
+
+                // Level Model
+                case File_Containers.item_data_type.Level_Model:
                     load_level_model(current_item_data);
                     elementHost_model_editor.Enabled = true;
                     tabControl1.SelectedIndex = 0;
@@ -1186,7 +1209,7 @@ namespace JSRF_ModTool
 
 
         // returns true if selected item is an MDLB
-        private bool selected_item_is_MDLB()
+        private bool selected_MDLB_is_valid()
         {
             // check selected node
             if (trv_file.SelectedNode == null || trv_file.SelectedNode.Index == -1 || trv_file.SelectedNode.Nodes.Count != 0)
@@ -1210,15 +1233,6 @@ namespace JSRF_ModTool
             return true;
         }
 
-
-        #endregion
-
-        #region level model
-
-        private void load_level_model(byte[] data)
-        {
-            Level_Model mdl = new Level_Model(data);
-        }
 
         #endregion
 
@@ -1307,6 +1321,7 @@ namespace JSRF_ModTool
             lab_vertBlockSize.Text = vert_size.ToString();
             lab_vert_count.Text = vert_count.ToString();
             lab_tris_count.Text = (tris_count / 3).ToString();
+            lab_mdl_DrawDist.Text = current_model.Model_Parts_header_List[current_model.Model_Parts_header_List.Count - 1].draw_distance.ToString();
 
             lab_triStrip.Text = "no";
             if (current_model.VertexBlock_header_List[mdl_partnum].stripped_triangles == 1)
@@ -1392,7 +1407,7 @@ namespace JSRF_ModTool
             for (int i = start_offset; i < end_offset - vert_size; i = i + vert_size)
             {
                 // Vertex
-                // mesh_data.vertices.Add(new Point3D(BitConverter.ToSingle(data, i),  BitConverter.ToSingle(data, i + 8) *-1, BitConverter.ToSingle(data, i + 4)));
+                // mesh_data.vertices.Add(new Point3D(BitConverter.ToSingle(data, i),  BitConverter.ToSingle(data, i + 8) *-1f, BitConverter.ToSingle(data, i + 4)));
                 if (i + 8 > data.Length)
                 {
                     MessageBox.Show("index out of range (vertex block loop)");
@@ -1404,7 +1419,7 @@ namespace JSRF_ModTool
                 double z = BitConverter.ToSingle(data, i +8);
 
                 // flip order 
-                Point3D vert = new Point3D(x*-1, z,y); //new Point3D(-x, z, y);  //// correct face position new Point3D(y, z, x);
+                Point3D vert = new Point3D(x*-1f, z,y); //new Point3D(-x, z, y);  //// correct face position new Point3D(y, z, x);
                 // add vert
                 mesh_data.vertices.Add(vert);
 
@@ -1519,9 +1534,13 @@ namespace JSRF_ModTool
             {
                 MDLB.triangle_group tg = current_model.Model_Parts_header_List[mdl_partnum].triangle_groups_List[0];
                 if(current_model.materials_List.Count > 0)
-                {       
-                    MDLB.color color = current_model.materials_List[tg.material_index].color;
-                    clr.R = color.R; clr.G = color.G; clr.B = color.B;
+                {      
+                    if(tg.material_index  < current_model.materials_List.Count )
+                    {
+                        MDLB.color color = current_model.materials_List[tg.material_index].color;
+                        clr.R = color.R; clr.G = color.G; clr.B = color.B;
+                    }
+
                 }
             }
 
@@ -1564,10 +1583,10 @@ namespace JSRF_ModTool
             GeometryModel.Material = myMaterial;
              */
             // assign texture if it was extracted and file exists
-            if (File.Exists(tmp_dir + mesh_data.texture_id + ".bmp"))
+            if (File.Exists(tmp_dir + mesh_data.texture_id + ".png"))
             {
                 ImageBrush image_brush = new ImageBrush();
-                byte[] buffer = System.IO.File.ReadAllBytes((tmp_dir + mesh_data.texture_id + ".bmp"));
+                byte[] buffer = System.IO.File.ReadAllBytes((tmp_dir + mesh_data.texture_id + ".png"));
                 MemoryStream ms = new MemoryStream(buffer);
 
                 System.Windows.Media.Imaging.BitmapImage imageSource = new System.Windows.Media.Imaging.BitmapImage();
@@ -1752,9 +1771,10 @@ namespace JSRF_ModTool
             int drawdistY_offset = 32 + ((current_model.VertexBlock_header_List.Count - 1) * 128) + 4;
 
             // set y draw distance to 8.5
-            Buffer.BlockCopy(BitConverter.GetBytes(-1.1957052f), 0, data, drawdistY_offset, 4);
+            //Buffer.BlockCopy(BitConverter.GetBytes(15f), 0, data, drawdistY_offset, 4);
 
-            Buffer.BlockCopy(BitConverter.GetBytes(13.355667f), 0, data, drawdistY_offset + 8, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(20f), 0, data, drawdistY_offset + 8, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(20f), 0, data, drawdistY_offset, 4);
 
             return data;
         }
@@ -1786,10 +1806,12 @@ namespace JSRF_ModTool
             light.Direction = new Vector3D(0.61, -0.5, 0.61);
             lights_visual.Content = light;
 
+            /*
             DirectionalLight light1 = new DirectionalLight();
-            // light1.Color = Color.FromArgb(255, 100, 100, 100);
+            light1.Color = System.Windows.Media.Color.FromArgb(255, 255, 100, 100);
             light1.Direction = new Vector3D(-0.61, 0.5, 0.61);
             lights_visual.Content = light1;
+            */
 
             // new_mv.view1.Viewport.Children.Add(new ModelVisual3D() { Content = new AmbientLight(Colors.White) });
             view.Viewport.Children.Add(lights_visual);
@@ -1817,7 +1839,7 @@ namespace JSRF_ModTool
 
             ProjectionCamera cam = view.Camera;
 
-            cam.Position = new Point3D(mesh_center.X + avg_distance.X, mesh_center.Y + avg_distance.Y, mesh_center.Z + avg_distance.Z);
+            cam.Position = new Point3D(mesh_center.X + avg_distance.X/2, mesh_center.Y + avg_distance.Y/2, mesh_center.Z + avg_distance.Z/2);
             cam.LookAt(new Point3D(mesh_center.X, mesh_center.Y, mesh_center.Z), 0);
 
             // add model to view
@@ -1830,7 +1852,7 @@ namespace JSRF_ModTool
         private void Btn_mdl_partPlus_Click(object sender, EventArgs e)
         {
             // check selected item is valid
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -1847,7 +1869,7 @@ namespace JSRF_ModTool
         private void Btn_mdl_partMin_Click(object sender, EventArgs e)
         {
             // check selected item is valid
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -1885,7 +1907,6 @@ namespace JSRF_ModTool
             Int32 unk_8 = BitConverter.ToInt32(data, 8);
             Int32 unk_16 = BitConverter.ToInt32(data, 16);
             Int32 res_x = BitConverter.ToInt32(data, 20);
-            Int32 res_y = BitConverter.ToInt32(data, 24);
 
             byte dxt_format = data[24]; // 5 = dxt1 | 6 = dxt3 |
             byte unk_25 = data[25]; // has alpha? is a cube map? not sure, probably if has alpha
@@ -1898,6 +1919,10 @@ namespace JSRF_ModTool
 
             switch (dxt_format)
             {
+                case 1:
+                    dxt_compression_type = "1";
+                    break;
+
                 case 5:
                     dxt_compression_type = "dxt1";
                     break;
@@ -1906,57 +1931,12 @@ namespace JSRF_ModTool
                     dxt_compression_type = "dxt3";
                     break;
                 // if unknown type exit
-                default:
-                    return "";
+               // default:
+               //     return "";
             }
 
-            // /TODO remove data header
-            byte[] data_noheader = new byte[data.Length - 32];
-            System.Buffer.BlockCopy(data, 32, data_noheader, 0, data_noheader.Length);// /
-
-            byte[] dds_header = Generate_dds_header(res_x, dxt_compression_type);
-            byte[] texture_file = new byte[dds_header.Length + data_noheader.Length + 32];
-            System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
-            System.Buffer.BlockCopy(data_noheader, 0, texture_file, dds_header.Length, data_noheader.Length);
-
-            string filename = "tmp";
-
-            if (by_id) { filename = id.ToString(); }
-
-            Parsing.ByteArrayToFile(tmp_dir + "\\" + filename + ".dds", texture_file);
-
-            #region convert dds to bmp
-
-
-            string args = "-i=" + filename + ".dds -o=" + filename + ".bmp -genmipmaps=1";
-
-            Process proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Application.StartupPath + "\\resources\\tmp\\",
-                    FileName = Application.StartupPath + "\\resources\\tools\\VampConvert.exe",
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-
-            proc.Start();
-            proc.WaitForExit();
-            proc.Dispose();
-
-            if (!File.Exists(tmp_dir + filename + ".bmp"))
-            {
-                MessageBox.Show("Could not load texture file: \n" + tmp_dir + filename + ".bmp");
-                return "";
-            }
-
-            #endregion
-
-            // if not in silent mode: load bitmap into picturebox and texture info in textbox
-            if (!silent)
+            // set texture info fox texbox
+            if(!silent)
             {
 
                 #region write texture info in textbox
@@ -1970,7 +1950,7 @@ namespace JSRF_ModTool
                 rtxtb_textureinfo.AppendText("\n" + "Mipmap count: " + mipmap_count.ToString() + " ");
 
                 string is_swizzled = "no";
-                if(swizzled == 1)
+                if (swizzled == 1)
                 {
                     is_swizzled = "yes";
                 }
@@ -1991,6 +1971,92 @@ namespace JSRF_ModTool
 
 
                 #endregion
+            }
+
+            if(dxt_compression_type != "dxt1" && dxt_compression_type != "dxt3")
+            {
+                rtxtb_textureinfo.AppendText("\n" + "Compression: " + dxt_format.ToString());
+                return id.ToString();
+            }
+
+            // /TODO remove data header
+            byte[] data_noheader = new byte[data.Length - 32];
+            System.Buffer.BlockCopy(data, 32, data_noheader, 0, data_noheader.Length);// /
+
+            byte[] dds_header = Generate_dds_header(res_x, dxt_compression_type);
+            byte[] texture_file = new byte[dds_header.Length + data_noheader.Length + 32];
+
+            if (swizzled == 1)
+            {
+                /*
+                byte[] data_unswizz = new byte[data.Length - 32];
+                data_unswizz = DataFormats.Xbox.TextureSwizzle.(data_noheader, 0, res_x, res_x, (int)numupDown_tex_depth.Value, (int)numupDown_tex_bitCount.Value, true);
+
+                if (data_unswizz == null) { System.Media.SystemSounds.Asterisk.Play(); return ""; }
+
+                System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
+                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
+                */
+                /*
+                //byte[] data_decompressed = new byte[data.Length - 32];
+                //DataFormats.Xbox.TextureSwizzle.DecompressDxt3(data_decompressed, data_noheader, res_x, res_x);
+
+                byte[] data_unswizz = new byte[data.Length - 32];
+                data_unswizz = DataFormats.Xbox.TextureSwizzle.Swizzle(data_noheader, res_x, res_x, (int)numupDown_tex_depth.Value, (int)numupDown_tex_bitCount.Value, true);
+
+                if (data_unswizz == null) { System.Media.SystemSounds.Asterisk.Play(); return ""; }
+
+                System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
+                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
+                */
+
+            } else {
+                System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
+                System.Buffer.BlockCopy(data_noheader, 0, texture_file, dds_header.Length, data_noheader.Length);
+            }
+          
+
+
+            string filename = "tmp";
+
+            if (by_id) { filename = id.ToString(); }
+
+            Parsing.ByteArrayToFile(tmp_dir + "\\" + filename + ".dds", texture_file);
+
+            #region convert dds to png
+
+
+            string args = "-i=" + filename + ".dds -o=" + filename + ".png -genmipmaps=1";
+
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    WorkingDirectory = Application.StartupPath + "\\resources\\tmp\\",
+                    FileName = Application.StartupPath + "\\resources\\tools\\VampConvert.exe",
+                    Arguments = args,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            proc.Start();
+            proc.WaitForExit();
+            proc.Dispose();
+
+            if (!File.Exists(tmp_dir + filename + ".png"))
+            {
+                MessageBox.Show("Could not load texture file: \n" + tmp_dir + filename + ".png");
+                return "";
+            }
+
+            #endregion
+
+            // if not in silent mode: load bitmap into picturebox and texture info in textbox
+            if (!silent)
+            {
+
 
 
                 if (res_x > 512)
@@ -2002,7 +2068,7 @@ namespace JSRF_ModTool
                     pictureBox_texture_editor.SizeMode = PictureBoxSizeMode.CenterImage;
                 }
 
-                Stream BitmapStream = System.IO.File.Open(tmp_dir + filename + ".bmp", System.IO.FileMode.Open);
+                Stream BitmapStream = System.IO.File.Open(tmp_dir + filename + ".png", System.IO.FileMode.Open);
                 Image imgPhoto = Image.FromStream(BitmapStream, true);
 
                 BitmapStream.Dispose();
@@ -2287,69 +2353,6 @@ namespace JSRF_ModTool
                 }
             }
 
-
-            /*
-            for (int m = 0; m < materials_bin_list.Count; m++)
-            {
-
-                for (int mid = 0; mid < materials_bin_list[m].texture_id.Count; mid++)
-                {
-                    int mat_id = materials_bin_list[m].texture_id[mid];
-
-                    // TODO support different containers and headerless indexed files
-                    if(trv_file.SelectedNode.Parent.Parent == null)
-                    {
-                        texture_ids.Add(0);
-                        return texture_ids;
-                    }
-
-                    // find textures container with same number of items as MDLB container
-                    for (int n = 0; n< trv_file.SelectedNode.Parent.Parent.Nodes.Count; n++)
-                    {
-                        TreeNode tn = trv_file.SelectedNode.Parent.Parent.Nodes[n];
-
-                        // if number of child nodes match and is textures
-                        if (tn.Nodes.Count == trv_file.SelectedNode.Parent.Nodes.Count)
-                        {
-                            if(JSRF_Containers.item_data_type.Texture == ((JSRF_Containers.item)jsrf_file.get_item(n, 0)).type)
-                            {
-                                for (int nid = 0; nid < trv_file.SelectedNode.Parent.Parent.Nodes[n].Nodes.Count; nid++)
-                                {
-                                    JSRF_Containers.item item = jsrf_file.get_item(n, nid);
-                                    if(item.data.Length > 0)
-                                    {
-                                        int tid = BitConverter.ToInt32(item.data, 0);
-
-                                        if (tid == mat_id)
-                                        {
-                                            texture_ids.Add(tid);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            */
-            /*
-            if (materials_dat_list.Count == 0)
-            {
-                if (node_index >= materials_bin_list.Count)
-                {
-                    node_index = materials_bin_list.Count - 1;
-                }
-                if (node_index < materials_bin_list.Count)
-                    mat = materials_bin_list[node_index].texture_id;
-
-            } else {
-                if (node_index >= materials_dat_list.Count)
-                {
-                    node_index = materials_dat_list.Count - 1;
-                }
-                mat = materials_dat_list[node_index].texture_id;
-            }
-            */
             return texture_id;
         }
 
@@ -2416,7 +2419,7 @@ namespace JSRF_ModTool
         private void Btn_extract_mdl_lastp_Click(object sender, EventArgs e)
         {
             // check selected item is valid if popup messagbox saying why and return
-            if (!selected_item_is_MDLB())
+            if (!selected_MDLB_is_valid())
             {
                 return;
             }
@@ -2618,7 +2621,7 @@ namespace JSRF_ModTool
                     //Single v = (-1 * (BitConverter.ToSingle(data, i + uv_offset + 4))) + 1; //BitConverter.ToSingle(data, i + uv_offset + 4);
                     //Single v_flipped = (-1 * v) + 1;
                     //(-1 * (BitConverter.ToSingle(data, i + uv_offset + 4))) + 1)
-                    System.Windows.Point uv = new System.Windows.Point(BitConverter.ToSingle(data, i + uv_offset), v * -1);  // Parsing.brReadVector3D(block, i + norm_offset);
+                    System.Windows.Point uv = new System.Windows.Point(BitConverter.ToSingle(data, i + uv_offset), v * -1f);  // Parsing.brReadVector3D(block, i + norm_offset);
                     mesh_data.UVs.Add(uv);
                 }
                 // vertex weights
@@ -2716,7 +2719,7 @@ namespace JSRF_ModTool
                     {
                         // get parent bone position
                         Vector3 vpp = current_model.Model_Parts_header_List[mp.real_parent_id].bone_pos;
-                        // substract parent position // invert X pos  *-1
+                        // substract parent position // invert X pos  *-1f
                         pos = new Vector3((pos.X - vpp.X), pos.Y - vpp.Y, pos.Z - vpp.Z);
                     }
                 }
@@ -2977,9 +2980,9 @@ namespace JSRF_ModTool
 
             #region get texture id from last loaded node data
 
-            string selected_node_type = File_Headers.get_block_header_type(current_item_data);
+            File_Containers.item_data_type selected_node_type = File_Containers.get_item_data_type(current_item_data);
 
-            if (selected_node_type != "Texture")
+            if (selected_node_type != File_Containers.item_data_type.Texture)
             {
                 MessageBox.Show("Select a texture item.");
                 return;
@@ -2987,7 +2990,7 @@ namespace JSRF_ModTool
 
             string texture_id = "";
 
-            if (File_Headers.get_block_header_type(current_item_data) == "Texture")
+            if (selected_node_type == File_Containers.item_data_type.Texture)
             {
                 texture_id = Load_block_Texture(current_item_data, true, true);
 
@@ -2997,7 +3000,7 @@ namespace JSRF_ModTool
                     return;
                 }
 
-                if (!File.Exists(tmp_dir + texture_id + ".bmp"))
+                if (!File.Exists(tmp_dir + texture_id + ".png"))
                 {
                     MessageBox.Show("Could not extract texture: ID " + texture_id);
                     return;
@@ -3006,27 +3009,8 @@ namespace JSRF_ModTool
 
             #endregion
 
-            string texture_path = GetShortPath(tmp_dir + texture_id + ".bmp");
+            string texture_path = GetShortPath(tmp_dir + texture_id + ".png");
 
-           
-            /*
-            // check if image editor is active and texture is is defined, else write bmp file
-            if ((proc_ImgEditor != null) && (texture_id != ""))
-            {
-                try
-                {
-                    StreamWriter myStreamWriter = proc_ImgEditor.StandardInput;
-                    myStreamWriter.WriteLine(texture_path);
-                }
-                catch
-                {
-                }
-            }
-            */
-           // MessageBox.Show(texture_path);
-
-            //  wait(1000);
-            //if(proc_ImgEditor == null)
             Launch_image_editor(texture_path);
         }
 
@@ -3048,15 +3032,15 @@ namespace JSRF_ModTool
             }
         }
 
-        // save texture changes: convert tmp.bmp to tmp.dds and import to selected texture node
+        // save texture changes: convert tmp.png to tmp.dds and import to selected texture node
         private void Btn_save_texture_edits_Click(object sender, EventArgs e)
         {
 
             #region get texture id from last loaded node data block
 
-            string selected_node_type = File_Headers.get_block_header_type(current_item_data);
+            File_Containers.item_data_type selected_node_type = File_Containers.get_item_data_type(current_item_data);
 
-            if (selected_node_type != "Texture")
+            if (selected_node_type != File_Containers.item_data_type.Texture)
             {
                 MessageBox.Show("Select a texture item first.");
                 return;
@@ -3064,7 +3048,7 @@ namespace JSRF_ModTool
 
             string texture_id = "";
 
-            if (File_Headers.get_block_header_type(current_item_data) == "Texture")
+            if (selected_node_type == File_Containers.item_data_type.Texture)
             {
 
                 texture_id = BitConverter.ToInt32(current_item_data, 0).ToString();
@@ -3076,7 +3060,7 @@ namespace JSRF_ModTool
                     return;
                 }
 
-                if (!File.Exists(tmp_dir + texture_id + ".bmp"))
+                if (!File.Exists(tmp_dir + texture_id + ".png"))
                 {
                     MessageBox.Show("Could not extract texture: ID " + texture_id);
                     return;
@@ -3134,8 +3118,8 @@ namespace JSRF_ModTool
             // so we get it to -genmipmap=1 so it doesn't generate any (only main texture)
             if (mipmap_count == 0) { mipmap_count = 1; }
 
-            #region convert texture_id.bmp to import.dds
-            string args = "-i=" + texture_id + ".bmp -o=" + "import.dds " + " -format=" + dxt_compression_type + " -genmipmaps=" + mipmap_count; // (mipmap_count-1).ToString()
+            #region convert texture_id.png to import.dds
+            string args = "-i=" + texture_id + ".png -o=" + "import.dds " + " -format=" + dxt_compression_type + " -genmipmaps=" + mipmap_count; // (mipmap_count-1).ToString()
 
 
             Process proc = new Process
@@ -3289,7 +3273,7 @@ namespace JSRF_ModTool
             jsrf_file.rebuild_file(jsrf_file.filepath);
 
             if (reload_file_treeview)
-                Load_file(jsrf_file.filepath);
+                Load_file(jsrf_file.filepath, true);
 
             // reslect modified node and expand
             if (expand_selection)
@@ -3489,5 +3473,14 @@ namespace JSRF_ModTool
 
         #endregion
 
+        private void numupDown_tex_depth_ValueChanged(object sender, EventArgs e)
+        {
+            Load_block_Texture(current_item_data, false, false);
+        }
+
+        private void numupDown_tex_bitCount_ValueChanged(object sender, EventArgs e)
+        {
+            Load_block_Texture(current_item_data, false, false);
+        }
     }
 }

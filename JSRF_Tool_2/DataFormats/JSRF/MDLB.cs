@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using JSRF_ModTool.Vector;
+using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
@@ -43,7 +44,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
     public class MDLB 
     { 
        public MDLB_header header = new MDLB_header();
-        public List<Model_Part_header> Model_Parts_header_List = new List<Model_Part_header>(); // possible mat clusters
+        public List<Model_Part_header> Model_Parts_header_List = new List<Model_Part_header>();
 
         public List<material> materials_List = new List<material>();
         public List<Vertex_triangles_buffers_header> VertexBlock_header_List = new List<Vertex_triangles_buffers_header>();
@@ -224,10 +225,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public Int32 model_type { get; set; } // 0 = visual mesh // 1 = shadow mesh // 2 = bone // Int32.Max = shadow model
 
             // 16
-            public float draw_distance_x { get; set; }
-            public float draw_distance_y { get; set; }
-            public float draw_distance_z { get; set; }
-            public float draw_distance_w { get; set; }
+            public float unk_float { get; set; }
+            public float unk_float_1 { get; set; }
+            public float unk_float_2 { get; set; }
+            public float draw_distance { get; set; }
             public Vector3 bone_pos { get; set; } // 0x28
             public float unk_44 { get; set; }
 
@@ -352,8 +353,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public Int32 triangles_count { get; set; } //  divide by 3 for triangle count
             public Int32 stripped_triangles { get; set; } // if triangles are stripped this = 1
             public Int32 unk7 { get; set; } // ?? 
-
-
         }
 
         #endregion

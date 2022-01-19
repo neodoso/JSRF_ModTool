@@ -39,13 +39,9 @@ namespace JSRF_ModTool.MDLB_Import
             panel_models.HorizontalScroll.Visible = false;
             panel_models.VerticalScroll.Visible = true;
 
-
             srcMDLB_vert_size = Main.current_model.VertexBlock_header_List[Main.current_model.Model_Parts_header_List.Count-1].vertex_def_size;
 
-            txtb_drawDist_x.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_x.ToString();
-            txtb_drawDist_y.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_y.ToString();
-            txtb_drawDist_z.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_z.ToString();
-            txtb_drawDist_w.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance_w.ToString();
+            txtb_drawDist_w.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance.ToString();
             //srcMDLB_materials_count = Main.model.materials_List.Count;
 
             cb_vertex_def_size.SelectedItem = srcMDLB_vert_size.ToString();
@@ -405,18 +401,10 @@ namespace JSRF_ModTool.MDLB_Import
             for (int i = 0; i < mdl_inspector_list.Count; i++)
             {
                Model_Inspector mdl = mdl_inspector_list[i];
-               mdlPart_import_settings_List.Add(new ModelPart_Import_Settings(mdl.filepath, mdl.get_mdl_type(), mdl.get_vert_def_size(), 
-                   Convert.ToSingle(txtb_drawDist_x.Text),
-                   Convert.ToSingle(txtb_drawDist_y.Text),
-                   Convert.ToSingle(txtb_drawDist_z.Text),
-                   Convert.ToSingle(txtb_drawDist_w.Text)));
+               mdlPart_import_settings_List.Add(new ModelPart_Import_Settings(mdl.filepath, mdl.get_mdl_type(), mdl.get_vert_def_size(), Convert.ToSingle(txtb_drawDist_w.Text)));
             }
 
-            mdlPart_import_settings_List.Add(new ModelPart_Import_Settings(main_SMD_filepath, 0, Convert.ToInt32(cb_vertex_def_size.SelectedItem),
-                   Convert.ToSingle(txtb_drawDist_x.Text),
-                   Convert.ToSingle(txtb_drawDist_y.Text),
-                   Convert.ToSingle(txtb_drawDist_z.Text),
-                   Convert.ToSingle(txtb_drawDist_w.Text)));
+            mdlPart_import_settings_List.Add(new ModelPart_Import_Settings(main_SMD_filepath, 0, Convert.ToInt32(cb_vertex_def_size.SelectedItem), Convert.ToSingle(txtb_drawDist_w.Text)));
 
             List <MDLB_Import.MDLB_classes.material> materials = new List<MDLB_Import.MDLB_classes.material>();
             // for each material inspector, create MDLB_builder.material and add to list
@@ -451,38 +439,13 @@ namespace JSRF_ModTool.MDLB_Import
                 materials.Add(new MDLB_Import.MDLB_classes.material(new MDLB_Import.MDLB_classes.color(c.B, c.G, c.R, c.A), shader_id, Convert.ToInt32(mi.txtb_unk_id2.Text), Convert.ToSingle(mi.txtb_hb.Text)));
             }
 
-            /*
-            List<MDLB_builder.model_part_triangle_groups> tris_groups = new List<MDLB_builder.model_part_triangle_groups>();
-
-            for (int i = 0; i < Main.model.Model_Parts_header_List.Count; i++)
-            {
-                tris_groups.Add(new MDLB_builder.model_part_triangle_groups());
-
-            
-                if (Main.model.Model_Parts_header_List[i].triangle_groups_count > 1)
-                {
-                    tris_groups[i] = new MDLB_builder.model_part_triangle_groups();
-                    for (int t = 0; t < Main.model.Model_Parts_header_List[i].triangle_groups_List.Count; t++)
-                    {
-                        tris_groups[i].tri_groups.Add(Main.model.Model_Parts_header_List[i].triangle_groups_List[t]); //Main.model.Model_Parts_header_List[i].triangle_groups_List[t]
-                    }
-                }
-            }
-            */
-
-            MDLB_builder MDLB_build = new MDLB_builder();
-            MDLB_import = MDLB_build.build_MDLB(mdlPart_import_settings_List, materials);
+            MDLB_compiler MDLB_build = new MDLB_compiler();
+            MDLB_import = MDLB_build.build(mdlPart_import_settings_List, materials); // 
 
             this.DialogResult = DialogResult.OK;
            // this.Close();
         }
-        /*
-        public class model_part_triangle_groups
-        {
-            //public int model_part_number { get; set; }
-            public List<JSRF_ModTool.DataFormats.JSRF.MDLB.triangle_group> tri_groups { get; set;}
-        }
-        */
+
         private void btn_cancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;

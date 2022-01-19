@@ -42,45 +42,47 @@ namespace JSRF_ModTool.Vector
 
         public Vector3()
         {
-           
+            X = 0f;
+            Y = 0f;
+            Z = 0f;
         }
 
-        public Vector3(string x, string y, string z)
-        {
-            setVals(float.Parse(x),float.Parse(y),float.Parse(z));
-        }
+            public Vector3(string x, string y, string z)
+            {
+                setVals(float.Parse(x),float.Parse(y),float.Parse(z));
+            }
 
-        public Vector3(float x, float y, float z)
-        {
-            setVals(x, y, z);
-        }
+            public Vector3(float x, float y, float z)
+            {
+                setVals(x, y, z);
+            }
 
 
-        /// <summary>
-        /// converts float to string also truncate the float precision and use dot instead of comma(with CultureInfo)
-        /// </summary>
-        public List<String> Vector_to_StringList(int float_precision, bool to_radians)
-        {
-                List<String> v = new List<String>();
+            /// <summary>
+            /// converts float to string also truncate the float precision and use dot instead of comma(with CultureInfo)
+            /// </summary>
+            public List<String> Vector_to_StringList(int float_precision, bool to_radians)
+            {
+                    List<String> v = new List<String>();
 
-                if (!to_radians)
-                {
-                    v.Add(this.X.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                    v.Add(this.Y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                    v.Add(this.Z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                }
-                else
-                {
-                    double x = (Math.PI / 180) * this.X;
-                    double y = (Math.PI / 180) * this.Y;
-                    double z = (Math.PI / 180) * this.Z;
-                    v.Add(x.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                    v.Add(y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                    v.Add(z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                }
+                    if (!to_radians)
+                    {
+                        v.Add(this.X.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                        v.Add(this.Y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                        v.Add(this.Z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                    }
+                    else
+                    {
+                        double x = (Math.PI / 180) * this.X;
+                        double y = (Math.PI / 180) * this.Y;
+                        double z = (Math.PI / 180) * this.Z;
+                        v.Add(x.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                        v.Add(y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                        v.Add(z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+                    }
 
-                return v;
-        }
+                    return v;
+            }
 
             private void setVals(object x, object y, object z)
             {

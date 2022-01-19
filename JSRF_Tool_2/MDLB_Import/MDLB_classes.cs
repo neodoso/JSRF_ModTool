@@ -55,10 +55,10 @@ namespace JSRF_ModTool.MDLB_Import
             public Int32 model_type { get; set; } // 0 = visual mesh // 1 = shadow mesh // 2 = bone
 
             // 16
-            public float draw_distance_x { get; set; }
-            public float draw_distance_y { get; set; }
-            public float draw_distance_z { get; set; }
-            public float draw_distance_w { get; set; }
+            public float unk_float { get; set; }
+            public float unk_float_1 { get; set; }
+            public float unk_float_2 { get; set; }
+            public float draw_distance { get; set; }
             public Vector3 bone_pos { get; set; } // 0x28
             public float unk_44 { get; set; }
 
@@ -99,8 +99,8 @@ namespace JSRF_ModTool.MDLB_Import
                 b.Add(BitConverter.GetBytes(model_part_number));
                 b.Add(BitConverter.GetBytes(model_type));
 
-                b.Add(BitConverter.GetBytes(draw_distance_x)); b.Add(BitConverter.GetBytes(draw_distance_y)); b.Add(BitConverter.GetBytes(draw_distance_z));
-                b.Add(BitConverter.GetBytes(draw_distance_w));
+                b.Add(BitConverter.GetBytes(unk_float)); b.Add(BitConverter.GetBytes(unk_float_1)); b.Add(BitConverter.GetBytes(unk_float_2));
+                b.Add(BitConverter.GetBytes(draw_distance));
                 b.Add(BitConverter.GetBytes(bone_pos.X)); b.Add(BitConverter.GetBytes(bone_pos.Y)); b.Add(BitConverter.GetBytes(bone_pos.Z));
                 b.Add(BitConverter.GetBytes(unk_44));
 

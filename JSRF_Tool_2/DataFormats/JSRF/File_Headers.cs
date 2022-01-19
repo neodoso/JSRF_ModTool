@@ -154,7 +154,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 // get childs
                 childs = new NORM_child_list();
                 childs.get_Childs(buff, start, end);
-
             }
         }
 
@@ -217,11 +216,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             public Indexed_child_list childs { get; set; }
 
-            public void get_Indexed(byte[] buff, int start, int end)
+            public void get_Indexed(byte[] buff)
             {
                 // get childs
                 childs = new Indexed_child_list();
-                childs.get_Childs(buff, start, end);
+                childs.get_Childs(buff);
+            }
+
+            public void add_child()
+            {
+                
             }
         }
 
@@ -229,199 +233,114 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// <summary>
         ///  "indxed" Child header (24 bytes)
         /// </summary>
-        public class Indexed_child
+        public class Indexed_item
         {
-            public Int32 type { get; set; } 
+            //public Int32 type { get; set; } 
             public Int32 ID { get; set; } 
-            public Int32 size { get; set; } 
-            public Int32 ID_parent { get; set; }
+            public Int32 block_size { get; set; } 
+            public Int32 unk_ID { get; set; }
+            public Int32 textures_IDs_count { get; set; }
+            //public List<Int32> textures_IDs { get; set; }
+
+            public File_Containers.item_data_type item_type { get; set; }
+            public Int32 block_type { get; set; }
             public Int32 block_start { get; set; }
             public Int32 block_end { get; set; }
+            //public Int32 header_offset { get; set; }
         }
 
         /// <summary>
         /// "Indexed" Childs (MDLB, Level models, Materials, Textures...)
         /// </summary>
-        public class Indexed_child_list : List<Indexed_child>
+        public class Indexed_child_list : List<Indexed_item>
         {
-            public void get_Childs(byte[] buff, int start, int end)
+            public void get_Childs(byte[] buff)
             {
-                int offset = start;
-                while (offset < end -24)
+
+                int offset = 0;
+                while (offset < buff.Length - 28)
                 {
-                    // if negative value exit
+                    // if offset value is negative, exit
                     if (offset < 0) { System.Windows.Forms.MessageBox.Show("Error on getting childs, invalid offset.\n see get_Childs(byte[] buff, int start, int end)"); break;  }
 
-                    Indexed_child nIndexed = new Indexed_child();
+                    Indexed_item child = new Indexed_item();
 
-              
-                    nIndexed.type = BitConverter.ToInt32(buff, offset); // +16 ?
-                    nIndexed.block_start = offset;
+                    child.block_type = BitConverter.ToInt32(buff, offset);
 
-                    if (nIndexed.type == 1)
+                    // level model
+                    if (child.block_type == 1)
                     {
-                        nIndexed.ID = BitConverter.ToInt32(buff, offset + 4);
-                        nIndexed.size = BitConverter.ToInt32(buff, offset + 8);
-                        nIndexed.ID_parent = BitConverter.ToInt32(buff, offset + 12);
-                        nIndexed.block_end = nIndexed.size + offset;
+                        child.ID = BitConverter.ToInt32(buff, offset + 4);
+                        child.block_size = BitConverter.ToInt32(buff, offset + 8);
+                        child.unk_ID = BitConverter.ToInt32(buff, offset + 12);
+                        child.block_type = 1;
 
-             
-                         int header_bytes_count = BitConverter.ToInt32(buff, offset + 16) * 4;
-                         nIndexed.block_end =  nIndexed.block_end + header_bytes_count + 20;
-                         int block_size = nIndexed.block_end - offset;
+                        // numnber of item's IDs as int32 (starting at offset 20)
+                         child.textures_IDs_count = BitConverter.ToInt32(buff, offset + 16);
 
-                    } else {
+                        if(child.textures_IDs_count == 0)
+                        {
+                            System.Windows.Forms.MessageBox.Show("Error: Indexed_child_list > get_Childs():\n\n child.items_count = 0, please report the error, thanks."); break;
+                        }
 
-                        nIndexed.block_end = BitConverter.ToInt32(buff, offset + 4) + offset + 4;
+                        if( child.textures_IDs_count > buff.Length) { return; }
+                        Int32 check_MDLB = BitConverter.ToInt32(buff, offset + 20 + (child.textures_IDs_count * 4));
+
+                        if (check_MDLB == 1112294477)  // MDLB
+                        {
+                            child.item_type = File_Containers.item_data_type.Level_MDLB;
+                            child.block_start = offset + 16 ; //20 + (child.textures_IDs_count * 4)
+                            child.block_end = offset + child.block_size + 20 + (child.textures_IDs_count * 4);
+                            child.block_size = child.block_end - child.block_start;    
+
+                        } else { // level model
+
+                            child.item_type = File_Containers.item_data_type.Level_Model;
+                            child.block_start = offset +16;//+ 20 + (child.textures_IDs_count * 4); 
+                            child.block_end = offset + child.block_size + 20 + (child.textures_IDs_count * 4);
+                            child.block_size = child.block_end - child.block_start;
+                        }
+
+                        
+
+                    } // Texture: if child.type == 0  then this is the start of a list of textures
+                      // the first block has a different (8 bytes) header: [int32 = 0]  [int32 = block_size]
+                    else if (child.block_type == 0)
+                    {
+                        child.block_type = 0;
+                        child.block_start = offset + 8;
+                        child.block_size = BitConverter.ToInt32(buff, offset + 4);
+                        child.block_end = offset + child.block_size + 8;
+                        child.item_type = File_Containers.get_item_data_type(buff, child.block_start);
+                    }
+                    else  //  Texture: 4 byte header defining block_size
+                    {
+                        child.block_type = 2;
+                        child.block_start = offset + 4;
+                        child.block_size = BitConverter.ToInt32(buff, offset);
+                        child.block_end = offset + child.block_size + 4;
+                        child.item_type = File_Containers.get_item_data_type(buff, child.block_start);
                     }
 
-                    this.Add(nIndexed);
-                    offset = nIndexed.block_end;
+
+                    this.Add(child);
+                    offset = child.block_end;
                 }
+            }
+
+
+            public void add_child(File_Containers.item_data_type type, byte[] buff)
+            {
+                Indexed_item child = new Indexed_item();
+
+
             }
         }
 
         #endregion
 
 
-        #region Functions
-
-        /// <summary>
-        /// returns type of data block (material, texture, model ...)
-        /// </summary>
-        /// <remarks>
-        /// Note: its unclear how JSRF determines the type of data, in some cases such as for textures
-        /// we use a pretty hacky way to test if its a texture or not... this can sometimes return the wrong type
-        /// 
-        /// TODO: research to figure out if NORM headers have a flag defines what type child of data blocks it contains? instead of doing this?
-        /// </remarks>
-        public static string get_block_header_type(byte[] buff)
-        {
-            if (buff == null) { return ""; }
-            Int32 size = buff.Length;
-            if (size <= 0) { return "empty"; }
-            if ((size < 17)) { return "Material"; }
-            // if (start >= buff.Length) { return "invalid-over buffer"; }
-
-            // texture resolutions
-            int[] texture_resolutions = new int[] { 8,16,32,64,128,256,512,1024,2048,4096 };
-
-            Int32 head = BitConverter.ToInt32(buff, 0);
-            Int32 head_8 = BitConverter.ToInt32(buff, 8);
-            Int16 head_20 = BitConverter.ToInt16(buff, 20);
-            Int16 head_22 = BitConverter.ToInt16(buff, 22);
-            Int32 head_24 = BitConverter.ToInt32(buff, 24);
-            Int32 head_28 = BitConverter.ToInt32(buff, 28);
-
-            /*
-            // if file is indexed, the texture headers position are shifted!
-            if (Main.jsrf_file.GetType() == typeof(Indexed_head))
-            {
-                // todo
-                // get type of data for Indexed file structures (level model, textures in level files)
-            }
-            */
-
-            if (head == 1179011410) // sound
-            {
-                return "Sound";
-            }
-
-            else if ((head == 1112294477) || (head_24 == 1112294477))  // MDLB
-            {
-                return "MDLB";
-            }
-
-            
-            // hacky! :/ 
-            // texture, if head > that, its probably a texture id at offset 0 ("head")
-            // we also check "head20" (value at offset 20) which is the offset/value defining texture resolution for textures
-            // check if  multiple of 8 (for textures resolution 8 16 32 64 128 256 512 1024 ...)
-            // else if ((head > 100000000) || (head_8 > 100000000) && ((head_20 % 8) == 0) && (size > 32))
-            // if resolution value is multiple of 8
-            else if (texture_resolutions.Contains(head_20) || (texture_resolutions.Contains(head_28)))
-            {   
-                // make sure DXT compression type is within range
-                //if ((head_28 < 128) && (head_28 >= 0))
-                return "Texture";
-            }
-
-            // generally material = 16 bytes data block
-            else if ((size < 256) & (head < 100) & (head > 0)) // Material
-            {
-                return "Material";
-            }
-
-            else if ((head == 1) && (head_24 != 1112294477)) // not MDLB
-            {
-                return "Level Model";
-            }
-
-            // else
-             return "unknown";
-        }
-
-        /// <summary>
-        /// returns the global starting/ending offset of data block relative to the file (and not the parent containter NORM or MULT that contains the block of data)
-        /// </summary>
-        /// <remarks>
-        /// TODO: should probably refactor this to be a function built within the NORM/MULT classes so the real offset is already given in the class properties...
-        /// </remarks>
-        public static int get_real_offset(object file_struct, int norm_index, int child_index, bool shift_24, string head_type)
-        {
-            int start_offset_real = -1;
-        
-            // MULT container
-            if (file_struct.GetType() == typeof(MULT_list))
-            {
-
-                MULT_list MULT = (MULT_list)file_struct;
-
-                if (shift_24)
-                {
- 
-                    start_offset_real = MULT[norm_index].start + MULT[norm_index].NORM.childs[child_index].end;
-                }
-                else
-                {
-                    start_offset_real = MULT[norm_index].start + MULT[norm_index].NORM.childs[child_index].start;
-                }
-            }
-
-            // NORM container
-            if (file_struct.GetType() == typeof(NORM_head))
-            {
-
-                NORM_head NORM = (NORM_head)file_struct;
-                if (shift_24)
-                {
-                    start_offset_real = NORM.childs[child_index].end;
-                }
-                else
-                {
-                    start_offset_real = NORM.childs[child_index].start;
-                }
-            }
-
-            // Indexed container
-            if (file_struct.GetType() == typeof(Indexed_container))
-            {
-               // shift_24 = true;
-                Indexed_container Indexed = (Indexed_container)file_struct;
-                if (shift_24)
-                {
-                    start_offset_real = Indexed.childs[child_index].block_end;
-                }
-                else
-                {
-                    start_offset_real = Indexed.childs[child_index].block_start; //+16; //+24
-                }
-            }
        
-            return start_offset_real;
-        }
-
-        #endregion
 
     }
 }
