@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JSRF_ModTool.Vector;
 using System.IO;
 
@@ -252,42 +250,44 @@ namespace JSRF_ModTool
             // for each model part
             for (int i = 0; i < mdl_parts_count; i++)
             {
-                // only build triangle_groups array if the SMD has more than one material
-                if (SMD_parts[i].mat_groups_list.Count > 1 || Main.current_model.Model_Parts_header_List[i].triangle_groups_count > 0)
+                if(i == 20)
                 {
-
-                    // for each material group from the imported SMD file
-                    for (int m = 0; m < SMD_parts[i].mat_groups_list.Count; m++)
-                    {
-
-                        if(!SMD_parts[i].mat_groups_list[m].material_name.Contains("mat_"))
-                        {
-                            System.Windows.Forms.MessageBox.Show("Error importing model, invalid material name, expected 'mat_'");
-                            return null;
-                        }
-
-                        int mesh_type = 1;
-                        // if its a visual mesh  set mesh_type to 0
-                        if( i == mdl_parts_count-1)
-                        {
-                            mesh_type = 0;
-                        }
-
-                        // TODO : determine if mat_index in triangle_group(_mat_index) needs to be shifted of +1 or not
-                        // instance triangle group with SMD data and (mesh_type, material_index) default values
-                        tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) +1, SMD_parts[i].mat_groups_list[m].triangle_start_index, mesh_type, Convert.ToInt32( SMD_parts[i].mat_groups_list[m].material_name.Replace("mat_", "")) );
-                        
-                        // if triangle group exists in original model, get original values for (mesh_type, material_index)
-                        if (Main.current_model.Model_Parts_header_List[i].triangle_groups_List.Count > 0 && m < Main.current_model.Model_Parts_header_List[i].triangle_groups_List.Count)
-                        {
-                            DataFormats.JSRF.MDLB.triangle_group ori_tg = Main.current_model.Model_Parts_header_List[i].triangle_groups_List[m];
-                            tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) +1, SMD_parts[i].mat_groups_list[m].triangle_start_index, mesh_type, ori_tg.material_index);
-                        }               
-
-                        // serialize and store in list
-                        bytes_triangle_groups_list.Add(tg.serialize());
-                    }
+                    string test = "here";
                 }
+
+                if (SMD_parts[i].mat_groups_list.Count == 0 && i == SMD_parts.Length -1)
+                {
+                    System.Windows.Forms.MessageBox.Show("Error importing model, the SMD or model have no material groups.");
+
+                    return null;
+                }
+
+
+                // for each material group from the imported SMD file
+                for (int m = 0; m < SMD_parts[i].mat_groups_list.Count; m++)
+                {
+                    int mesh_type = 1;
+                    // if its a visual mesh  set mesh_type to 0
+                    if (i == mdl_parts_count - 1)
+                    {
+                        mesh_type = 0;
+                    }
+                    Int32 mat_num = 0;
+
+
+                    if (SMD_parts[i].mat_groups_list[m].material_name == "mat_")
+                    {
+                        mat_num = Convert.ToInt32(SMD_parts[i].mat_groups_list[m].material_name.Replace("mat_", ""));
+                    }
+
+                    // TODO : determine if mat_index in triangle_group(_mat_index) needs to be shifted of +1 or not
+                    // instance triangle group with SMD data and (mesh_type, material_index) default values
+                    tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) +1, SMD_parts[i].mat_groups_list[m].triangle_start_index, mesh_type, mat_num);
+                        
+                    // serialize and store in list
+                    bytes_triangle_groups_list.Add(tg.serialize());
+                }
+                
             }
           
             // convert triangles_group_list of byte arrays into a single array
@@ -353,6 +353,12 @@ namespace JSRF_ModTool
             // for each model part
             for (int i = 0; i < mdl_parts_count; i++)
             {
+
+                if (i == 20)
+                {
+                    string test = "here";
+                }
+
                 vertex_tris_header = new MDLB_Import.MDLB_classes.Vertex_triangles_buffers_header();
                 vtx_buffer_list = new List<byte[]>(); tris_buffer_list = new List<byte[]>();
                 List<byte[]> materials_buffer_list = new List<byte[]>();

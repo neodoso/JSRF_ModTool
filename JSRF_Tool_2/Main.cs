@@ -100,8 +100,7 @@ namespace JSRF_ModTool
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
 
-            #region DEV - load file automatically
-
+            
             //string game_dir = @"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\";
             //Level_bin stgBin_00 = new Level_bin(game_dir + "Stage\\stg00_.bin");
 
@@ -115,10 +114,10 @@ namespace JSRF_ModTool
             */
 
 
-            /*
-            Level_bin stgBin_00 = new Level_bin(game_dir + "Stage\\stg10_.bin");
-            Application.Exit();
-            */
+            
+         //   Level_bin stgBin_10 = new Level_bin(txtb_jsrf_mod_dir.Text + "\\Stage\\stg10_.bin");
+          //  Application.Exit();
+            
 
             /*
             Level_Compiler lvl_comp = new Level_Compiler();
@@ -150,7 +149,7 @@ namespace JSRF_ModTool
             lvl_bin_Compiler.header.set_stg_dat_count(1);
             lvl_bin_Compiler.build(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_SkatePark\");
             */
-            #endregion
+
 
             #region other file loading methods
 
@@ -248,7 +247,7 @@ namespace JSRF_ModTool
         }
 
 
-        // searches textures by ids on ALL the files of the game
+        // searches textures by ids on all files
         public void mass_search_texture_by_ID(string texture_id)
         {
             List<string> matches = new List<string>();
@@ -292,7 +291,7 @@ namespace JSRF_ModTool
 
                             if (id.ToString() == texture_id)
                             {
-                                matches.Add(Path.GetFileName(file) + "   NORM: Item[" + e + "]");
+                                matches.Add(Path.GetFileName(file) + "   MULT: Item[" + e + "]");
                             }
                         }
 
@@ -303,6 +302,8 @@ namespace JSRF_ModTool
                 {
 
                 }
+
+
             }
         }
 
@@ -1537,8 +1538,15 @@ namespace JSRF_ModTool
                 {      
                     if(tg.material_index  < current_model.materials_List.Count )
                     {
-                        MDLB.color color = current_model.materials_List[tg.material_index].color;
-                        clr.R = color.R; clr.G = color.G; clr.B = color.B;
+                        try
+                        {
+                            MDLB.color color = current_model.materials_List[tg.material_index].color;
+                            clr.R = color.R; clr.G = color.G; clr.B = color.B;
+                        } catch (Exception error)
+                        {
+                            MessageBox.Show("Error:'MDLB.color color' material groups has an invalid index.");
+                        }
+
                     }
 
                 }
@@ -2353,6 +2361,69 @@ namespace JSRF_ModTool
                 }
             }
 
+
+            /*
+            for (int m = 0; m < materials_bin_list.Count; m++)
+            {
+
+                for (int mid = 0; mid < materials_bin_list[m].texture_id.Count; mid++)
+                {
+                    int mat_id = materials_bin_list[m].texture_id[mid];
+
+                    // TODO support different containers and headerless indexed files
+                    if(trv_file.SelectedNode.Parent.Parent == null)
+                    {
+                        texture_ids.Add(0);
+                        return texture_ids;
+                    }
+
+                    // find textures container with same number of items as MDLB container
+                    for (int n = 0; n< trv_file.SelectedNode.Parent.Parent.Nodes.Count; n++)
+                    {
+                        TreeNode tn = trv_file.SelectedNode.Parent.Parent.Nodes[n];
+
+                        // if number of child nodes match and is textures
+                        if (tn.Nodes.Count == trv_file.SelectedNode.Parent.Nodes.Count)
+                        {
+                            if(JSRF_Containers.item_data_type.Texture == ((JSRF_Containers.item)jsrf_file.get_item(n, 0)).type)
+                            {
+                                for (int nid = 0; nid < trv_file.SelectedNode.Parent.Parent.Nodes[n].Nodes.Count; nid++)
+                                {
+                                    JSRF_Containers.item item = jsrf_file.get_item(n, nid);
+                                    if(item.data.Length > 0)
+                                    {
+                                        int tid = BitConverter.ToInt32(item.data, 0);
+
+                                        if (tid == mat_id)
+                                        {
+                                            texture_ids.Add(tid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            */
+            /*
+            if (materials_dat_list.Count == 0)
+            {
+                if (node_index >= materials_bin_list.Count)
+                {
+                    node_index = materials_bin_list.Count - 1;
+                }
+                if (node_index < materials_bin_list.Count)
+                    mat = materials_bin_list[node_index].texture_id;
+
+            } else {
+                if (node_index >= materials_dat_list.Count)
+                {
+                    node_index = materials_dat_list.Count - 1;
+                }
+                mat = materials_dat_list[node_index].texture_id;
+            }
+            */
             return texture_id;
         }
 
@@ -3011,6 +3082,25 @@ namespace JSRF_ModTool
 
             string texture_path = GetShortPath(tmp_dir + texture_id + ".png");
 
+           
+            /*
+            // check if image editor is active and texture is is defined, else write bmp file
+            if ((proc_ImgEditor != null) && (texture_id != ""))
+            {
+                try
+                {
+                    StreamWriter myStreamWriter = proc_ImgEditor.StandardInput;
+                    myStreamWriter.WriteLine(texture_path);
+                }
+                catch
+                {
+                }
+            }
+            */
+           // MessageBox.Show(texture_path);
+
+            //  wait(1000);
+            //if(proc_ImgEditor == null)
             Launch_image_editor(texture_path);
         }
 

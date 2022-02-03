@@ -69,10 +69,22 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #region process material groups and materials from the .mtl
 
+            //List<byte[]> texture_IDs_list = new List<byte[]>();
             List<Int32> texture_IDs_list = new List<int>();
             
+            /*
+            // if obj's materials count differs from the mtl materials count
+            if (obj.meshes[0].material_groups.Count != obj.mtl_materials_list.Count)
+            {
+                System.Windows.Forms.MessageBox.Show("Error: OBJ materials count does not match with the .mtl materials count.");
+                return new byte[0];
+            }
+            */
+
             OBJ.obj_mesh mesh = obj.meshes[0];
             
+            // add count of textures ids
+            //texture_IDs_list.Add(BitConverter.GetBytes(mesh.material_groups.Count)); //BitConverter.GetBytes(mesh.material_groups.Count)
 
             // get texture paths and generate ids for them
             for (int i = 0; i < mesh.material_groups.Count; i++)
@@ -398,17 +410,17 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 mgBbox.radius = radius;
 
 
-#if DEBUG
+                // debug, give a large draw distance/radius
                 if (mgBbox.radius == 0)
                 {
                     mgBbox.radius = 500;
                 }
-
+                // debug, give a large draw distance/radius
                 if (debug_draw_distance)
                 {
                     mgBbox.radius *= 10;
                 }
-#endif
+
 
                 lines_bboxes.Add(mgBbox.position.X + " " + mgBbox.position.Y + " " + mgBbox.position.Z + " " + mgBbox.radius);
 
@@ -423,6 +435,30 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #region build vertex buffer
 
+
+            /*
+            if (vtxt_head.vertex_def_size != 28)
+            {
+                System.Windows.Forms.MessageBox.Show("Error: unsuported vertex_def_size");
+                return new byte[0];
+            }
+            */
+            /*
+            if (vtxt_head.vertex_def_size == 28)
+            {
+                vertex_def v;
+                for (int i = 0; i < mesh.vertex_buffer.Count; i++)
+                {
+                    // f mesh has normals include normals b
+                   // if (mesh.normals_buffer.Count > 0)
+                   // {
+                        //v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[mesh.uv_indices[i]], mesh.normals_buffer[mesh.normals_indices[i]]);
+                        v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[i], new Vector3(0,0,0) ); //
+                        file_buffers_list.Add(v.Serialize(28));
+                   // }
+                }
+            }
+            */
 
             if (vtxt_head.vertex_def_size == 28)
             {
@@ -439,6 +475,74 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 }
             }
 
+            /*
+            //aaaaaaa
+            if (vtxt_head.vertex_def_size == 28)
+            {
+                vertex_def v;
+                for (int i = 0; i < mesh.face_indices.Count; i++)
+                {
+                    // f mesh has normals include normals b
+                    // if (mesh.normals_buffer.Count > 0)
+                    // {
+                    //v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[mesh.uv_indices[i]], mesh.normals_buffer[mesh.normals_indices[i]]);
+                    v = new vertex_def(mesh.vertex_buffer[mesh.face_indices[i]-1], mesh.uv_buffer[mesh.uv_indices[i]-1], new Vector3(0, 0, 0)); //
+                    file_buffers_list.Add(v.Serialize(28));
+                    // }
+                }
+            }
+            */
+
+
+            /*
+            vertex_def v;
+            for (int i = 0; i < mesh.triangles.Count; i++)
+            {
+                OBJ.obj_mesh.tri t = mesh.triangles[i];
+
+                 v = new vertex_def(mesh.vertex_buffer[t.a.v], mesh.uv_buffer[t.a.vt], mesh.normals_buffer[t.a.vn]); //
+                file_buffers_list.Add(v.Serialize(28));
+
+                if (t.b.v < mesh.vertex_buffer.Count && t.b.vt < mesh.uv_buffer.Count && t.b.vn < mesh.normals_buffer.Count)
+                v = new vertex_def(mesh.vertex_buffer[t.b.v], mesh.uv_buffer[t.b.vt], mesh.normals_buffer[t.b.vn]); //
+                file_buffers_list.Add(v.Serialize(28));
+
+                if(t.c.v < mesh.vertex_buffer.Count && t.c.vt < mesh.uv_buffer.Count)
+                v = new vertex_def(mesh.vertex_buffer[t.c.v], mesh.uv_buffer[t.c.vt], mesh.normals_buffer[t.c.vn]); //
+                file_buffers_list.Add(v.Serialize(28));
+
+            }
+
+            */
+
+            /*
+            vertex_def v;
+            for (int i = 0; i < mesh.triangles.Count; i++)
+            {
+                OBJ.obj_mesh.tri t = mesh.triangles[i];
+
+                if (t.a.v < mesh.vertex_buffer.Count && t.a.vt < mesh.uv_buffer.Count && t.a.vn < mesh.normals_buffer.Count)
+                {
+                    v = new vertex_def(mesh.vertex_buffer[t.a.v], mesh.uv_buffer[t.a.vt], mesh.normals_buffer[t.a.vn]); //
+                    file_buffers_list.Add(v.Serialize(28));
+                }
+
+
+                if (t.b.v < mesh.vertex_buffer.Count && t.b.vt < mesh.uv_buffer.Count && t.b.vn < mesh.normals_buffer.Count)
+                {
+                    v = new vertex_def(mesh.vertex_buffer[t.b.v], mesh.uv_buffer[t.b.vt], mesh.normals_buffer[t.b.vn]); //
+                    file_buffers_list.Add(v.Serialize(28));
+                }
+
+
+                if (t.c.v < mesh.vertex_buffer.Count && t.c.vt < mesh.uv_buffer.Count && t.c.vn < mesh.normals_buffer.Count)
+                {
+                    v = new vertex_def(mesh.vertex_buffer[t.c.v], mesh.uv_buffer[t.c.vt], mesh.normals_buffer[t.c.vn]); //
+                    file_buffers_list.Add(v.Serialize(28));
+                }
+            }
+            */
+
             #endregion
 
             #region build triangle indices buffer
@@ -452,6 +556,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
             #endregion
 
             return file_buffers_list.SelectMany(a => a).ToArray();
+
+            //File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stg_mdl_compile_test.dat", file_buffers_list.SelectMany(a => a).ToArray());
+
         }
 
 

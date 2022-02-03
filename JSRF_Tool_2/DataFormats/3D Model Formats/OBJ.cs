@@ -8,6 +8,7 @@ namespace JSRF_ModTool.DataFormats._3D_Model_Formats
 {
     class OBJ
     {
+
         public string FilePath { get; set; }
 
         public List<obj_mesh> meshes { get; set; }
@@ -23,8 +24,13 @@ namespace JSRF_ModTool.DataFormats._3D_Model_Formats
             Import(filepath);
         }
 
+
         public void Import(string filepath)
         {
+            /*
+            try
+            {
+                */
             if (!File.Exists(filepath))
             {
                 System.Windows.MessageBox.Show("Model importer: " + Path.GetFileName(filepath) + " file does not exist");

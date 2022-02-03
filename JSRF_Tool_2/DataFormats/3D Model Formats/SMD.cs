@@ -56,7 +56,7 @@ namespace JSRF_ModTool
                 while ((line = file.ReadLine()) != null)
                 {
                     // add line to list, while removing double spaces and trim start/end
-                    lines.Add(Regex.Replace(line, @"\s+", " ").Trim());
+                    lines.Add(Regex.Replace(line, @"\s+", " ").Trim()); //Regex.Replace(line, " +", " ")
                 }
 
                 file.Close();

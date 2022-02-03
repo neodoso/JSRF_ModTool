@@ -30,16 +30,23 @@ namespace JSRF_ModTool.DataFormats.JSRF
         public block_01 block_01;
         public block_02 block_02;
 
-
+        /// <summary>
+        /// converts triangles vertex indices to JSRF's format
+        /// </summary>
+        /// <param name="tris"></param>
+        /// <returns></returns>
         public List<short> convert_coll_triangles_indices(List<short> tris)
         {
             short a = tris[0];
             short b = tris[1];
             short c = tris[2];
-
+            /*
+            if (a == 256 && b == 282 && c == 3)
+            {
+                string testxx = "";
+            }
+            */
             short addB = 0;
-
-            // convert triangle data back to normal indices
 
             if (a == 512)
             {
@@ -117,7 +124,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
             List<string> tri_errors = new List<string>();
-   
+
             #region process each collision model
             // for each collision model: read vertex buffer and export collision data to text files
             // for (int i = 1; i < 2; i++)
@@ -134,7 +141,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
          
                     int vert_end = mdl.vertices_start_offset + (mdl.vertices_count * 16);
 
-                    // for each vertex definition (16 bytes per vert def)
+                    // for each vertex definition (16 bytes per vert definition)
                     for (int v = 0; mdl.vertices_start_offset + v < vert_end; v += 16)
                     {
                         mdl.vertex_list.Add((block_00.coll_vertex)Parsing.binary_to_struct(data_block_00, mdl.vertices_start_offset + v, typeof(block_00.coll_vertex)));
@@ -143,8 +150,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                    // int tris_buff_size = mdl.triangle_count * 8;
                     int tris_end = mdl.triangles_start_offset + (mdl.triangle_count * 8);
 
-                    
-                    // for each triangle definition (8 bytes per def)
+                   
+
+                        // for each triangle definition (8 bytes per definition)
                     for (int t = 0; mdl.triangles_start_offset + t < tris_end; t += 8)
                     {
                         block_00.coll_triangle tri = new block_00.coll_triangle();
@@ -164,31 +172,66 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         tri.b_raw = tri.b;
                         tri.c_raw = tri.c;
 
+                        if(i == 15 && j == 0)
+                        {
+                            if (Ta == 253 && Tb == 248 && Tc == 4099)
+                            {
+                                string test = "the princess is in this castle!";
+                            }
+
+                            if (Ta == 253 && Tb == 0 && Tc == 4084)
+                            {
+                                string test = "the princess is in this castle!";
+                            }
+
+                        }
+
+
+
                         // calculate remainder of the vertex's index division, that will be used to add to the index number for vertex_ID_0 and vertex_ID_1
-                        decimal vtx1_remainder = (decimal)((decimal)(tri.b / 4.0) - Math.Truncate((decimal)(tri.b / 4.0)));
-                        decimal vtx2_remainder = (decimal)((decimal)(tri.c / 16.0) - Math.Truncate((decimal)(tri.c / 16.0)));
+                        tri.vtx1_remainder = (decimal)((decimal)(tri.b / 4.0) - Math.Truncate((decimal)(tri.b / 4.0)));
+                        tri.vtx2_remainder = (decimal)((decimal)(tri.c / 16.0) - Math.Truncate((decimal)(tri.c / 16.0)));
                        
 
                         // divide vertex IDs to get truncated number
                         tri.b = (byte)(tri.b / 4);
                         tri.c = (byte)(tri.c / 16);
 
-                        if (vtx1_remainder > 0)
+                        if (tri.vtx1_remainder > 0)
                         {
                             // add remainder (from vertex_ID_1) index and add it to  tri.vertex_ID_0
-                            tri.a += (short)(vtx1_remainder * 1024);
+                            tri.a += (short)(tri.vtx1_remainder * 1024);
+
+                            /*
+                            if ( tri.vtx1_remainder == (decimal)0.25) //tri.vtx2_remainder == 0 &&
+                            {
+                                tri.a -= 256;
+                            }
+                            */
                         }
 
-                        if (vtx2_remainder > 0)
+                        if (tri.vtx2_remainder > 0)
                         {
                             // add remainder (from vertex_ID_2) index and add it to  tri.vertex_ID_1
-                            tri.b += (short)(vtx2_remainder * 1024);
+                            tri.b += (short)(tri.vtx2_remainder * 1024);
                         }
+
+                        if (tri.c_raw >= 4096) // && tri.b_raw > 254
+                        {
+                           tri.c = (short)(tri.b + 1);
+                        }
+                        
+                        if(tri.b >= 254)
+                        {
+                            tri.c += 254;
+                        }
+                        
 
                         mdl.triangles_list.Add(tri);
 
                         #region debug test triangles
                         /*
+                         // test converting regular triangles indices to JSRF and compare them to game's original tris indices to see if the conversion matches properly
                         // convert triangles to game's format
                         List<short> tt = convert_coll_triangles_indices(new List<short> { tri.a, tri.b, tri.c });
 
@@ -216,8 +259,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     if (export_vtx_tri)
                     {
                         // string coll_export_dir = @"C:\Users\Mike\Desktop\JSRF\research\stage_bin\exp\" + Path.GetFileNameWithoutExtension(lvl_bin_filepath) + "coll\\";
-                        string coll_export_dir = @"C:\Users\Mike\Desktop\JSRF\research\stage_bin\Stg_Export\" + Path.GetFileNameWithoutExtension(lvl_bin_filepath).Replace("_", "") + "\\triangle_data\\";
-                        Directory.CreateDirectory(coll_export_dir);
+                        string coll_tris_export_dir = @"C:\Users\Mike\Desktop\JSRF\stg_collision\" + Path.GetFileNameWithoutExtension(lvl_bin_filepath).Replace("_", "") + "\\triangle_data\\";
+                        if (!Directory.Exists(coll_tris_export_dir)) { Directory.CreateDirectory(coll_tris_export_dir); }
 
                         #region write vertex data to binary .vtx file
                         /*
@@ -252,9 +295,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                         #region export triangle data as test
 
+
                         List<block_00.coll_triangle> tris = new List<block_00.coll_triangle>();
+
                         string faces_list = "";
+
                         List<string> lines = new List<string>();
+
 
 
                         for (int t = 0; t < mdl.triangles_list.Count; t ++)
@@ -264,7 +311,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             //lines.Add(tri.a.ToString("D3") + "  " + tri.b.ToString("D3") + "  " + tri.c.ToString("D3") + " | " + tri.surface_property.ToString("D3") + " | " + tri.surface_data_0.ToString("D3") + "  " + tri.surface_data_1.ToString("D3"));
                             //lines.Add(fn(tri.a.ToString("D3")) + "  " + fn(tri.b.ToString("D3")) + "  " + fn(tri.c.ToString("D3")) + " |" + fn(tri.surface_property.ToString("D3")) + " | " + fn(tri.surface_data_0.ToString("D3")) + "  " + fn(tri.surface_data_1.ToString("D3")));
                             //lines.Add(fn(tri.a.ToString("D3")) + "  " + fn(tri.b.ToString("D3")) + "  " + fn(tri.c.ToString("D3")) + " |" + fn(tri.surface_property.ToString("D3")) + " | " + fn(tri.unk.ToString("D3")) );
-                            lines.Add(fn(tri.a_raw.ToString("D3")) + "  " + fn(tri.b_raw.ToString("D3")) + "  " + fn(tri.c_raw.ToString("D3")) + " |" + fn(tri.surface_property.ToString("D3")) + " | " + fn(tri.surface_data_0.ToString("D3")) + "  " + fn(tri.surface_data_1.ToString("D3")));
+                            lines.Add(fn(tri.a_raw.ToString("D3")) + "  " + fn(tri.b_raw.ToString("D3")) + "  " + fn(tri.c_raw.ToString("D3")) +
+                                    " |" + fn(tri.a.ToString("D3")) + "  " + fn(tri.b.ToString("D3")) + "  " + fn(tri.c.ToString("D3")) +
+                                    " |" + tri.vtx1_remainder.ToString() + "  " + tri.vtx2_remainder.ToString() +
+                                    " #" +  fn(tri.surface_property.ToString("D3")) + " | " + fn(tri.surface_data_0.ToString("D3")) + "  " + fn(tri.surface_data_1.ToString("D3")));
                             //tris.Add(tri);
 
                             if (tri.surface_data_0 == 65)
@@ -280,7 +330,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         lines.Add("");
                         //lines.Add(faces_list);
 
-                        System.IO.File.WriteAllLines(coll_export_dir + "tris_" + i + "_" + j + ".txt", lines);
+                        System.IO.File.WriteAllLines(coll_tris_export_dir + "tris_" + i + "_" + j + ".txt", lines);
 
                         #endregion
                     }
@@ -291,6 +341,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             string fn(string s)
             {
+
 
                 if (s.StartsWith("00"))
                 {
@@ -335,6 +386,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             block_02 = new block_02(data_block_02);
 
 
+
             // block_02_header = (unk_block_02)(Parsing.binary_to_struct(data_block_02, 0, typeof(unk_block_02)));
 
             /*
@@ -354,7 +406,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             if(export_data)
             {
-                string export_dir = @"C:\Users\Mike\Desktop\JSRF\research\stage_bin\Stg_Export\" + Path.GetFileNameWithoutExtension(lvl_bin_filepath).Split('_')[0] + "\\";
+                string export_dir = @"C:\Users\Mike\Desktop\JSRF\stg_collision\" + Path.GetFileNameWithoutExtension(lvl_bin_filepath).Split('_')[0] + "\\";
 
                 block_00.export_all_collision_meshes(export_dir + "collision_models\\");
 
@@ -447,6 +499,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
 
+
+
+
     #region main_block_00
 
     /// <summary>
@@ -516,7 +571,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
         /// <summary>
-        ///  gives offset to list of "coll_model"s (32 bytes)
+        ///  gives offset to list of "collision_model"s (32 bytes)
         /// </summary>
         public class collision_models_list
         {
@@ -619,25 +674,23 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// </remarks>
         public class coll_triangle
         {
+            // triangle's vertex indices (the game encodes these in a particular way, "0 8 16" raw data indices are decoded back into regular "0 1 2" indices by the JSRF tool)
             public Int16 a { get; set; } // 
             public Int16 b { get; set; } // divide by 4  for real vertex index
             public Int16 c { get; set; } // divide by 16 for real vertex index
 
-            public Int16 a_raw { get; set; }
-            public Int16 b_raw { get; set; }
-            public Int16 c_raw { get; set; }
-
-            /*
-            // used for debug, contains encoded triangle vertex indices
-            public Int16 a { get; set; } // 
-            public Int16 b { get; set; } // divide by 4 for real vertex index
-            public Int16 c { get; set; } // divide by 16 for real vertex index
-            */
-
             public Int16 surface_property { get; set; } // defines if surface is a wall, floor, stairs, ramp etc
             //public Int16 unk { get; set; }
-            public byte surface_data_0 { get; set; } // 
-            public byte surface_data_1 { get; set; } // 
+            public byte surface_data_0 { get; set; } // aka "extra2" 2 bytes at the end of a collision triangle data. if we figure out what this is and how to calculate these two for each triangle
+            public byte surface_data_1 { get; set; } // then we can have custom levels :O
+
+
+            public Int16 a_raw { get; set; } // these 3 "_raw" values does not actually exist in the game's file structure
+            public Int16 b_raw { get; set; } // 
+            public Int16 c_raw { get; set; } // this is are just to keep the vertices indices un-decoded for research/debugging
+
+            public decimal vtx1_remainder { get; set; } // stored for debugging (doesn't exist in the in-game class/format)
+            public decimal vtx2_remainder { get; set; } // stored for debugging (doesn't exist in the in-game class/format)
         }
 
         public void export_all_collision_meshes(string dir)
@@ -920,7 +973,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
 
-#endregion
+    #endregion
 
     // grind paths
     #region main_block_01
@@ -951,14 +1004,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
         /// <summary>
         /// item_header is a list of [ [item count] and [start offset] ]
-        /// each  item_header
+        /// each item_header
         /// </summary>
         public class item_header
         {
             /// <summary>
             /// file structure: 
             /// [int32] item count
-            /// [int32]  start offset
+            /// [int32] start offset
 
             public Int32 start_offset { get; set; }
             public Int32 items_count { get; set; } // doesn't seen to match the item size/count between this.start_offset and next.item_header.start_offset
@@ -1002,31 +1055,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 public Int32 grind_points_count { get; set; }
                 public Int16 unk_8 { get; set; }
                 public Int16 unk_10 { get; set; }
-                public Vector3 bbBox_A { get; set; } // bounding box poin A
-                public Vector3 bbBox_B { get; set; } // bounding box
+                public Vector3 bbBox_A { get; set; } // bounding box point A
+                public Vector3 bbBox_B { get; set; } // bounding box point B
 
                 public List<grind_path_point> grind_path_points { get; set; }
-
-                /*
-                public grind_path_header()
-                {
-                    //grind_path_points = new List<grind_path_point>();
-                }
-                */
-
-                /*
-                public grind_path_header(byte[] data, Int32 start_offset)
-                {
-                    
-                    this.grind_points_list_start_offset = BitConverter.ToInt32(data, start_offset);
-                    this.grind_points_count = BitConverter.ToInt32(data, start_offset);
-                    this.unk_8 = BitConverter.ToInt16(data, start_offset);
-                    this.unk_10 = BitConverter.ToInt16(data, start_offset);
-                    this.bbBox_A = BitConverter.ToInt32(data, start_offset);
-                    this.bbBox_B = BitConverter.ToInt32(data, start_offset);
-                    
-                }
-                */
 
                 public class grind_path_point
                 {
@@ -1039,10 +1071,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         this.normal = _norm;
                     }
                 }
-
             }
-
-
         }
 
 
@@ -1070,8 +1099,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     grind_points_list_offset.Add(grind_path_item.grind_points_list_start_offset);
 
-                    lines.Add("[" + item_count + ":" + grind_path_item_count + ":" + grind_path_item.unk_8 + " " + grind_path_item.unk_10 + "]"); //Grind Path SubGroup  
-                                                                                      // creatre point
+                    lines.Add("[" + item_count + ":" + grind_path_item_count + ":" + grind_path_item.unk_8 + " " + grind_path_item.unk_10 + "]"); //Grind Path SubGroup
+
+                    // creatre point
                     foreach (var points in grind_path_item.grind_path_points)
                     {
                         lines.Add(points.position.X + " " + points.position.Y + " " + points.position.Z + " " + points.normal.X + " " + points.normal.Y + " " + points.normal.Z);
@@ -1146,10 +1176,18 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             if (i == grind_path_item.grind_path_points.Count-1)
                             {
                                 lines[lines.Count - 1] = "l " + (line_point_index + i) + " " + (line_point_index + i + 1);
+                            
+                                /*
+                                if (i % 2 == 0)
+                                {
+                                    lines[lines.Count - 1] = "l " + (line_point_index + i) + " " + (line_point_index + i + 1);
+                                } else { 
+                                }
+                                */
                             }
                             
                         }
-                      line_point_index += grind_path_item.grind_path_points.Count;
+                        line_point_index += grind_path_item.grind_path_points.Count;
 
                         lines.Add("");
                         grind_path_item_count++;
@@ -1164,7 +1202,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
     }
 
-#endregion
+    #endregion
 
     #region main_block_02
 
@@ -1179,7 +1217,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
     public struct block_02
     {
 
-        #region header
+#region header
         
         //stg10 seems to have 35 block types
 
@@ -1241,7 +1279,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         public List<object_spawn> block_06_list { get; set; }
         public List<object_spawn> block_07_props_list { get; set; }
         public List<object_spawn> block_08_MDLB_list { get; set; } // more props, small fences under ufo in Garage level
-        public List<object_spawn> block_09_props_list { get; set; } // basket ball props  in Garage level
+        public List<object_spawn> block_09_list_prop { get; set; } // basket ball props  in Garage level
         public List<object_spawn> block_10_list { get; set; }
         public List<object_spawn> block_11_list { get; set; }
         public List<object_spawn> block_12_list { get; set; }
@@ -1342,7 +1380,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 block_08_MDLB_list.Add((object_spawn)(Parsing.binary_to_struct(block, 0, typeof(object_spawn))));
             }
 
-            block_09_props_list = new List<object_spawn>();
+            block_09_list_prop = new List<object_spawn>();
 
             if(block_09_count < 90000) //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             {
@@ -1352,7 +1390,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     if (block.Length > block_09_starto + (i * 80)) //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     {
                         Array.Copy(data, block_09_starto + (i * 80), block, 0, 80);
-                        block_09_props_list.Add((object_spawn)(Parsing.binary_to_struct(block, 0, typeof(object_spawn))));
+                        block_09_list_prop.Add((object_spawn)(Parsing.binary_to_struct(block, 0, typeof(object_spawn))));
                     }
 
                 }
@@ -1506,6 +1544,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
 
-#endregion
+    #endregion
 
 }

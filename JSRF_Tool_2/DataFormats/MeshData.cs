@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace JSRF_ModTool.DataFormats
 {
     /// <summary>
-    /// custom XALM model class for the model viewer
+    /// custom XALM model class
     /// </summary>
     public class MeshData
     {

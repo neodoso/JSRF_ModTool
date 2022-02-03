@@ -15,6 +15,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         static string import_dir = @"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_SkatePark\";
         static string stg_num = "stg00_";
 
+
         public void compile()
         {
 
@@ -85,7 +86,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #endregion
 
-            #region generate StgXX_XX .dat files
+            #region generate StgXX_XX .dat file(s)
 
             File_Containers.INDEXED indx = new File_Containers.INDEXED();
 
@@ -104,6 +105,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 // get texture resolution
                 int res_x = BitConverter.ToInt32(dds, 12); int res_y = BitConverter.ToInt32(dds, 16);
 
+                if(res_x != res_y)
+                {
+                    System.Windows.Forms.MessageBox.Show("Error: textures must have the same scale on X and Y. " +
+                        "\nTexture " + Path.GetFileNameWithoutExtension(Level_MDL_Compiler.textures[i].texture_filepath) + "does not have equal reslution on X Y.\n\nCompilation cancelled.");
+
+                    return;
+                }
+
                 // build JSRF texture header
                 Texture_header tex_head = new Texture_header();
                 tex_head.compression_format = 5;
@@ -114,9 +123,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 byte[] jtex_head = tex_head.serialize();
 
                 byte[] dds_import = new byte[dds.Length -96];
-                // normall we'd skip 128 bytes to skip the DDS header
-                // but to avoid doing two ehavy array operations'
-                // we only remove 96, leaving 32 bytes for the jsrf texturre header
+                // normally we'd skip 128 bytes to skip the DDS header
+                // but to avoid doing two heavy array operations
+                // we only remove 96, leaving 32 bytes for the jsrf texture header
                 Array.Copy(dds, 96, dds_import, 0, dds_import.Length);
 
                 Array.Copy(jtex_head, 0, dds_import, 0, jtex_head.Length);
@@ -144,6 +153,26 @@ namespace JSRF_ModTool.DataFormats.JSRF
             
             #endregion
 
+
+
         }
+
+        // for every folder in
+        // for every .obj in
+
+
+
+        // generate StageXX_XX.dat files 
+        // depending on how many level modelsm MDLB and textures
+
+        // generate StageXX_.bin
+        // get total number of level models and mdlb from  StageXX_XX.dat 
+
+        // (block00) import collision mesh
+
+        // (block01) import grind paths
+
+        // generate block02 spawns
+
     }
 }

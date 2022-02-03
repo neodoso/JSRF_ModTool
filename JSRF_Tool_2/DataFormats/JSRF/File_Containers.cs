@@ -748,7 +748,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             // generally material = 16 bytes data block
-            else if ((head < 100) && (head > 0)) // Material
+            else if ((size < 256) & (head < 100) & (head > 0)) // Material
             {
                 return item_data_type.Material;
             }

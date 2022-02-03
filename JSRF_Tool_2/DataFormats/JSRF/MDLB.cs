@@ -66,6 +66,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // load model parts headers
             for (int i = 0; i < header.model_parts_count ; i++)
             {
+
+#if DEBUG
+                if(i == 20)
+                {
+                    string test = "here";
+                }
+#endif
+
                 Model_Part_header mdl_part_header = (Model_Part_header)(Parsing.binary_to_struct(data, 16 + (128 * i), typeof(Model_Part_header)));
 
                 // recalculate id multiplied by the size of a Model_Part_header
@@ -81,12 +89,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     Model_Parts_header_List[i].triangle_groups_List.Add((triangle_group)(Parsing.binary_to_struct(data, Model_Parts_header_List[i].triangle_groups_list_offset + 16 + (c * 32), typeof(triangle_group))));
                 }
 
+                /*
+                //TEST
                 // calculate triangle group start/end triangles
                 for (int g = 0; g < Model_Parts_header_List[i].triangle_groups_List.Count; g++)
                 {
                     Model_Parts_header_List[i].triangle_groups_List[g].triangle_start_index = Model_Parts_header_List[i].triangle_groups_List[g].triangle_start_index / 3;
                     //Model_Part_header_List[i].triangle_groups_List[g].triangle_group_size -=1;      
-                }     
+                }  
+                */
             }
             #endregion
 
@@ -159,9 +170,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             // if MDLB header specific head.materials_count > 0
             // get materials list
+            // FIXED?
             for (int m = 0; m < header.materials_count; m++)
             {
-                materials_List.Add((material)(Parsing.binary_to_struct(data, (Model_Parts_header_List[0].materials_list_offset + 16) + (m * 20), typeof(material))));
+                materials_List.Add((material)(Parsing.binary_to_struct(data, (Model_Parts_header_List[Model_Parts_header_List.Count-1].materials_list_offset + 16) + (m * 20), typeof(material))));
             }
            
             for (int v = 0; v < Model_Parts_header_List.Count; v++)
@@ -257,7 +269,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             // this isn't within the 128 bytes block
             // materials clusters are listed after the model parts headers
-            //[NonSerialized]
             public Int32 real_parent_id { get; set; }
             public List<triangle_group> triangle_groups_List = new List<triangle_group>();
 

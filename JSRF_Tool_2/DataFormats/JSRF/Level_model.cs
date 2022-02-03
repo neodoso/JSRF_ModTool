@@ -7,13 +7,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
 {
     public class Level_Model
     {
+        //MDLBL_header header;
+        //header_second header_sec;
         public Header header;
         public List<Int32> texture_ids;
         public List<material> materials;
         public List<material_group> materials_groups;
         public vertex_triangles_buffers_header vtx_tri_buff_head;
 
-        List<material_group_draw_distance> mat_group_BBoxes;
+        List<material_group_BBox> mat_group_BBoxes;
 
         public List<Vector3> vertices_list;
         public List<Vector3> normals_list;
@@ -23,9 +25,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// <summary>
         /// Load level model
         /// This is a work in progress, the level model headers can vary in size
-        /// TODO: figure out why there sometimes is +12 bytes of data before triangle_group list
-        /// TODO: find if there is a flag in the headers for when there is +12 bytes (couldnt find any flag so far)
-        /// TODO: it seems the vertex buffer starts with series of vector3 and the actual mesh vertices(points) buffer/list starts a bit after
+        // TODO: figure out why there sometimes is +12 bytes of data before triangle_group list
+        // TODO: find if there is a flag in the headers for when there is +12 bytes (couldnt find any flag so far)
+        /// TODO: it seems the vertex buffer starts with series of vector3 and the real mesh points start a bit after
         /// </summary>
         /// <param name="data">Input data</param>
         public Level_Model(byte[] _data)
@@ -50,7 +52,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             materials = new List<material>();
             materials_groups = new List<material_group>();
 
-            /////////////////// HEADER  //////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////// HEADER  //////////////////////////////////////////////////////////////////////////////////////////////
             // get second header part
             header = (Header)(Parsing.binary_to_struct(data, offset, typeof(Header)));
             offset += 144; //144
@@ -65,21 +67,21 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // calculate offset after materials (1 material definition = 20 bytes)
             offset += header.x124_mat_count * 20;
 
-            // if no materials, there's still 20 bytes of padding to skip
-            // see stg00_00 : level model number: 23
+            // if not materials, there's still 20 bytes of padding to skip
+            // see stg00_00 : level model number 23
             if(header.x124_mat_count == 0 )
             {
                 offset += 20;
             }
 
-            /////////////////// VERTEX TRIANGLES DATA HEADERS  //////////////////////////////////////////////////////////////////////////////////
+            /////////////////// VERTEX TRIANGLES DATA HEADERS  //////////////////////////////////////////////////////////////////////////////////////////////
             // vertex triangles buffer header
             vtx_tri_buff_head = (vertex_triangles_buffers_header)(Parsing.binary_to_struct(data, offset, typeof(vertex_triangles_buffers_header)));
 
             // set offset after " vertex triangles buffer header" (32 bytes)
             offset += 32;
 
-            /////////////////// TRIANGLE GROUPS  ////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////// TRIANGLE GROUPS  //////////////////////////////////////////////////////////////////////////////////////////////
             // get each header.x132_tri_groups_count get triangle group
             // 1 triangle group = 32 bytes
             for (int i = 0; i < header.x132_tri_groups_count * 32; i += 32)
@@ -94,18 +96,18 @@ namespace JSRF_ModTool.DataFormats.JSRF
             offset += header.x132_tri_groups_count * 32;
 
 
-            /////////////////// MATERIAL GROUP BOUNDING BOXES  ///////////////////////////////////////////////////////////////////////////////////
-            mat_group_BBoxes = new List<material_group_draw_distance>();
+            /////////////////// MATERIAL GROUP BOUNDING BOXES  //////////////////////////////////////////////////////////////////////////////////////////////
+            mat_group_BBoxes = new List<material_group_BBox>();
             int mat_group_BBoxes_end = offset + (header.x132_tri_groups_count * 16);
             // get each material group bouding box
             for (int i = offset; i < mat_group_BBoxes_end; i += 16)
             {
-                mat_group_BBoxes.Add((material_group_draw_distance)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_draw_distance))));
+                mat_group_BBoxes.Add((material_group_BBox)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_BBox))));
             }
 
             offset = mat_group_BBoxes_end;
 
-            /////////////////// VERTICES NORMALS UVS  /////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////// VERTICES NORMALS UVS  //////////////////////////////////////////////////////////////////////////////////////////////
             // calculate and store vertex buffer end position
             vertices_list = new List<Vector3>();
             uv_list = new List<Vector2>();
@@ -142,7 +144,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 }
             }
 
-            /////////////////// READ AND STORE TRIANGLES VERT INDICES  /////////////////////////////////////////////////////////////////////////////////////
+            /////////////////// READ AND STORE TRIANGLES VERT INDICES  //////////////////////////////////////////////////////////////////////////////////////////////
             List<short> tri_indx = new List<short>();
             triangles_list = new List<triangle>();
             int triangles_buffer_end = vertex_buffer_end + vtx_tri_buff_head.triangle_buffer_size * 2;
@@ -154,7 +156,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             /*
-            // debug - export triangle data
             List<string> tri_indices = new List<string>();
             for (int i = 0; i < tri_indx.Count-2; i+=3)
             {
@@ -288,9 +289,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 #endregion
             }
 
-            // debug - export triangle data
             //System.IO.File.Delete(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt");
             //System.IO.File.AppendAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt", tris_list);
+
+
         }
 
         public void export_model(string filepath)
@@ -505,10 +507,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// render draw distance for each material group
-        /// the game hides parts of the model, on a per-material group basis, with the "position" and "radius" properties
+        /// 
         /// </summary>
-        private class material_group_draw_distance
+        private class material_group_BBox
         {
             Vector3 position { get; set; }
             float radius { get; set; }
@@ -517,7 +518,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// <summary>
         /// material (20 bytes)  (HB block)
         /// </summary>
-        public class material
+        public class material // 20 bytes (HB block)
         {
             public DataFormats.JSRF.MDLB.color color { get; set; } // its BGRA instead of RGBA (invert color order)
             public Int32 shader_id { get; set; } // if this = FFFFFF color_0 is used // otherwise external material or texture?

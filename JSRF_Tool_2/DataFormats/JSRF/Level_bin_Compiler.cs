@@ -21,7 +21,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
     ///  Media\Stage\stg11_.bin
     ///  ...
     /// This filetype contains 3 main blocks of data.
-    /// It contains block 0 = level physics collision, block 1 = grind curve paths, block 2 = prop (StgObj models) placement/spawn lists, character spawn points etc
+    /// It contains data such as, level physics collision, grind curve paths, prop (StgObj models) placement/spawn lists, character spawn points etc
     /// </remarks>
     public class Level_bin_Compiler
     {
@@ -29,8 +29,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
         public block_00 block_0; // level physics collision 3d model data
         public block_01 block_1; // grind paths
-        public block_02 block_2; // object spawns (spawns/positions of MDLB props(contained in StgXX_XX.dat and/or StgObj), MDLB (contained in the Stg), decals and more)
+        public block_02 block_2; // object spawns (spawns/positions MDLB containeed in StgXX_XX.dat and/or StgObj)
 
+        //string preset_data = @"C:\Users\Mike\Desktop\JSRF\research\stage_bin\stg00_block02.dat";
         public Level_bin_Compiler()
         {
 
@@ -47,34 +48,36 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #region import collision models into classes instances
 
-            // create collision model object
-            block_00.collision_model coll_mdl = new block_00.collision_model();
+                // create collision model object
+                block_00.collision_model coll_mdl = new block_00.collision_model();
 
-            // import vertices buffer
-            for (int v = 0; v < obj.meshes[0].vertex_buffer.Count; v++)
-            {
-                coll_mdl.vertex_list.Add(new block_00.coll_vertex(obj.meshes[0].vertex_buffer[v], 0));
-            }
-            // set vextex count
-            coll_mdl.vertices_count = coll_mdl.vertex_list.Count;
+                // import vertices buffer
+                for (int v = 0; v < obj.meshes[0].vertex_buffer.Count; v++)
+                {
+                    coll_mdl.vertex_list.Add(new block_00.coll_vertex(obj.meshes[0].vertex_buffer[v], 0));
+                }
+                // sert vextex count
+                coll_mdl.vertices_count = coll_mdl.vertex_list.Count;
 
-            // import triangles buffer
-            // and convert triangles indices with: convert_coll_triangles_indices()
-            for (int f = 0; f < obj.meshes[0].face_indices.Count - 2; f += 3)
-            {
-                List<short> t = block_0.convert_coll_triangles_indices(new List<short> { (short)(obj.meshes[0].face_indices[f] - 1), (short)(obj.meshes[0].face_indices[f + 1] - 1), (short)(obj.meshes[0].face_indices[f + 2] - 1) });
+                // import triangles buffer
+                // and convert triangles indices with: convert_coll_triangles_indices()
+                for (int f = 0; f < obj.meshes[0].face_indices.Count - 2; f += 3)
+                {
+                    List<short> t = block_0.convert_coll_triangles_indices(new List<short> { (short)(obj.meshes[0].face_indices[f] - 1), (short)(obj.meshes[0].face_indices[f + 1] - 1), (short)(obj.meshes[0].face_indices[f + 2] - 1) });
 
 
-                coll_mdl.triangles_list.Add(new block_00.coll_triangle(t[0], t[1], t[2], 4, 0, 0));
-            }
-            // triangle count
-            coll_mdl.triangle_count = coll_mdl.triangles_list.Count;
+                    coll_mdl.triangles_list.Add(new block_00.coll_triangle(t[0], t[1], t[2], 4, 0, 0));
+                }
+                // triangle count
+                coll_mdl.triangle_count = coll_mdl.triangles_list.Count;
 
             #endregion
 
- 
+  
+
             List<byte[]> vertex_buffer_byte_arrays = new List<byte[]>();
             List<byte[]> triangles_buffer_byte_arrays = new List<byte[]>();
+
 
             // serialize vertices into byte array
             for (int v = 0; v < coll_mdl.vertex_list.Count; v++)
@@ -88,17 +91,18 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 triangles_buffer_byte_arrays.Add(coll_mdl.triangles_list[t].Serialize());
             }
 
+      
 
-            // merge byte array lists into a single byte array
+
+            // merge byte array lists into a single by array
             byte[] vtx_arr = vertex_buffer_byte_arrays.SelectMany(byteArr => byteArr).ToArray();
             byte[] tri_arr = triangles_buffer_byte_arrays.SelectMany(byteArr => byteArr).ToArray();
 
-            // export vertex and triangles buffers for debugging
+
             File.WriteAllBytes(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_src\stg00\vtx.bin", vtx_arr);
             File.WriteAllBytes(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_src\stg00\tri.bin", tri_arr);
         }
 
-        // build stage fuke
         public void build(string import_dir)
         {
             #region import collision models into classes instances
@@ -253,13 +257,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
 
-            // build vertices/triangles arrays
+            // build vertex array
+
+
             block_00_byte_arrays.Add(vertex_buffer_byte_arrays.SelectMany(byteArr => byteArr).ToArray());
             block_00_byte_arrays.Add(triangles_buffer_byte_arrays.SelectMany(byteArr => byteArr).ToArray());
 
             #endregion
 
-            // merge byte array lists into a single byte array
+            // merge byte array lists into a single by array
             byte[] file = block_00_byte_arrays.SelectMany(byteArr => byteArr).ToArray();
 
             #region calcualte main header block sizes and offsets
@@ -288,6 +294,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
             Byte[] arr = file.Concat(pres_data).ToArray();
 
             File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\Stage\stg00_.bin", arr);
+
+
         }
 
 
@@ -444,8 +452,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 unk_148 = _val;
                 unk_152 = _val;
             }
-
-
         }
 
 
@@ -699,6 +705,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 {
                     List<byte[]> bb = new List<byte[]>();
 
+
                     byte[] bt = new byte[2];
                     bt[0] = (byte)a;
                     bt[1] = (byte)b;
@@ -726,14 +733,27 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 short a = tris[0];
                 short b = tris[1];
                 short c = tris[2];
+                /*
+                int newA = a % 1024;
+                int newB = (a / 1024) + ((b * 4) % 256);
+                int newC = (c * 16) + (b / 64);
+
+                if (newA >= 256)
+                {
+                    newB += 1;
+
+                    newA = newA % 256;
+                    newB += (int)((newA + 256 - 1) / 256);
+                }
+                */
 
                 short addB = 0;
 
-                // convert triangle's indices to game format
                 if (a == 512)
                 {
                     addB += 1;
                 }
+
 
                 if (a > 256)
                 {
@@ -747,11 +767,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     a -= 256;
                 }
 
+
+
                 int newA = a % 1024;
                 int newB = (a / 1024) + ((b * 4) % 256);
                 int newC = (c * 16) + (b / 64);
 
+
                 newB += (short)addB;
+
 
                 return new List<short> { (short)newA, (short)newB, (short)newC };
             }
@@ -951,9 +975,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 int line_point_index = 0;
                 foreach (var item in items)
                 {
+             
                     if (item.items_count > 0)
                     {
 
+                        //lines.Add("Grind Path Group [" + item_count + "]");
+                        // create model object
+                      //  for (int i = 0; i < length; i++)
                         //foreach (var grind_path_item in item.grind_path_header_List)
                         for (int f = 0; f < item.grind_path_header_List.Count; f++)
                         {
@@ -978,6 +1006,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                                 lines.Add("v " + px + " " + py  + " " + pz);
                             }
+                     
 
                     
                             for (int i = 0; i < grind_path_item.grind_path_points.Count; i+=2)
@@ -991,11 +1020,19 @@ namespace JSRF_ModTool.DataFormats.JSRF
                                 // if last line
                                 if (i == grind_path_item.grind_path_points.Count-1)
                                 {
-                                    lines[lines.Count - 1] = "l " + (line_point_index + i) + " " + (line_point_index + i + 1); 
+                                    lines[lines.Count - 1] = "l " + (line_point_index + i) + " " + (line_point_index + i + 1);
+                            
+                                    /*
+                                    if (i % 2 == 0)
+                                    {
+                                        lines[lines.Count - 1] = "l " + (line_point_index + i) + " " + (line_point_index + i + 1);
+                                    } else { 
+                                    }
+                                    */
                                 }
+                            
                             }
-
-                            line_point_index += grind_path_item.grind_path_points.Count;
+                          line_point_index += grind_path_item.grind_path_points.Count;
 
                             lines.Add("");
                             grind_path_item_count++;
@@ -1025,6 +1062,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// </remarks>
         public struct block_02
         {
+
             #region header
 
             public Int32 blocks_count { get; set; } // number of items
@@ -1070,9 +1108,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #endregion
 
+
+
             // rendering zones? has data which seems to be coords for cubes, defined by 4 Vector3 points + 1 for height and one more for unknown purpose
             // these boxes seem to emcompass part of a level model part
-            // so its probably a box to cull and show/hide the model if its on the field of view or not
+            // so its probably a box to cull and show/hide the model if its on screen or not
             public List<block_00> block_00_list { get; set; }
 
             public List<object_spawn> block_01_list { get; set; }
@@ -1322,7 +1362,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // block of 500 bytes at offset 340 = coordinates list? or bounding boxes?
         }
 
+
+
+
+
         #endregion
 
     }
+
 }
