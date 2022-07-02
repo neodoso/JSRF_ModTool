@@ -10,9 +10,25 @@ using System.Windows.Media.Media3D;
 
 namespace JSRF_ModTool.Functions
 {
-
     public class Parsing 
     {
+        // calculates remainder padding bytes count
+        // example, if block of data = 72 bytes, we need to add 8 padding bytes so it aligns to a 16 bytes structure
+        public static int calc_remainder_padding(int byte_count)
+        {
+            int padding_count = (int)((1 - ((byte_count / 16f) % 1)) * 16);
+
+            // return 0 padding length, because 16 bytes aligns with the structure, it's useless padding
+            if (padding_count == 16)
+            {
+                return 0;
+            }
+            else // return padding length
+            {
+                return padding_count;
+            }
+        }
+
 
         public static Int32 calc_length_bytes_list(List<byte[]> buff)
         {
@@ -41,7 +57,7 @@ namespace JSRF_ModTool.Functions
         }
 
         /// <summary>
-        /// Goes through a class/struct's properties and reads a byte array as typeof, for each property in the class/struct.
+        /// return instance of a class/struct whose properties are automatically(tyepof) loaded from the binary/bytes array
         /// </summary>
         /// <remaks>
         /// This is used to load most JSRF classes dynamically.
@@ -74,80 +90,90 @@ namespace JSRF_ModTool.Functions
                 string t = prop.PropertyType.Name;
 
                 //if (i > bytes.Length) { System.Windows.Forms.MessageBox.Show("binary_to_struct() : Index out of range."); return obj; }
-
-                switch (t)
+                /*
+                try
                 {
-                    case "Int32":
-                        prop.SetValue(obj, BitConverter.ToInt32(bytes, i), null);
-                        i += 4;
-                        break;
-                    case "UInt32":
-                        prop.SetValue(obj, BitConverter.ToUInt32(bytes, i), null);
-                        i += 4;
-                        break;
-
-                    case "Int16":
-                        prop.SetValue(obj, BitConverter.ToInt16(bytes, i), null);
-                        i += 2;
-                        break;
-                    case "UInt16":
-                        prop.SetValue(obj, BitConverter.ToUInt16(bytes, i), null);
-                        i += 4;
-                        break;
-
-                    case "Single":
-                        prop.SetValue(obj, BitConverter.ToSingle(bytes, i), null);
-                        i += 4;
-                        break;
-
-                    case "float":
-                        prop.SetValue(obj, BitConverter.ToSingle(bytes, i), null);
-                        i += 4;
-                        break;
-
-                    case "Byte":
-                        prop.SetValue(obj, bytes[i], null);
-                        i += 1;
-                        break;
-
-                    case "Point3D":
-                        prop.SetValue(obj, brReadPoint3D(bytes, 3, i), null);
-                        i += 12;
-                        break;
-
-                    case "Vector3D":
-                        prop.SetValue(obj, brReadVector(bytes, 3, i), null);
-                        i += 12;
-                        break;
-
-                    case "Vector3":
-                        prop.SetValue(obj, brReadVector(bytes, 3, i), null);
-                        i += 12;
-                        break;
-                    case "Vector2":
-                        prop.SetValue(obj, brReadVector(bytes, 2, i), null);
-                        i += 8;
-                        break;
-                    case "Vector4":
-                        prop.SetValue(obj, brReadVector(bytes, 4, i), null);
-                        i += 16;
-                        break;
-
-                    case "color":
-                        prop.SetValue(obj, brReadColor(bytes, i), null);
-                        i += 4;
-                        break;
-
-                    case "String":
-                        int length = prop.GetValue(obj, null).ToString().Length;
-                        if(bytes.Length == 0)
-                        {
+                */
+                    switch (t)
+                    {
+                        case "Int32":
+                            prop.SetValue(obj, BitConverter.ToInt32(bytes, i), null);
+                            i += 4;
                             break;
-                        }
-                        prop.SetValue(obj, Encoding.UTF8.GetString(bytes, i, length).Trim('\0'), null);
-                        i += length;
-                        break;
+                        case "UInt32":
+                            prop.SetValue(obj, BitConverter.ToUInt32(bytes, i), null);
+                            i += 4;
+                            break;
+
+                        case "Int16":
+                            prop.SetValue(obj, BitConverter.ToInt16(bytes, i), null);
+                            i += 2;
+                            break;
+                        case "UInt16":
+                            prop.SetValue(obj, BitConverter.ToUInt16(bytes, i), null);
+                            i += 4;
+                            break;
+
+                        case "Single":
+                            prop.SetValue(obj, BitConverter.ToSingle(bytes, i), null);
+                            i += 4;
+                            break;
+
+                        case "float":
+                            prop.SetValue(obj, BitConverter.ToSingle(bytes, i), null);
+                            i += 4;
+                            break;
+
+                        case "Byte":
+                            prop.SetValue(obj, bytes[i], null);
+                            i += 1;
+                            break;
+
+                        case "Point3D":
+                            prop.SetValue(obj, brReadPoint3D(bytes, 3, i), null);
+                            i += 12;
+                            break;
+
+                        case "Vector3D":
+                            prop.SetValue(obj, brReadVector(bytes, 3, i), null);
+                            i += 12;
+                            break;
+
+                        case "Vector3":
+                            prop.SetValue(obj, brReadVector(bytes, 3, i), null);
+                            i += 12;
+                            break;
+                        case "Vector2":
+                            prop.SetValue(obj, brReadVector(bytes, 2, i), null);
+                            i += 8;
+                            break;
+                        case "Vector4":
+                            prop.SetValue(obj, brReadVector(bytes, 4, i), null);
+                            i += 16;
+                            break;
+
+                        case "color":
+                            prop.SetValue(obj, brReadColor(bytes, i), null);
+                            i += 4;
+                            break;
+
+                        case "String":
+                            int length = prop.GetValue(obj, null).ToString().Length;
+                            if(bytes.Length == 0)
+                            {
+                                break;
+                            }
+                            prop.SetValue(obj, Encoding.UTF8.GetString(bytes, i, length).Trim('\0'), null);
+                            i += length;
+                            break;
+                    }
+/*
                 }
+                catch
+                {
+
+                }
+                */
             }
 
             return obj;
@@ -308,7 +334,6 @@ namespace JSRF_ModTool.Functions
             }
             else
             {
-
                 return new Vector3(0,0,0);
             }
         }

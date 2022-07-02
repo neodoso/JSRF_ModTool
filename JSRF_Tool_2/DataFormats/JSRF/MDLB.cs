@@ -66,14 +66,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // load model parts headers
             for (int i = 0; i < header.model_parts_count ; i++)
             {
-
-#if DEBUG
-                if(i == 20)
-                {
-                    string test = "here";
-                }
-#endif
-
                 Model_Part_header mdl_part_header = (Model_Part_header)(Parsing.binary_to_struct(data, 16 + (128 * i), typeof(Model_Part_header)));
 
                 // recalculate id multiplied by the size of a Model_Part_header
@@ -88,16 +80,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 {
                     Model_Parts_header_List[i].triangle_groups_List.Add((triangle_group)(Parsing.binary_to_struct(data, Model_Parts_header_List[i].triangle_groups_list_offset + 16 + (c * 32), typeof(triangle_group))));
                 }
-
-                /*
-                //TEST
-                // calculate triangle group start/end triangles
-                for (int g = 0; g < Model_Parts_header_List[i].triangle_groups_List.Count; g++)
-                {
-                    Model_Parts_header_List[i].triangle_groups_List[g].triangle_start_index = Model_Parts_header_List[i].triangle_groups_List[g].triangle_start_index / 3;
-                    //Model_Part_header_List[i].triangle_groups_List[g].triangle_group_size -=1;      
-                }  
-                */
             }
             #endregion
 
@@ -194,10 +176,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     {
                         Model_Parts_header_List[v].vtx_buffer_materials.Add((MDLB.material)(Parsing.binary_to_struct(data, (mats_start) + (m * 20), typeof(MDLB.material))));
                     }
-
-
                 }
-
             }
         }
 

@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using JSRF_ModTool.Vector;
 using JSRF_ModTool.DataFormats._3D_Model_Formats;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
-    class Level_Model_Compiler
+    class Stage_Model_Compiler
     {
         public List<texture_info> textures { get; set; }
 
-        public Level_Model_Compiler()
+        public Stage_Model_Compiler()
         {
             textures = new List<texture_info>();
         }
@@ -37,39 +38,64 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // list of arrays of the data to compile for the file
             List<byte[]> file_buffers_list = new List<byte[]>();
 
+            #region import OBJ and check for errors
+
             // load .obj file into OBJ instance
             OBJ obj = new OBJ(obj_filepath);
-           // if obj has not meshes, return
-            if (obj.meshes.Count == 0)
+
+            if(!obj.imported_succeeded)
+            {
+                // no need for a messagebox here, the OBJ class already gives a messagebox with the info on where/what failed
+                return new byte[0];
+            }
+
+            // if obj has no vertices, return empty array
+            if (obj.mesh.vertex_buffer.Count == 0)
             {
                 System.Windows.Forms.MessageBox.Show("Error: OBJ mesh could not be loaded.");
                 return new byte[0];
             }
 
+            // if model has no uvs
+            if (obj.mesh.uv_buffer.Count == 0)
+            {
+                System.Windows.Forms.MessageBox.Show("Error: OBJ mesh doesn't have UVs.");
+                return new byte[0];
+            }
+
+            /*
             // check if there is more than one group with the same material
             // if so reject import
             List<String> mat_names = new List<string>();
-            for (int i = 0; i < obj.meshes[0].material_groups.Count; i++)
+            for (int i = 0; i < obj.mesh.material_groups.Count; i++)
             {
-                if(mat_names.Contains(obj.meshes[0].material_groups[i].mat_name))
+                if(mat_names.Contains(obj.mesh.material_groups[i].mat_name))
                 {
-                    System.Windows.Forms.MessageBox.Show("Error: OBJ mesh " + Path.GetFileName(obj.FilePath) + " has different face groups using the same material.\n\nPlease merge the different face groups using the same material into a single one.");
+                    System.Windows.Forms.MessageBox.Show("Error: OBJ mesh " + Path.GetFileName(obj.FilePath) + " has different face groups using the same material.\n\n"+ obj.FilePath + "\n\nPlease merge the different face groups using the same material into a single one." + "\n\nMaterial name: " + obj.mesh.material_groups[i].mat_name);
                     return new byte[0];
                 }
 
-                mat_names.Add(obj.meshes[0].material_groups[i].mat_name);
+                mat_names.Add(obj.mesh.material_groups[i].mat_name);
+            }
+            */
+
+            #endregion
+
+            //obj.flip_model_for_Stage();
+
+            
+            // flip UV map     
+            for (int i = 0; i < obj.mesh.uv_buffer.Count; i++)
+            {
+                //obj.mesh.uv_buffer[i].X = ((obj.mesh.uv_buffer[i].X) * -1f) + 1;
+                obj.mesh.uv_buffer[i].Y = ((obj.mesh.uv_buffer[i].Y) * -1f) + 1;
             }
 
-            // flip UV map on Y axis
-            for (int i = 0; i < obj.meshes[0].uv_buffer.Count; i++)
-            {
-                obj.meshes[0].uv_buffer[i].Y = ((obj.meshes[0].uv_buffer[i].Y) * -1f) + 1; //
-            }
+            
 
 
             #region process material groups and materials from the .mtl
 
-            //List<byte[]> texture_IDs_list = new List<byte[]>();
             List<Int32> texture_IDs_list = new List<int>();
             
             /*
@@ -81,32 +107,27 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
             */
 
-            OBJ.obj_mesh mesh = obj.meshes[0];
-            
             // add count of textures ids
-            //texture_IDs_list.Add(BitConverter.GetBytes(mesh.material_groups.Count)); //BitConverter.GetBytes(mesh.material_groups.Count)
+            //texture_IDs_list.Add(BitConverter.GetBytes(obj.mesh_.material_groups.Count)); //BitConverter.GetBytes(obj.mesh_.material_groups.Count)
 
-            // get texture paths and generate ids for them
-            for (int i = 0; i < mesh.material_groups.Count; i++)
+            // for each obj.mesh_.material_groups, get texture paths and generate ids for them
+            for (int i = 0; i < obj.mesh.material_groups.Count; i++)
             {
                 // for each material form the mtl file
                 for (int e = 0; e < obj.mtl_materials_list.Count; e++)
                 {
-                    // if material group mat matches material name in mtl
-                    if(mesh.material_groups[i].mat_name.ToLower() == obj.mtl_materials_list[e].material_name.ToLower())
+                    // if material group's texture filepath matches the texture filepath in .mtl material, create ID for the texture
+                    if (obj.mesh.material_groups[i].texture_filepath.ToLower() == obj.mtl_materials_list[e].texture_filepath.ToLower())
                     {
                         // sleep for a bit, otherwise MathI.RandomDigits() keeps ouputting the same number in a short timeframe
                         System.Threading.Thread.Sleep(50);
-                        // generate unique ID which will be what is used by the game file format to index textures
-                        //int random_num = Functions.MathI.RandomDigits(9);
-                        //int textutre_id = Int32.Parse(Path.GetFileNameWithoutExtension(obj.mtl_materials_list[e].texture_path));
 
                         Int32 tex_id = -1;
 
                         // check if texture path already exists in textures list
                         foreach (var tx in textures)
                         {
-                            if(tx.texture_filepath == obj.mtl_materials_list[e].texture_path)
+                            if(tx.texture_filepath == obj.mtl_materials_list[e].texture_filepath)
                             {
                                 tex_id = tx.texture_id;
                                 break;
@@ -114,28 +135,30 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         }
 
                         bool valid_tex_path = true;
-                        // if texture wasn't found generate id and add to textures list
+                        // if texture wasn't found generate ID and add to textures list
                         if(tex_id == -1)
                         {
+                            // generate unique ID which will be what is used by the game file format to index textures
                             tex_id = Functions.MathI.RandomDigits(9);
 
-                            if (File.Exists(obj.mtl_materials_list[e].texture_path))
+                            if (File.Exists(obj.mtl_materials_list[e].texture_filepath))
                             {
                                 valid_tex_path = true;
-                                textures.Add(new texture_info(obj.mtl_materials_list[e].texture_path, tex_id));
+                                textures.Add(new texture_info(obj.mtl_materials_list[e].texture_filepath, tex_id));
                             } else {
                                 valid_tex_path = false;
-                               // System.Windows.Forms.MessageBox.Show("Material \"" + obj.mtl_materials_list[e].material_name + "\" texture path is invalid.\nThis material and texture will not be added to the compile.");
-                                obj.mtl_materials_list.RemoveAt(e);
-                                
+                                System.Windows.Forms.MessageBox.Show("Warning: the texture file for the material \"" + obj.mtl_materials_list[e].material_name + "\" cannot be found.\n\n"+ 
+                                    "The texture path defined in the obj/mtl are invalid: \"" + obj.mtl_materials_list[e].texture_filepath + "\"\n\nThis material and texture will not be added to the compiled Stage.");
+                                obj.mtl_materials_list.RemoveAt(e); 
                             }  
                         }
 
-                        if(valid_tex_path)
+                        // if texture file exists, set texture ID on the mtl_materials_list, material_groups list and texture_IDs_list
+                        if (valid_tex_path)
                         {
                             // generate texture ID and store it
                             obj.mtl_materials_list[e].ID = tex_id;
-                            mesh.material_groups[i].ID = tex_id;
+                            obj.mesh.material_groups[i].ID = tex_id;
 
                             // add ID to texture id list
                             texture_IDs_list.Add(tex_id);
@@ -148,9 +171,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             List<string> mat_names_list = new List<string>();
 
-            #region merge triangle groups using the same material
-
-            #endregion
 
             // add count of texture ids to buffer
             file_buffers_list.Add(BitConverter.GetBytes((Int32)texture_IDs_list.Count));
@@ -165,65 +185,43 @@ namespace JSRF_ModTool.DataFormats.JSRF
             Header head = new Header();
             head.x124_mat_count = 1;
             head.x128_unk = 180;
-            head.x132_tri_groups_count = mesh.material_groups.Count;
+            head.x132_mat_groups_count = obj.mesh.material_groups.Count;
 
             #region calculate mesh center and bounding box
 
-            // min max to calculate the mesh point's bounding box
-            float Xmin = 0, Xmax = 0, Ymin = 0, Ymax = 0, Zmin = 0, Zmax = 0;
-            Vector3 ctr = new Vector3();
+            //Vector3 model_center = new Vector3();
+            bounds bbox = new bounds();
 
-            List<Vector3> points_list = new List<Vector3>();
-
-            // loop through the mat's triangles (from mg.start_index; to  mg.start_index + mg.size)
+            // loop through the mesh vertex buffer
             // to get all vertices positions to calculate min/max bouding box and center of the material group mesh
-            for (int o = 0 ; o < mesh.vertex_buffer.Count; o++)
+            for (int o = 0 ; o < obj.mesh.vertex_buffer.Count; o++)
             {
-                Vector3 vert = mesh.vertex_buffer[o];
+                Vector3 vert = obj.mesh.vertex_buffer[o];
 
-                // ignore duplicate verts
-                if (points_list.Contains(vert))
-                {
-                    continue;
-                }
+                bbox.add_point(vert);
 
-                points_list.Add(vert);
-
-                // if vertex value decreases or increases update min/max value
-                Xmin = vert.X < Xmin ? Xmin = vert.X : Xmin;
-                Ymin = vert.Y < Ymin ? Ymin = vert.Y : Ymin;
-                Zmin = vert.Z < Zmin ? Zmin = vert.Z : Zmin;
-                Xmax = vert.X > Xmax ? Xmax = vert.X : Xmax;
-                Ymax = vert.Y > Ymax ? Ymax = vert.Y : Ymax;
-                Zmax = vert.Z > Zmax ? Zmax = vert.Z : Zmax;
-
-                // if min/max is equal zero
-                Xmin = Xmin == 0 ? Xmin = vert.X : Xmin;
-                Ymin = Ymin == 0 ? Ymin = vert.Y : Ymin;
-                Zmin = Zmin == 0 ? Zmin = vert.Z : Zmin;
-                Xmax = Xmax == 0 ? Xmax = vert.X : Xmax;
-                Ymax = Ymax == 0 ? Ymax = vert.Y : Ymax;
-                Zmax = Zmax == 0 ? Zmax = vert.Z : Zmax;
-
-                ctr = new Vector3(ctr.X + vert.X, ctr.Y + vert.Y, ctr.Z + vert.Z);
+                //model_center = new Vector3(model_center.X + vert.X, model_center.Y + vert.Y, model_center.Z + vert.Z);
             }
 
 
             // divide ctr floats by number of vertices
-            ctr = new Vector3(ctr.X / points_list.Count, ctr.Y / points_list.Count, ctr.Z / points_list.Count);
-            points_list.Clear();
+           // model_center = new Vector3(model_center.X / obj.mesh_.vertex_buffer.Count, model_center.Y / obj.mesh_.vertex_buffer.Count, model_center.Z / obj.mesh_.vertex_buffer.Count);
 
-            head.model_center = ctr;
-            head.model_radius = (Math.Abs((Math.Abs(Xmax) - Math.Abs(Xmin))) + Math.Abs((Math.Abs(Ymax) - Math.Abs(Ymin))) + Math.Abs((Math.Abs(Zmax) - Math.Abs(Zmin)))) * (85f / 100f);
 
-            #if DEBUG
+            head.model_center = bbox.center;
 
+            // TODO : maybe have the possiblity to set a custom model_radius in case it's rendering turns off in some cases if the player goes out of that radius
+            // calculate mesh draw distance radius from it's bounding box min/max and multiply by a factor (of 1.55f right now)
+            head.model_radius = (Math.Abs((Math.Abs(bbox.Xmax) - Math.Abs(bbox.Xmin))) + Math.Abs((Math.Abs(bbox.Ymax) - Math.Abs(bbox.Ymin))) + Math.Abs((Math.Abs(bbox.Zmax) - Math.Abs(bbox.Zmin)))) * (1.55f);
+
+#if DEBUG
+            // force mesh draw distance radius
             if (debug_draw_distance)
             {
                 head.model_radius = 4000f;
             }
 
-            #endif
+#endif
             #endregion
 
             head.x080_unk_Vector3 = new Vector3(1, 1, 1);
@@ -231,15 +229,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
             head.mat_group_start_offset = 128 + (head.x124_mat_count * 20);
             head.x020_unk = 128;
 
-            head.x136_unk_ID = 1243916; // TODO unknown id
-            head.x140_unk_ID = 2013322001; // TODO unknown id
+            head.x136_unk_ID = 1243916; // unknown default id
+            head.x140_unk_ID = 2013322001; // unknown default id
 
             file_buffers_list.Add(head.Serialize());
 
             #endregion
 
             #region materials list
-             // for new we only do one, some models can have two more?
+
+             // for now we only do one, some models can have two more?
             material mat = new material();
             mat.color = new MDLB.color(255, 255, 255, 255);
             mat.shader_id = 0;
@@ -250,19 +249,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #endregion
 
-            // start position aftet the texture ids array
-            int startoff_no_texIDs = (Functions.Parsing.calc_length_bytes_list(file_buffers_list) - (texture_IDs_list.Count * 4 + 4));
-
             #region vertex triangles buffers header
 
             vertex_triangles_buffers_header vtxt_head = new vertex_triangles_buffers_header();
-            // 16 shift + length of header data (without texture_ids list) + this 32 bytes (vtxt_head) length + material groups length + material group bounding box
-            vtxt_head.vertex_buffer_startoffset = 16 + startoff_no_texIDs + (mesh.material_groups.Count * 32) + (mesh.material_groups.Count * 16) ; // bytes count from main header to end of bbox list
-            vtxt_head.vertex_count = mesh.vertex_buffer.Count;
+           
+            vtxt_head.last_MatGroupBbox_offset = Functions.Parsing.calc_length_bytes_list(file_buffers_list) - (texture_IDs_list.Count * 4 + 4) + 32 + (obj.mesh.material_groups.Count * 32) + ((obj.mesh.material_groups.Count -1) * 16);
+            vtxt_head.vertex_count = obj.mesh.vertex_buffer.Count;
             vtxt_head.vertex_struct = 514; // 514 = 28 flag //  vtx def 28 = 512 flag //   vtx def 32 = 274 flag   // //  vtx def 24 = 322 flag //  vtx def 16 = 66 flag
             vtxt_head.vertex_def_size = 28;
-            vtxt_head.triangle_buffer_startoffset = vtxt_head.vertex_buffer_startoffset + (vtxt_head.vertex_count * vtxt_head.vertex_def_size); // todo
-            vtxt_head.triangle_buffer_size = mesh.face_indices.Count; //  if= 36 then real byte size is *21 = 72  // offset from texture counts it(start of this model)  +128
+            vtxt_head.triangle_buffer_startoffset = vtxt_head.last_MatGroupBbox_offset + (vtxt_head.vertex_count * vtxt_head.vertex_def_size);
+            vtxt_head.triangle_buffer_size = obj.mesh.face_indices.Count; //  if= 36 then real byte size is * 21 = 72  // offset from texture counts it(start of this model)  +128
 
             // set vertex flag that varies depending on the vertex_def_size
             switch (vtxt_head.vertex_def_size)
@@ -292,273 +288,100 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             int starto_mat_groups = Functions.Parsing.calc_length_bytes_list(file_buffers_list);
             //List<byte[]> mat_groups_list = new List<byte[]>();
-            for (int i = 0; i < mesh.material_groups.Count; i++)
+            for (int i = 0; i < obj.mesh.material_groups.Count; i++)
             {
                 //material_group mat_group = new material_group();
-                OBJ.obj_mesh.material_group mg = mesh.material_groups[i];
+                OBJ.obj_mesh.material_group mg = obj.mesh.material_groups[i];
                 material_group mat_group  = new material_group();
                 mat_group.triangle_count = mg.size;
                 mat_group.triangle_start_index = mg.start_index * 3;
                 mat_group.unk_08 = 0; 
-                mat_group.material_ID = i;
+                mat_group.material_num = i;
 
                 mat_group.unk_16 = 0;
                 mat_group.unk_20 = 0;
                 mat_group.unk_24 = 0;
-                mat_group.unk_28 = starto_mat_groups + (mesh.material_groups.Count * 32) + (i * 16) -32 -16; // Functions.Parsing.calc_length_bytes_list(file_buffers_list) + (mesh.material_groups.Count * 32) -32; // count bytes from start minus 16 // todo calculate // increases by +16 for each triangle group // first tri group start value seems the number of bytes from the start position to end of triangles group, minus -16
+                mat_group.unk_28 = starto_mat_groups + (obj.mesh.material_groups.Count * 32) + (i * 16) - 4  - (texture_IDs_list.Count * 4) -16; 
 
                 file_buffers_list.Add(mat_group.Serialize());
             }
 
             #endregion
 
-            #region setup material groups bounding boxes
-            List<string> lines_bboxes = new List<string>();
-            for (int i = 0; i < mesh.material_groups.Count; i++)
+            #region setup material groups boundaries(works as a radius)
+
+            bounds bounds = new bounds();
+
+            for (int i = 0; i < obj.mesh.material_groups.Count; i++)
             {
                 // get mesh's material group
-                OBJ.obj_mesh.material_group mg = mesh.material_groups[i];
+                OBJ.obj_mesh.material_group mg = obj.mesh.material_groups[i];
 
-                // min max to calculate the mesh point's bounding box
-                 Xmin = Xmax = Ymin = Ymax = Zmin =  Zmax = 0;
-                 ctr = new Vector3();
-
-                 points_list = new List<Vector3>();
-
-                // loop through the mat's triangles (from mg.start_index; to  mg.start_index + mg.size)
+                // loop through the mat's triangles (from mg.start_index; to  mg.start_index + mg.size) * 3
+                // (times 3 since we need 3 vertices for one triangle from face indices)
                 // to get all vertices positions to calculate min/max bouding box and center of the material group mesh
-                for (int o = mg.start_index; o < (mg.start_index  + mg.size); o++)
+                for (int o = mg.start_index * 3; o < (mg.start_index  + mg.size) * 3; o++)
                 {
-                    if (mesh.face_indices[o] >= mesh.vertex_buffer.Count) { break; }
-                    Vector3 vert = mesh.vertex_buffer[mesh.face_indices[o]];
+                    if (o >= obj.mesh.face_indices.Count) { break; }
 
-                    bool vert_already_indexed = false;
-                    // for each point in list check if vertex already exists
-                    for (int p = 0; p < points_list.Count; p++)
-                    {
-                            Vector3 ve = points_list[p];
-                            if (ve.X == vert.X && ve.Y == vert.Y && ve.Z == vert.Z)
-                            {
-                                vert_already_indexed = true;
-                                break;
-                            }
-                    }
-
-                    // if vertex isn't exist indexed
-                    if (!vert_already_indexed)
-                    {
-                        points_list.Add(vert);
-                        vert_already_indexed = false;
-
-                        // if vertex value decreases or increases update min/max value
-                        Xmin = vert.X < Xmin ? Xmin = vert.X : Xmin;
-                        Ymin = vert.Y < Ymin ? Ymin = vert.Y : Ymin;
-                        Zmin = vert.Z < Zmin ? Zmin = vert.Z : Zmin;
-                        Xmax = vert.X > Xmax ? Xmax = vert.X : Xmax;
-                        Ymax = vert.Y > Ymax ? Ymax = vert.Y : Ymax;
-                        Zmax = vert.Z > Zmax ? Zmax = vert.Z : Zmax;
-
-                        // if min/max is equal zero
-                        Xmin = Xmin == 0 ? Xmin = vert.X : Xmin;
-                        Ymin = Ymin == 0 ? Ymin = vert.Y : Ymin;
-                        Zmin = Zmin == 0 ? Zmin = vert.Z : Zmin;
-                        Xmax = Xmax == 0 ? Xmax = vert.X : Xmax;
-                        Ymax = Ymax == 0 ? Ymax = vert.Y : Ymax;
-                        Zmax = Zmax == 0 ? Zmax = vert.Z : Zmax;
-
-                        ctr = new Vector3(ctr.X + vert.X, ctr.Y + vert.Y, ctr.Z + vert.Z);
-                    }
-                }
-
-                
-                List<string> lines = new List<string>();
-
-                for (int l = 0; l < points_list.Count; l++)
-                {
-                    lines.Add(points_list[l].X + " " + points_list[l].Y + " " + points_list[l].Z);
-                }
-
-                File.WriteAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\" + "matgroup_" + i + ".txt", lines);
-
-
-                ctr = new Vector3(ctr.X / points_list.Count, ctr.Y / points_list.Count, ctr.Z / points_list.Count);
-                // calculate distance between min and max points
-                //bounds_legth = (float)Math.Sqrt(Math.Pow(Xmax - Math.Abs(Xmin), 2) + Math.Pow(Ymax - Math.Abs(Ymin), 2) + Math.Pow(Zmax - Math.Abs(Zmin), 2));
-                //bounds_legth /= 10;
-
-                // float radius = (float)Math.Sqrt(Math.Pow((Xmax - Xmin) + ctr.X, 2) + Math.Pow((Ymax - Ymin) + ctr.Y, 2) + Math.Pow((Zmax - Zmin) + ctr.Z, 2));
-
-                /*
-                float bx = Xmax - Xmin;
-                float by = Ymax - Ymin;
-                float bz = Zmax - Zmin;
-
-                float brounded = (bx + by + bz) / 3;
-
-                // bounds_legth /= 6;
-                // reduce bouds_length of 15%
-                //bounds_legth *= (65f / 100f); // removed 35%
-                */
-
-                // divide ctr floats by number of vertices
-
-                float radius = Math.Abs((Math.Abs(Xmax) - Math.Abs(Xmin))) + Math.Abs((Math.Abs(Ymax) - Math.Abs(Ymin))) + Math.Abs((Math.Abs(Zmax) - Math.Abs(Zmin)));
-
-
-                material_group_BBox mgBbox = new material_group_BBox();
-                mgBbox.position = ctr;
-                mgBbox.radius = radius;
-
-
-                // debug, give a large draw distance/radius
-                if (mgBbox.radius == 0)
-                {
-                    mgBbox.radius = 500;
-                }
-                // debug, give a large draw distance/radius
-                if (debug_draw_distance)
-                {
-                    mgBbox.radius *= 10;
+                    Vector3 vert = obj.mesh.vertex_buffer[obj.mesh.face_indices[o] - 1];
+                    bounds.add_point(vert);
                 }
 
 
-                lines_bboxes.Add(mgBbox.position.X + " " + mgBbox.position.Y + " " + mgBbox.position.Z + " " + mgBbox.radius);
+                float radius = Math.Abs((Math.Abs(bounds.Xmax) - Math.Abs(bounds.Xmin))) + Math.Abs((Math.Abs(bounds.Ymax) - Math.Abs(bounds.Ymin))) + Math.Abs((Math.Abs(bounds.Zmax) - Math.Abs(bounds.Zmin)));
 
-                points_list.Clear();
+                material_group_boundary mat_group_Boundary = new material_group_boundary();
 
-                file_buffers_list.Add(mgBbox.Serialize());
+                mat_group_Boundary.position = bounds.center;
+
+                mat_group_Boundary.radius = radius;
+ 
+                file_buffers_list.Add(mat_group_Boundary.Serialize());
             }
-
-            File.WriteAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\bboxes.txt", lines_bboxes);
 
             #endregion
 
             #region build vertex buffer
 
-
-            /*
-            if (vtxt_head.vertex_def_size != 28)
-            {
-                System.Windows.Forms.MessageBox.Show("Error: unsuported vertex_def_size");
-                return new byte[0];
-            }
-            */
-            /*
-            if (vtxt_head.vertex_def_size == 28)
-            {
-                vertex_def v;
-                for (int i = 0; i < mesh.vertex_buffer.Count; i++)
-                {
-                    // f mesh has normals include normals b
-                   // if (mesh.normals_buffer.Count > 0)
-                   // {
-                        //v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[mesh.uv_indices[i]], mesh.normals_buffer[mesh.normals_indices[i]]);
-                        v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[i], new Vector3(0,0,0) ); //
-                        file_buffers_list.Add(v.Serialize(28));
-                   // }
-                }
-            }
-            */
-
-            if (vtxt_head.vertex_def_size == 28)
-            {
-                vertex_def v;
-                for (int i = 0; i < mesh.vertex_buffer.Count; i++)
-                {
-                    // f mesh has normals include normals b
-                    // if (mesh.normals_buffer.Count > 0)
-                    // {
-                    //v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[mesh.uv_indices[i]], mesh.normals_buffer[mesh.normals_indices[i]]);
-                    v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[i], new Vector3(0, 0, 0)); //
-                    file_buffers_list.Add(v.Serialize(28));
-                    // }
-                }
-            }
-
-            /*
-            //aaaaaaa
-            if (vtxt_head.vertex_def_size == 28)
-            {
-                vertex_def v;
-                for (int i = 0; i < mesh.face_indices.Count; i++)
-                {
-                    // f mesh has normals include normals b
-                    // if (mesh.normals_buffer.Count > 0)
-                    // {
-                    //v = new vertex_def(mesh.vertex_buffer[i], mesh.uv_buffer[mesh.uv_indices[i]], mesh.normals_buffer[mesh.normals_indices[i]]);
-                    v = new vertex_def(mesh.vertex_buffer[mesh.face_indices[i]-1], mesh.uv_buffer[mesh.uv_indices[i]-1], new Vector3(0, 0, 0)); //
-                    file_buffers_list.Add(v.Serialize(28));
-                    // }
-                }
-            }
-            */
-
-
-            /*
             vertex_def v;
-            for (int i = 0; i < mesh.triangles.Count; i++)
+            Vector2 uv = new Vector2();
+
+            if (vtxt_head.vertex_def_size == 28)
             {
-                OBJ.obj_mesh.tri t = mesh.triangles[i];
-
-                 v = new vertex_def(mesh.vertex_buffer[t.a.v], mesh.uv_buffer[t.a.vt], mesh.normals_buffer[t.a.vn]); //
-                file_buffers_list.Add(v.Serialize(28));
-
-                if (t.b.v < mesh.vertex_buffer.Count && t.b.vt < mesh.uv_buffer.Count && t.b.vn < mesh.normals_buffer.Count)
-                v = new vertex_def(mesh.vertex_buffer[t.b.v], mesh.uv_buffer[t.b.vt], mesh.normals_buffer[t.b.vn]); //
-                file_buffers_list.Add(v.Serialize(28));
-
-                if(t.c.v < mesh.vertex_buffer.Count && t.c.vt < mesh.uv_buffer.Count)
-                v = new vertex_def(mesh.vertex_buffer[t.c.v], mesh.uv_buffer[t.c.vt], mesh.normals_buffer[t.c.vn]); //
-                file_buffers_list.Add(v.Serialize(28));
-
-            }
-
-            */
-
-            /*
-            vertex_def v;
-            for (int i = 0; i < mesh.triangles.Count; i++)
-            {
-                OBJ.obj_mesh.tri t = mesh.triangles[i];
-
-                if (t.a.v < mesh.vertex_buffer.Count && t.a.vt < mesh.uv_buffer.Count && t.a.vn < mesh.normals_buffer.Count)
+                // for each vertex
+                for (int i = 0; i < obj.mesh.vertex_buffer.Count; i++)
                 {
-                    v = new vertex_def(mesh.vertex_buffer[t.a.v], mesh.uv_buffer[t.a.vt], mesh.normals_buffer[t.a.vn]); //
-                    file_buffers_list.Add(v.Serialize(28));
-                }
+                    // for each triangle's vertex index
+                    for (int f = 0; f < obj.mesh.face_indices.Count; f++)
+                    {
+                        // if tri vertex index == i
+                        if(obj.mesh.face_indices[f] -1 == i)
+                        {
+                            // get uv that we have to assign to the vertex
+                            uv = obj.mesh.uv_buffer[obj.mesh.uv_indices[f] - 1];
+                            break;
+                        }
+                    }
 
-
-                if (t.b.v < mesh.vertex_buffer.Count && t.b.vt < mesh.uv_buffer.Count && t.b.vn < mesh.normals_buffer.Count)
-                {
-                    v = new vertex_def(mesh.vertex_buffer[t.b.v], mesh.uv_buffer[t.b.vt], mesh.normals_buffer[t.b.vn]); //
-                    file_buffers_list.Add(v.Serialize(28));
-                }
-
-
-                if (t.c.v < mesh.vertex_buffer.Count && t.c.vt < mesh.uv_buffer.Count && t.c.vn < mesh.normals_buffer.Count)
-                {
-                    v = new vertex_def(mesh.vertex_buffer[t.c.v], mesh.uv_buffer[t.c.vt], mesh.normals_buffer[t.c.vn]); //
+                    // create vertex with point position + uv + normal
+                    v = new vertex_def(obj.mesh.vertex_buffer[i], uv, new Vector3(0, 0, 0)); // obj.mesh_.normals_buffer[i]  
                     file_buffers_list.Add(v.Serialize(28));
                 }
             }
-            */
 
             #endregion
 
-            #region build triangle indices buffer
+            #region build triangle buffer
 
-
-            for (int i = 0; i < mesh.face_indices.Count; i++)
+            for (int t = 0; t < obj.mesh.face_indices.Count; t++)
             {
-                file_buffers_list.Add((BitConverter.GetBytes((Int16)(mesh.face_indices[i] -1))));
+                file_buffers_list.Add(BitConverter.GetBytes((Int16)(obj.mesh.face_indices[t] -1)));
             }
 
             #endregion
 
             return file_buffers_list.SelectMany(a => a).ToArray();
-
-            //File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stg_mdl_compile_test.dat", file_buffers_list.SelectMany(a => a).ToArray());
-
         }
 
 
@@ -608,7 +431,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             public Int32 x124_mat_count { get; set; }
             public Int32 x128_unk { get; set; }
-            public Int32 x132_tri_groups_count { get; set; }
+            public Int32 x132_mat_groups_count { get; set; }
 
             public Int32 x136_unk_ID { get; set; }
             public Int32 x140_unk_ID { get; set; }
@@ -663,7 +486,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 b.Add(BitConverter.GetBytes(x124_mat_count));
                 b.Add(BitConverter.GetBytes(x128_unk));
-                b.Add(BitConverter.GetBytes(x132_tri_groups_count));
+                b.Add(BitConverter.GetBytes(x132_mat_groups_count));
 
                 b.Add(BitConverter.GetBytes(x136_unk_ID));
                 b.Add(BitConverter.GetBytes(x140_unk_ID));
@@ -674,11 +497,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        ///  vertex buffer header
+        ///  vertex / triangle buffer header
         /// </summary>
         public class vertex_triangles_buffers_header
         {
-            public Int32 vertex_buffer_startoffset { get; set; } // gives position to last material_group_BBox
+            public Int32 last_MatGroupBbox_offset { get; set; } // gives position to last material_group_boundary
             public Int32 vertex_count { get; set; }
             public Int32 vertex_struct { get; set; }
             public Int32 vertex_def_size { get; set; }
@@ -693,7 +516,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             {
                 List<byte[]> b = new List<byte[]>();
 
-                b.Add(BitConverter.GetBytes(vertex_buffer_startoffset));
+                b.Add(BitConverter.GetBytes(last_MatGroupBbox_offset));
                 b.Add(BitConverter.GetBytes(vertex_count));
                 b.Add(BitConverter.GetBytes(vertex_struct));
                 b.Add(BitConverter.GetBytes(vertex_def_size));
@@ -708,14 +531,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// (32 bytes) triangle group, defines triangles indices and material to apply 
+        /// (32 bytes) triangle material group, defines triangles indices and material to apply 
         /// </summary>
         public class material_group
         {
             public Int32 triangle_count { get; set; } //
             public Int32 triangle_start_index { get; set; } // divide by 9 (multiply by 3 for compiling)
             public Int32 unk_08 { get; set; } // increases by +16 for each triangle group // first tri group start value seems th be the number of bytes from the start position to end of triangles group, minus -16
-            public Int32 material_ID { get; set; } // tri count
+            public Int32 material_num { get; set; } // tri count
 
             public Int32 unk_16 { get; set; } // 
             public Int32 unk_20 { get; set; } // 
@@ -729,7 +552,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 b.Add(BitConverter.GetBytes(triangle_count));
                 b.Add(BitConverter.GetBytes(triangle_start_index));
                 b.Add(BitConverter.GetBytes(unk_08));
-                b.Add(BitConverter.GetBytes(material_ID));
+                b.Add(BitConverter.GetBytes(material_num));
 
                 b.Add(BitConverter.GetBytes(unk_16));
                 b.Add(BitConverter.GetBytes(unk_20));
@@ -741,14 +564,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// 
+        /// the material group has a point position for it's center(calculated from the average of mesh vertices(points position) that are part of the material group)
+        /// as well as a radius which is used to define the drawing distance for the material group, when the player/camera position
+        /// is beyond the material's group radius distance, the material group stops rendering
         /// </summary>
-        private class material_group_BBox
+        private class material_group_boundary
         {
             public Vector3 position { get; set; }
             public float radius { get; set; }
 
-            public material_group_BBox()
+            public material_group_boundary()
             {
                 position = new Vector3();
             }
@@ -807,6 +632,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 this.norm = _norm;
             }
 
+            // serialize vertex definition according to the type/size of vertex def
             public byte[] Serialize(int _size)
             {
                 List<byte[]> b = new List<byte[]>();
@@ -819,9 +645,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     case 20:
                         b.Add(BitConverter.GetBytes(uv.X)); b.Add(BitConverter.GetBytes(uv.Y));
                         break;
+
                     case 24:
                         b.Add(new byte[4]); b.Add(BitConverter.GetBytes(uv.X));  b.Add(BitConverter.GetBytes(uv.Y)); 
                         break;
+
                     case 28:
                         b.Add(BitConverter.GetBytes(uv.X)); b.Add(BitConverter.GetBytes(uv.Y)); 
                         b.Add(new byte[4]);

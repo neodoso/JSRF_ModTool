@@ -250,7 +250,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// "Indexed" Childs (MDLB, Level models, Materials, Textures...)
+        /// "Indexed" Childs (MDLB, stage models, Materials, Textures...)
         /// </summary>
         public class Indexed_child_list : List<Indexed_item>
         {
@@ -267,7 +267,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     child.block_type = BitConverter.ToInt32(buff, offset);
 
-                    // level model
+                    // stage model
                     if (child.block_type == 1)
                     {
                         child.ID = BitConverter.ToInt32(buff, offset + 4);
@@ -288,14 +288,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                         if (check_MDLB == 1112294477)  // MDLB
                         {
-                            child.item_type = File_Containers.item_data_type.Level_MDLB;
+                            child.item_type = File_Containers.item_data_type.Stage_MDLB;
                             child.block_start = offset + 16 ; //20 + (child.textures_IDs_count * 4)
                             child.block_end = offset + child.block_size + 20 + (child.textures_IDs_count * 4);
                             child.block_size = child.block_end - child.block_start;    
 
-                        } else { // level model
+                        } else { // stage model
 
-                            child.item_type = File_Containers.item_data_type.Level_Model;
+                            child.item_type = File_Containers.item_data_type.Stage_Model;
                             child.block_start = offset +16;//+ 20 + (child.textures_IDs_count * 4); 
                             child.block_end = offset + child.block_size + 20 + (child.textures_IDs_count * 4);
                             child.block_size = child.block_end - child.block_start;

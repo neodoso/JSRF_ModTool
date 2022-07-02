@@ -7,23 +7,32 @@ using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
-    class mission_dat
+    class Mission_dat
     {
-        // containes list of 3D models
+        private string debug_data_export_dir = @"C:\Users\Mike\Desktop\JSRF\research\Mission_dat\";
+
+        // contains list of 3D models
+        // which are grafftis pre-calculated projection planes, the mesh of a plane projected onto the Stage visual model, slightly offset over the surface of the stage visual mesh
+        // these meshes pick up *some* topology from the stage visual mesh and seem to be cut into vertical rectangular slices divided into the graffiti circle spray parts
         public List<model> models { get; set; }
         private string filename;
 
-        public mission_dat(string filepath)
+        // read and extract mission.dat graffiti projection meshes (in .obj) and their position + rotation matrix (in .xyz)
+        public Mission_dat(string filepath)
         {
+            List<String> transform_lines = new List<string>();
             filename = System.IO.Path.GetFileNameWithoutExtension(filepath);
             this.models = new List<model>();
 
             byte[] data = Parsing.FileToByteArray(filepath, 0);
 
             int i = 0;
+            int count = 0;
             model mdl;
             while (i < data.Length)
             {
+                transform_lines = new List<string>();
+
                 // if file is empty (if it starts with: FFFFFFFF 000000000000000000000000)
                 if (BitConverter.ToInt32(data, i) == -1)
                 {
@@ -33,16 +42,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 // load binary to class 
                 mdl = (model)(Parsing.binary_to_struct(data, i, typeof(model)));
 
-                List<string> verts_str_list = new List<string>();
+                //List<string> verts_str_list = new List<string>();
                 int vert_startoff = i + 272;
                 // load vertices to list
                 for (int v = vert_startoff; v < vert_startoff + (mdl._248_vertex_count * mdl._256_vertex_def_size); v+= mdl._256_vertex_def_size)
                 {
                     mdl.vertices.Add((Vector3)(Parsing.binary_to_struct(data, v + 4, typeof(Vector3))));
-                    verts_str_list.Add(mdl.vertices[mdl.vertices.Count - 1].X + " " + mdl.vertices[mdl.vertices.Count - 1].Y + " " + mdl.vertices[mdl.vertices.Count - 1].Z);
+                    //verts_str_list.Add(mdl.vertices[mdl.vertices.Count - 1].X + " " + mdl.vertices[mdl.vertices.Count - 1].Y + " " + mdl.vertices[mdl.vertices.Count - 1].Z);
                 }
 
-                System.IO.File.WriteAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mission_dat\vertices.txt", verts_str_list);
+                //System.IO.File.WriteAllLines(@"C:\Users\Mike\Desktop\JSRF\research\Mission_dat\vertices.txt", verts_str_list);
 
                 int tri_startoff = i + 96 + mdl._260_triangle_buffer_startoff;
 
@@ -55,11 +64,17 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 this.models.Add(mdl);
 
                 i += mdl._04_total_size;
+                transform_lines.Add(mdl.position.X  + " " + mdl.position.Y  + " " + mdl.position.Z);
+                transform_lines.Add(mdl.matrix_a1.X + " " + mdl.matrix_a1.Y + " " + mdl.matrix_a1.Z);
+                transform_lines.Add(mdl.matrix_a2.X + " " + mdl.matrix_a2.Y + " " + mdl.matrix_a2.Z);
+                transform_lines.Add(mdl.matrix_a3.X + " " + mdl.matrix_a3.Y + " " + mdl.matrix_a3.Z);
 
+                // mesh's matrix 3 transform data export
+                System.IO.File.WriteAllLines(debug_data_export_dir + filename + "\\" + filename + "_" + count + ".xyz", transform_lines);
+                count++;
             }
-
-            export_models(@"C:\Users\Mike\Desktop\JSRF\research\mission_dat_models\");
-
+            // mesh data export
+            export_models(debug_data_export_dir);     
         }
 
         public void export_models(string directory)
@@ -83,11 +98,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     obj.Add("f " + (int)(mdl.triangles[t] + 1) + " " + (int)(mdl.triangles[t + 1] + 1) + " "  + (int)(mdl.triangles[t + 2] + 1));
                 }
 
-                System.IO.Directory.CreateDirectory(directory + filename + "\\" + filename);
+                //System.IO.Directory.CreateDirectory(directory + filename + "\\" + filename);
                 System.IO.File.WriteAllLines(directory + filename + "\\" + filename + "_" + i + ".obj", obj);
             }
-
-
         }
 
         public class model
@@ -97,11 +110,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public Int32 _08_count { get; set; }
             public Int32 _12_unk { get; set; }
 
-            public Vector4 v0 { get; set; }
-            public Vector4 v1 { get; set; }
-            public Vector4 v2 { get; set; }
-            public Vector4 v3 { get; set; }
-
+            public Vector3 matrix_a1 { get; set; }
+            public float _unk_float_va1 { get; set; }
+            public Vector3 matrix_a2 { get; set; }
+            public float _unk_float_va2 { get; set; }
+            public Vector3 matrix_a3 { get; set; }
+            public float _unk_float_va3 { get; set; }
+            public Vector3 position { get; set; }
+            public float _unk_float_pos { get; set; }
 
             public Int32 _080_unk { get; set; }
             public Int32 _084_unk { get; set; } // set to 1

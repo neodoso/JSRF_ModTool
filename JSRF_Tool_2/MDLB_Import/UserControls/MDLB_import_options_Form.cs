@@ -224,21 +224,6 @@ namespace JSRF_ModTool.MDLB_Import
 
         private void load_materials()
         {
-            /*
-            // adds material based on the triangle groups (for this model part)
-            // this method is wrong, should take all Main.model.materials_List instead, and write the material id (0 ,1, 2 ,3 etc) in the triangle group
-            if (Main.model.Model_Parts_header_List[20].triangle_groups_List.Count > 0)
-            {
-               List<DataFormats.JSRF.MDLB.triangle_group> tg = Main.model.Model_Parts_header_List[20].triangle_groups_List;
-
-                for (int i = 0; i < tg.Count; i++)
-                {
-                   add_material_inspector(Main.model.materials_List[tg[i].material_ID]);
-                }
-            }*/
-
-
-
             // load materials list from original model (last part)
             for (int i = 0; i < Main.current_model.materials_List.Count; i++)
             {
@@ -248,24 +233,6 @@ namespace JSRF_ModTool.MDLB_Import
             // if model hast materials after triangle groups return;
             if (Main.current_model.materials_List.Count > 0) { return; }
 
-            /*
-
-
-            int vtx_mat_count = 0;
-            // TODO
-            if(Main.model.header.materials_count == 0)
-            {
-                List<DataFormats.JSRF.MDLB.material> mats = Main.model.Model_Parts_header_List[Main.model.Model_Parts_header_List.Count - 1].vtx_buffer_materials;
-
-                foreach (var m in mats)
-                {
-                    vtx_mat_count++;
-                    add_material_inspector(m);
-                }
-
-            }
-
-            */
 
             //int vtx_mat_count = 0;
             // TODO
@@ -313,15 +280,6 @@ namespace JSRF_ModTool.MDLB_Import
                         mat_num = Convert.ToInt32(args[1]);
                     }
                 }
-
-                /*
-                // if material number inferior original model materials count
-                // set material
-                if(mat_num < mat_list_ori.Count)
-                {
-                    mat = mat_list_ori[mat_num];
-                }
-                */
 
                 // if material not found 
                 // add generic material

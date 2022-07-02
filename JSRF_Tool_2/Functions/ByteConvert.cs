@@ -3,8 +3,7 @@
 namespace JSRF_ModTool
 {
    public class ByteReader
-    {
-
+   {
         // Int16 to Byte Array
         public static byte[] ConvertIntToByteArray(Int16 I16)
         {
@@ -34,9 +33,5 @@ namespace JSRF_ModTool
         {
             return BitConverter.ToInt32(b, 0);
         }
-
-
-
-
-    }
+   }
 }

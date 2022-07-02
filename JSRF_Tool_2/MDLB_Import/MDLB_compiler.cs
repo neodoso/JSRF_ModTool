@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JSRF_ModTool.Vector;
 using System.IO;
+using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool
 {
@@ -313,7 +314,7 @@ namespace JSRF_ModTool
             if (Main.current_model.header.materials_count > 0)
             {
                 // add serialized material to list of byte arrays
-                bytes_materials_list.Add(new byte[calc_remainder_padding(bytes_materials_list.Count * 20)]);
+                bytes_materials_list.Add(new byte[Parsing.calc_remainder_padding(bytes_materials_list.Count * 20)]);
                 // padding
                 //bytes_materials_list.Add(new byte[16]);
                 materials_list_bytes = bytes_materials_list.SelectMany(byteArr => byteArr).ToArray();
@@ -378,7 +379,7 @@ namespace JSRF_ModTool
                         materials_buffer_list.Add(materials[0].serialize());
                         materials_buffer_list.Add(BitConverter.GetBytes(SMD_parts[i].triangles_list.Count));
                         byte[] tmp_buff = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
-                        byte[] tmp_padding = new byte[calc_remainder_padding(tmp_buff.Length)];
+                        byte[] tmp_padding = new byte[Parsing.calc_remainder_padding(tmp_buff.Length)];
                         materials_buffer_list.Add(tmp_padding);
                         vtx_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
                     }
@@ -393,7 +394,7 @@ namespace JSRF_ModTool
                         }
 
                         byte[] tmp_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
-                        byte[] padding = new byte[calc_remainder_padding(tmp_materials_list_bytes.Length)];
+                        byte[] padding = new byte[Parsing.calc_remainder_padding(tmp_materials_list_bytes.Length)];
                         materials_buffer_list.Add(padding);
 
                         vtx_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
@@ -515,7 +516,7 @@ namespace JSRF_ModTool
                 vtx_buffer = vtx_buffer_list.SelectMany(byteArr => byteArr).ToArray();
 
                 // calculate add remainder padding for vertex buffer
-                vtx_buffer_list.Add(new byte[calc_remainder_padding(vtx_buffer.Length)]);      
+                vtx_buffer_list.Add(new byte[Parsing.calc_remainder_padding(vtx_buffer.Length)]);      
                 vtx_buffer = vtx_buffer_list.SelectMany(byteArr => byteArr).ToArray();
 
                 #endregion
@@ -550,7 +551,7 @@ namespace JSRF_ModTool
                 tris_buffer = tris_buffer_list.SelectMany(byteArr => byteArr).ToArray();
 
                 // calculate "tris_buffer" remainder padding and add to the "tris_buffer_list" byte arrays list
-                tris_buffer_list.Add(new byte[calc_remainder_padding(tris_buffer.Length)]);
+                tris_buffer_list.Add(new byte[Parsing.calc_remainder_padding(tris_buffer.Length)]);
                 tris_buffer = tris_buffer_list.SelectMany(byteArr => byteArr).ToArray();
 
                 #endregion
@@ -776,25 +777,6 @@ namespace JSRF_ModTool
             return file_bytes.SelectMany(byteArr => byteArr).ToArray();
         }
 
-
-
-        // calculates remainder padding bytes count
-        // example, if triangles list = 72 bytes, we need to add 8 padding bytes so it aligns to a 16 bytes structure
-        // 72/16 = 4.5 // 1- 0.5 = 0.5 //  0.5 * 8
-        private int calc_remainder_padding(int byte_count)
-        {
-            int padding_count = (int)((1 - ((byte_count / 16f) % 1)) * 16);
-
-            // return 0 padding length, because 16 bytes aligns with the structure, its useless padding
-            if (padding_count == 16)
-            {
-                return 0;
-            } 
-            else // return padding length
-            {
-                return padding_count;
-            }
-        }
 
         #region bone/node converstion classes
 

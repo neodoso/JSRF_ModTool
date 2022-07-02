@@ -8,14 +8,12 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-
 using System.Globalization;
-
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 
 using JSRF_ModTool.DataFormats;
-using JSRF_ModTool.DataFormats.JSRF;
+using JSRF_ModTool.DataFormats.JSRF; 
 using JSRF_ModTool.Vector;
 using JSRF_ModTool.Functions;
 
@@ -34,8 +32,7 @@ namespace JSRF_ModTool
 
         FileExplorer fe = new FileExplorer();
 
-
-        /// Dynamic parser: pr.binary_to_struct() method automatically parses binary files and loads them into an instance of a class/struct
+        /// Dynamic parser: pr.binary_to_struct() method automatically parses binary files and loads the data to properties in an instance of a class/struct
         Parsing pr = new Parsing();
 
         private List<DataFormats.JSRF.Material> materials_dat_list = new List<DataFormats.JSRF.Material>();
@@ -70,7 +67,6 @@ namespace JSRF_ModTool
 
         #endregion
 
-
         public Main()
         {
             InitializeComponent();
@@ -100,62 +96,77 @@ namespace JSRF_ModTool
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
 
-            
-            //string game_dir = @"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\";
-            //Level_bin stgBin_00 = new Level_bin(game_dir + "Stage\\stg00_.bin");
+            Stage_Compiler Stage_compiler = new Stage_Compiler();
+            // arguments: export_dir, media_dir, stage_num
+            Stage_compiler.Compile(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_demo\", @"C:\Users\Mike\Desktop\JSRF\game_files\ModOR\", "stg00");
+
+            #region loading methods
 
             /*
-            
-            Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
-            lvl_bin_Compiler.header.Level_Models_count = 28; //level_models_count  // if set to low numbers it will crash on load (maybe this number is also defined and dependent on another file)
-            lvl_bin_Compiler.header.set_stg_dat_count(1);
-            lvl_bin_Compiler.build(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Coll_test\");
-
-            */
-
-
-            
-         //   Level_bin stgBin_10 = new Level_bin(txtb_jsrf_mod_dir.Text + "\\Stage\\stg10_.bin");
-          //  Application.Exit();
-            
-
-            /*
-            Level_Compiler lvl_comp = new Level_Compiler();
-            lvl_comp.compile();
+            Stage_Compiler Stage_compiler = new Stage_Compiler();
+            Stage_compiler.Compile(txtb_vis_mdls_dir.Text + "\\", txtb_coll_mdls_dir.Text + "\\", txtb_grindPaths_path.Text, txtb_jsrf_mod_dir.Text + "\\", txtb_stage_num.Text);
+            System.Media.SystemSounds.Asterisk.Play();
             Application.Exit();
             */
 
+
+            // scans every StageXX_YY.dat to get the number of models/textures/triangles and get the average
+            //Stage_Data_Metrics stg_stats = new Stage_Data_Metrics(@"C:\Users\Mike\Desktop\JSRF\game_files\ModOR\Stage\");
+
+
+            //Mission_dat msn = new Mission_dat(@"C:\Users\Mike\Desktop\JSRF\game_files\ModOR\Mission\mssn0101.dat");
+
+
             /*
-            // load stages_.bin to test collision triangles
-            string[] stage_bins = Directory.GetFiles(@"C:\Users\Mike\Desktop\JSRF\game_files\files\ModOR\Stage\", "*_.bin");
-            for (int i = 0; i < stage_bins.Length; i++)
+            
+            // Export Stage models
+
+            Load_file(txtb_jsrf_mod_dir.Text + "\\" + @"Stage\stg52_00.dat");
+            for (int i = 0; i < trv_file.Nodes[0].Nodes.Count; i++)
             {
-                if (i == 15 || i == 16 || i == 17) { continue; }
-                Level_bin stgBin_00 = new Level_bin(stage_bins[i]);
+                // get item from 'jsrf_file'
+                File_Containers.item item = jsrf_file.get_item(0, i);
+
+                if (item.type == File_Containers.item_data_type.Stage_Model)
+                {
+                    Stage_Model mdl = new Stage_Model(item.data);
+
+                    //if(mdl.vtx_tri_buff_head.is_stripped == 0)
+                    // {
+                    mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\stg52\Stage_Model_" + i + ".obj");
+                    // }
+                }
             }
             */
 
 
+            // load stg00_.bin
+            // DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+
+            //stgBin_00.block_01.export_grind_path_data(@"C:\Users\Mike\Desktop\JSRF\Stg_Demo_Assets\Compiles\test.txt");
 
 
 
-
-            //Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
-            //lvl_bin_Compiler.compile_single_model_vtx_tri_buffers();
-
-            /*
-            Level_bin_Compiler lvl_bin_Compiler = new Level_bin_Compiler();
-            lvl_bin_Compiler.header.Level_Models_count = 28; //level_models_count  // if set to low numbers it will crash on load (maybe this number is also defined and dependent on another file)
-            lvl_bin_Compiler.header.set_stg_dat_count(1);
-            lvl_bin_Compiler.build(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_SkatePark\");
-            */
-
+            #endregion
 
             #region other file loading methods
 
+            /*
+            // loop through indexed file node items
+            for (int i = 0; i < jsrf_file.INDX_root.items.Count; i++)
+            {
+                File_Containers.item item = jsrf_file.INDX_root.items[i];
 
-            // DataFormats.JSRF.Level_Model_Builder lvl_mdl_builder = new DataFormats.JSRF.Level_Model_Builder();
-            // lvl_mdl_builder.build(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
+                // if it's a stage model
+                if(item.type != File_Containers.item_data_type.Stage_Model)
+                {
+                    continue;
+                }
+
+                Stage_Model mdl = new Stage_Model(item.data);
+            }
+            */
+
 
             //DataFormats._3D_Model_Formats.OBJ obj = new DataFormats._3D_Model_Formats.OBJ(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
 
@@ -169,7 +180,7 @@ namespace JSRF_ModTool
 
             //Load_file(game_dir + @"Stage\stg00_00.dat", false);
             /*
-            Level_Model_Compiler lvlmdl_comp = new Level_Model_Compiler();
+            Stage_Model_Compiler lvlmdl_comp = new Stage_Model_Compiler();
             byte[] item_data = lvlmdl_comp.build(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\test.obj");
             if(item_data.Length > 0)
             {
@@ -183,7 +194,7 @@ namespace JSRF_ModTool
             //Load_file(game_dir + @"Stage\stg33_01.dat"); // stg22_01 - 0
             Load_file(game_dir + @"Stage\stg00_00.dat", false);
             File_Containers.item item = jsrf_file.get_item(0, 20); 
-            Level_Model mdl = new Level_Model(item.data);
+            Stage_Model mdl = new Stage_Model(item.data);
             mdl.export_model(@"C:\Users\Mike\Documents\XSI_Projects\JSRF\Models_export\model.obj");
             Application.Exit();
             */
@@ -199,15 +210,15 @@ namespace JSRF_ModTool
                 // get item from 'jsrf_file'
                 File_Containers.item item = jsrf_file.get_item(0, i);
 
-                if(item.type == File_Containers.item_data_type.Level_Model)
+                if(item.type == File_Containers.item_data_type.Stage_Model)
                 {
-                    Level_Model mdl = new Level_Model(item.data);
+                    Stage_Model mdl = new Stage_Model(item.data);
 
                    //if(mdl.vtx_tri_buff_head.is_stripped == 0)
                   // {
-                        mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Level_Model_" + i + ".obj");
+                        mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Stage_Model_" + i + ".obj");
                   // }
-                   
+
                 }
             }
             Application.Exit();
@@ -240,7 +251,7 @@ namespace JSRF_ModTool
 
 
 
-            //   Level_bin lvl = new Level_bin(game_dir + "Stage\\stg10_.bin");
+            //   Stage_bin lvl = new Stage_bin(game_dir + "Stage\\stg10_.bin");
             #endregion
 
 #endif
@@ -274,7 +285,6 @@ namespace JSRF_ModTool
                                     matches.Add(Path.GetFileName(file) + "   MULT:NORM[" + i + "] Item[" + e + "]");
                                 }
                             }
-
                         }
                     }
                 }
@@ -282,7 +292,6 @@ namespace JSRF_ModTool
                 
                 if (jsrf_file.type == File_Containers.container_types.NORM)
                 {
-                   
                     for (int e = 0; e < jsrf_file.NORM_root.items.Count; e++)
                     {
                         if (jsrf_file.NORM_root.items[e].type == File_Containers.item_data_type.Texture)
@@ -294,7 +303,6 @@ namespace JSRF_ModTool
                                 matches.Add(Path.GetFileName(file) + "   MULT: Item[" + e + "]");
                             }
                         }
-
                     }
                 }
 
@@ -302,8 +310,6 @@ namespace JSRF_ModTool
                 {
 
                 }
-
-
             }
         }
 
@@ -324,7 +330,6 @@ namespace JSRF_ModTool
 
             // texture viewer
             pictureBox_texture_editor.Image = null;
-
             rtxtb_textureinfo.Text = "";
 
             // model viewer4
@@ -341,7 +346,6 @@ namespace JSRF_ModTool
             view.Children.Add(model);
             elementHost_model_editor.Child = ModelViewer;
 
-
             lab_filename.Text = "no file loaded";
 
             #endregion
@@ -352,12 +356,11 @@ namespace JSRF_ModTool
         /// <summary>
         /// loads JSRF file into corresponding file structure type and returns the load file as a class object
         /// </summary>
-        private object Load_file(string filepath, bool load_bin_materials = false)
+        public object Load_file(string filepath, bool load_bin_materials = false)
         {
             Reset_vars();
 
             jsrf_file = new File_Containers(filepath);
-
 
             if (filepath.Contains(".dat") && load_bin_materials)
             {
@@ -380,53 +383,24 @@ namespace JSRF_ModTool
 
 
 
-        // load level model
-        private void load_level_model(byte[] data)
+        // load stage model
+        private void load_stage_model(byte[] data)
         {
-            Level_Model mdl = new Level_Model(data);
+            Stage_Model mdl = new Stage_Model(data);
 
-            ///mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Level_Model_0.obj");
+            ///mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Stage_Model_0.obj");
             // setup labels giving model info
             lab_lvlmdl_tex_ids.Text = mdl.texture_ids.Count.ToString();
             lab_lvlmdl_mat_count.Text = mdl.header.x124_mat_count.ToString();
-            lab_lvlmdl_triGroup_count.Text = mdl.header.x132_tri_groups_count.ToString();
+            lab_lvlmdl_triGroup_count.Text = mdl.header.x132_mat_groups_count.ToString();
             lab_lvlmdl_vtx_def_size.Text = mdl.vtx_tri_buff_head.vertex_def_size.ToString();
             lab_lvlmdl_vtx_flag.Text = mdl.vtx_tri_buff_head.vertex_struct.ToString();
             lab_lvlmdl_tri_count.Text = ( mdl.vtx_tri_buff_head.triangle_buffer_size / 3).ToString();
             lab_lvlmdl_tri_stripped.Text = mdl.vtx_tri_buff_head.is_stripped.ToString();
             lab_lvlmdl_drawdist.Text = mdl.header.model_radius.ToString();
-                
 
-            // setup level model for model viewer
+            // setup stage model for model viewer
             MeshData mesh_data = new MeshData();
-            Point3D mesh_center = new Point3D(0, 0, 0);
-            double maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
-
-
-            for (int i = 0; i < mdl.vertices_list.Count; i++)
-            {
-                Vector3 vert = mdl.vertices_list[i];
-                
-                mesh_data.vertices.Add(new Point3D(vert.X, vert.Y, vert.Z));
-
-                #region calculate mesh center and bounds
-
-                // calculate mesh center
-                mesh_center.X += vert.X;
-                mesh_center.Y += vert.Y;
-                mesh_center.Z += vert.Z;
-
-                // get max/min vertice distances
-                if (vert.X > maxX) { maxX = vert.X; }
-                if (vert.Y > maxY) { maxY = vert.Y; }
-                if (vert.Z > maxZ) { maxZ = vert.Z; }
-
-                if (vert.X < minX) { minX = vert.X; }
-                if (vert.Y < minY) { minY = vert.Y; }
-                if (vert.Z < minZ) { minZ = vert.Z; }
-
-                #endregion
-            }
 
             for (int i = 0; i < mdl.triangles_list.Count; i++)
             {
@@ -435,22 +409,23 @@ namespace JSRF_ModTool
                 mesh_data.triangles.Add(mdl.triangles_list[i].c - 1);
             }
 
-
-
             #region calculate mesh center, bounds, average distance
-            // calculate mesh center
-            mesh_center.X = mesh_center.X / mesh_data.vertices.Count;
-            mesh_center.Y = mesh_center.Y / mesh_data.vertices.Count;
-            mesh_center.Z = mesh_center.Z / mesh_data.vertices.Count;
 
-            // mesh_center = new Point3D(BitConverter.ToSingle(data, start_offset), -BitConverter.ToSingle(data, start_offset + 8), BitConverter.ToSingle(data, start_offset + 4));
+            bounds bounds = new bounds();
 
-            mesh_data.mesh_center = mesh_center;
-            mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(minX) + maxX)), Math.Abs((Math.Abs(minY) + maxY)), Math.Abs((Math.Abs(minZ) + maxZ)));// Math.Abs((Math.Abs(minX) + maxX)) + Math.Abs((Math.Abs(minY) + maxY)) + Math.Abs((Math.Abs(minZ) + maxZ));
-            mesh_data.mesh_bounds = new Point3D(minX + maxX, minY + maxY, minZ + maxZ);
+            for (int i = 0; i < mdl.vertices_list.Count; i++)
+            {
+                Vector3 vert = mdl.vertices_list[i];
+
+                mesh_data.vertices.Add(new Point3D(vert.X, vert.Y, vert.Z));
+                bounds.add_point(vert);
+            }
+
+            mesh_data.mesh_center = new Point3D(bounds.center.X, bounds.center.Y, bounds.center.Z);
+            mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(bounds.Xmin) + bounds.Xmax)), Math.Abs((Math.Abs(bounds.Ymin) + bounds.Ymax)), Math.Abs((Math.Abs(bounds.Zmin) + bounds.Zmax)));
+            mesh_data.mesh_bounds = new Point3D(bounds.Xmin + bounds.Xmax, bounds.Ymin + bounds.Xmax, bounds.Zmin + bounds.Zmax);
 
             #endregion
-
 
             #region load full mesh with one material (no clusters nor splititng the mesh)          
 
@@ -463,9 +438,6 @@ namespace JSRF_ModTool
             Load_model_to_HelixModelViewer(meshes, mesh_data.mesh_center, mesh_data.mesh_bounds, mesh_data.avg_distance);
 
             #endregion
-
-
-
         }
 
         #endregion
@@ -789,9 +761,82 @@ namespace JSRF_ModTool
             {
                 string path = openFileDialog1.FileName;
                 txtb_img_editor_path.Text = path;
-
             }
         }
+
+       
+        // bgWorker_StageCompiler: Do Work
+        private void bgWorker_StageCompiler_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+
+       /*
+            //Invoke(new Action(() => { items_loading = true; }));
+
+            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Location = new Point(9, 4); }));
+            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Size = new Size(1222, 733); }));
+            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Visible = true; ; }));
+
+            Stage_Compiler lvl_compiler = new Stage_Compiler();
+            lvl_compiler.compile();
+            */
+
+            
+        }
+        // bgWorker_StageCompiler: Progress
+        private void bgWorker_StageCompiler_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+
+        }
+        // bgWorker_StageCompiler: Completed
+        private void bgWorker_StageCompiler_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            label_compiling_stage.Location = new Point(130,276);
+
+            System.Media.SystemSounds.Beep.Play();
+            string message = "Stage compilation complete";
+            string title = "JSRF ModTool";
+            label_compiling_stage.Text = "Stage Compilation Complete";
+
+            //MessageBox.Show(message, title);
+            Application.Exit();
+
+        }
+
+
+
+        private void numupDown_tex_depth_ValueChanged(object sender, EventArgs e)
+        {
+            Load_block_Texture(current_item_data, false, false);
+        }
+
+        private void numupDown_tex_bitCount_ValueChanged(object sender, EventArgs e)
+        {
+            Load_block_Texture(current_item_data, false, false);
+        }
+
+        private void Main_Shown(object sender, EventArgs e)
+        {
+            //bgWorker_StageCompiler.RunWorkerAsync();
+        }
+
+        private void btn_sel_vis_mdl_dir_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string path = folderBrowserDialog1.SelectedPath;
+                txtb_stage_source_dir.Text = path;
+            }
+        }
+
+
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Stage_Compiler Stage_compiler = new Stage_Compiler();
+            Stage_compiler.Compile(Path.GetFullPath(txtb_stage_source_dir.Text + "\\"), Path.GetFullPath(txtb_jsrf_mod_dir.Text + "\\"), txtb_stage_num.Text);
+            System.Media.SystemSounds.Asterisk.Play();
+        }
+
 
         #endregion
 
@@ -997,17 +1042,14 @@ namespace JSRF_ModTool
                         if (item.data.Length == 0)
                         {
                             nChild = new TreeNode(String.Format("empty"));
-                            // do not add empty item if option is unchecked
                         }
                         else
                         {
                             all_child_empty = false;
                         }
 
-                        //if(item.data.Length > 0)
                         // add item
                         childNodes.Add(nChild);
-                        //nNORM.Nodes.Add(nChild);
                     }
 
                     // if at least one of the child nodes is not empty add items
@@ -1015,13 +1057,6 @@ namespace JSRF_ModTool
                     {
                         nNORM.Nodes.AddRange(childNodes.ToArray());
                     }
-                    else // if all child nodes have no data
-                    {
-                        ///nMULT.Nodes[m] = new TreeNode("NORM" + " [" + (file.items.items[m].items.Count) + "] Empty");
-                    }
-
-
-
                 }
 
                 root.Expand();
@@ -1032,10 +1067,6 @@ namespace JSRF_ModTool
             #region NORM
             if (file.type == File_Containers.container_types.NORM)
             {
-                // cast object as MULT class
-                //JSRF_Container.MULT_list MULT = (JSRF_Container.MULT_list)file;
-
-
                 // Main node
                 TreeNode root = new TreeNode(file.type.ToString() + " [" + (file.NORM_root.items.Count) + "]");
                 trv_file.Nodes.Add(root);
@@ -1068,13 +1099,10 @@ namespace JSRF_ModTool
                     if (item.data.Length == 0)
                     {
                         nChild = new TreeNode(String.Format("empty"));
-                        // do not add empty item if option is unchecked
                     }
 
-                    //if(item.data.Length > 0)
                     // add item
                     childNodes.Add(nChild);
-                    //nNORM.Nodes.Add(nChild);
                 }
 
                 root.Nodes.AddRange(childNodes.ToArray());
@@ -1085,7 +1113,6 @@ namespace JSRF_ModTool
 
             #region Indexed
 
-           
             if (file.type == File_Containers.container_types.indexed)
             {
                 TreeNode root = new TreeNode(file.type.ToString() + " [" + (file.INDX_root.items.Count) + "]");
@@ -1104,7 +1131,6 @@ namespace JSRF_ModTool
                     if (item.data.Length == 0)
                     {
                         nChild = new TreeNode(String.Format("empty"));
-                        // do not add empty item if option is unchecked
                     }
                    
                     childNodes.Add(nChild);
@@ -1115,8 +1141,6 @@ namespace JSRF_ModTool
             }
             
             #endregion
-
-
         }
 
         // when node is selected
@@ -1178,9 +1202,9 @@ namespace JSRF_ModTool
                     tabControl1.SelectedIndex = 0;
                     break;
 
-                // Level MDLB
-                case File_Containers.item_data_type.Level_MDLB:
-                    // MDLB in Level (Stg00_00.dat) have a header starting with extra data
+                // Stage MDLB
+                case File_Containers.item_data_type.Stage_MDLB:
+                    // MDLB in Stage (Stg00_00.dat) have a header starting with extra data
                     // int32 texture ids count -- and the list of int32s for each id
                     Int32 texture_ids_count = BitConverter.ToInt32(current_item_data, 0);
                     // remove texture_ids_count and list of texture ids from array
@@ -1193,9 +1217,9 @@ namespace JSRF_ModTool
                     tabControl1.SelectedIndex = 0;
                     break;
 
-                // Level Model
-                case File_Containers.item_data_type.Level_Model:
-                    load_level_model(current_item_data);
+                // Stage Model
+                case File_Containers.item_data_type.Stage_Model:
+                    load_stage_model(current_item_data);
                     elementHost_model_editor.Enabled = true;
                     tabControl1.SelectedIndex = 0;
                     break;
@@ -1337,8 +1361,7 @@ namespace JSRF_ModTool
 
             #region GET VERTEX DATA
 
-            Point3D mesh_center = new Point3D(0, 0, 0);
-            double maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
+            bounds bounds = new bounds();
 
             #region determine vertex data order
 
@@ -1424,24 +1447,9 @@ namespace JSRF_ModTool
                 // add vert
                 mesh_data.vertices.Add(vert);
 
-                #region calculate mesh center and bounds
 
-                // calculate mesh center
-                mesh_center.X += vert.X;
-                mesh_center.Y += vert.Y;
-                mesh_center.Z += vert.Z;
-
-                // get max/min vertice distances
-                if (vert.X > maxX) { maxX = vert.X; }
-                if (vert.Y > maxY) { maxY = vert.Y; }
-                if (vert.Z > maxZ) { maxZ = vert.Z; }
-
-                if (vert.X < minX) { minX = vert.X; }
-                if (vert.Y < minY) { minY = vert.Y; }
-                if (vert.Z < minZ) { minZ = vert.Z; }
-
-                #endregion
-
+                // add point to bounds to calculate the mesh'es bounding box
+                bounds.add_point(new Vector3(vert.X.ToString(), vert.Y.ToString(), vert.Z.ToString()));
 
                 // Normals
                 if (norm_offset != -1)
@@ -1454,26 +1462,14 @@ namespace JSRF_ModTool
                 {
                     double u = BitConverter.ToSingle(data, i + uv_offset);
                     double v = BitConverter.ToSingle(data, i + uv_offset + 4);
-                   // Single u = (-1 * (BitConverter.ToSingle(data, i + uv_offset + 4))) + 1;
 
                     mesh_data.UVs.Add(new System.Windows.Point(u, v));
                 }
             }
 
-
-            #region calculate mesh center, bounds, average distance
-            // calculate mesh center
-            mesh_center.X = mesh_center.X / mesh_data.vertices.Count;
-            mesh_center.Y = mesh_center.Y / mesh_data.vertices.Count;
-            mesh_center.Z = mesh_center.Z / mesh_data.vertices.Count;
-
-            // mesh_center = new Point3D(BitConverter.ToSingle(data, start_offset), -BitConverter.ToSingle(data, start_offset + 8), BitConverter.ToSingle(data, start_offset + 4));
-
-            mesh_data.mesh_center = mesh_center;
-            mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(minX) + maxX)), Math.Abs((Math.Abs(minY) + maxY)), Math.Abs((Math.Abs(minZ) + maxZ)));// Math.Abs((Math.Abs(minX) + maxX)) + Math.Abs((Math.Abs(minY) + maxY)) + Math.Abs((Math.Abs(minZ) + maxZ));
-            mesh_data.mesh_bounds = new Point3D(minX + maxX, minY + maxY, minZ + maxZ);
-
-            #endregion
+            mesh_data.mesh_center = new Point3D(bounds.center.X, bounds.center.Y, bounds.center.Z );
+            mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(bounds.Xmin) + bounds.Xmax)), Math.Abs((Math.Abs(bounds.Ymin) + bounds.Ymax)), Math.Abs((Math.Abs(bounds.Zmin) + bounds.Zmax)));
+            mesh_data.mesh_bounds = new Point3D(bounds.Xmin + bounds.Xmax, bounds.Ymin + bounds.Xmax, bounds.Zmin + bounds.Zmax);
 
             #endregion
 
@@ -3563,14 +3559,6 @@ namespace JSRF_ModTool
 
         #endregion
 
-        private void numupDown_tex_depth_ValueChanged(object sender, EventArgs e)
-        {
-            Load_block_Texture(current_item_data, false, false);
-        }
 
-        private void numupDown_tex_bitCount_ValueChanged(object sender, EventArgs e)
-        {
-            Load_block_Texture(current_item_data, false, false);
-        }
     }
 }

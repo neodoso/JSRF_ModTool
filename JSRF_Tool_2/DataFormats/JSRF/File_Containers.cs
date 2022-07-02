@@ -28,7 +28,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         public NORM NORM_root { get; set; }
         public INDEXED INDX_root { get; set; }
 
-        public bool root_node_is_NORM { get; }
+       // public bool root_node_is_NORM { get; }
 
         #endregion
 
@@ -50,8 +50,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
             invalid,
             unkown,
             MDLB,
-            Level_MDLB,
-            Level_Model,
+            Stage_MDLB,
+            Stage_Model,
             Material,
             Texture,
             NCAM,
@@ -699,7 +699,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             if (buff == null) { return item_data_type.invalid; }
             Int32 size = buff.Length;
-            if (size <= 0) { return item_data_type.unkown; }
+            if (size == 0) { return item_data_type.empty; }
+            if (size < 0) { return item_data_type.invalid; }
             if ((size < 17)) { return item_data_type.Material; }
             // if (start >= buff.Length) { return "invalid-over buffer"; }
 
@@ -718,28 +719,31 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if file is indexed, the texture headers position are shifted!
             if (Main.jsrf_file.GetType() == typeof(Indexed_head))
             {
-                // todo
-                // get type of data for Indexed file structures (level model, textures in level files)
+                // TODO
+                // get type of data for Indexed file structures (stage model, textures in stage files)
             }
             */
 
-            if (head == 1179011410) // sound
+            // sound
+            if (head == 1179011410) 
             {
                 return item_data_type.Sound;
             }
-
-            else if ((head == 1112294477) || (head_24 == 1112294477))  // MDLB
+            // MDLB
+            else if ((head == 1112294477) || (head_24 == 1112294477))
             {
                 return item_data_type.MDLB;
             }
 
 
             // hacky! :/ 
-            // texture, if head > that, its probably a texture id at offset 0 ("head")
+            // not sure if there's a proper way to know which type of data is contained/defined by the header
+            // so we check for specific values on different offsets of what we expect to be the header of a certain data type
+
+            // texture, if header > that, it's probably a texture ID at offset 0 ("head")
             // we also check "head20" (value at offset 20) which is the offset/value defining texture resolution for textures
-            // check if  multiple of 8 (for textures resolution 8 16 32 64 128 256 512 1024 ...)
-            // else if ((head > 100000000) || (head_8 > 100000000) && ((head_20 % 8) == 0) && (size > 32))
-            // if resolution value is multiple of 8
+            // check if the values of "head_20" or "head_28" a power of 2 (since the texture header gives the textures resolution at that offset
+            // and texture resolutions are a power of two,, such as 8 16 32 64 128 256 512 1024 ...)
             else if ((head != 0) && (head_4 != 1) && texture_resolutions.Contains(head_20) || (texture_resolutions.Contains(head_28)))
             {
                 // make sure DXT compression type is within range
@@ -747,15 +751,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 return item_data_type.Texture;
             }
 
-            // generally material = 16 bytes data block
+            // generally a material = 16 bytes of data(but it can be larger if it contains multiple IDs)
             else if ((size < 256) & (head < 100) & (head > 0)) // Material
             {
                 return item_data_type.Material;
             }
-
+            // Stage model
             else if ((head == 0) && (head_4 == 1)) // not MDLB
             {
-                return item_data_type.Level_Model;
+                return item_data_type.Stage_Model;
             }
 
             // else
@@ -950,7 +954,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 // TODO support MDLB
 
-                // Level model
+                // Stage model
                 if (item.indexed_item.block_type == 1)
                 {    
                     item_data_list.Add(BitConverter.GetBytes((Int32)1)); // Int32 : item_type // item.indexed_item.type
@@ -980,8 +984,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     item_data_list.Add(BitConverter.GetBytes((Int32)0)); // Int32 : item_type
                     item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
                 }
-
-                // Texture: 4 byte header defining block_size
+                // only the first texture file has an 8 byte header, the following textures data blocks
+                // only have 4 bytes as a header, which define the texture data block size (at least for Stage files such as StgXX_YY.dat)
+                // Texture: 4 bytes header defining the texture block_size
                 else if (item.indexed_item.block_type == 2)
                 {
                     item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
@@ -1013,8 +1018,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 // TODO support MDLB
 
-                // Level model
-                if (item.type == File_Containers.item_data_type.Level_Model)
+                // stage model
+                if (item.type == File_Containers.item_data_type.Stage_Model)
                 {
                     item_data_list.Add(BitConverter.GetBytes((Int32)1)); // Int32 : item_type // item.indexed_item.type
                     item_data_list.Add(BitConverter.GetBytes((Int32)c)); // Int32 : item ID

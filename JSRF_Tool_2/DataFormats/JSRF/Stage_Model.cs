@@ -5,7 +5,7 @@ using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
-    public class Level_Model
+    public class Stage_Model
     {
         //MDLBL_header header;
         //header_second header_sec;
@@ -15,7 +15,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
         public List<material_group> materials_groups;
         public vertex_triangles_buffers_header vtx_tri_buff_head;
 
-        List<material_group_BBox> mat_group_BBoxes;
+        List<material_group_boundary> mat_group_boundary_list;
 
         public List<Vector3> vertices_list;
         public List<Vector3> normals_list;
@@ -23,14 +23,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
         public List<triangle> triangles_list;
 
         /// <summary>
-        /// Load level model
-        /// This is a work in progress, the level model headers can vary in size
-        // TODO: figure out why there sometimes is +12 bytes of data before triangle_group list
-        // TODO: find if there is a flag in the headers for when there is +12 bytes (couldnt find any flag so far)
+        /// Load Stage model
+        /// This is a work in progress, the Stage model headers can vary in size
+        /// TODO: figure out why there sometimes is +12 bytes of data before triangle_group list
+        /// TODO: find if there is a flag in the headers for when there is +12 bytes (couldnt find any flag so far)
         /// TODO: it seems the vertex buffer starts with series of vector3 and the real mesh points start a bit after
         /// </summary>
         /// <param name="data">Input data</param>
-        public Level_Model(byte[] _data)
+        public Stage_Model(byte[] _data)
         {
             Int32 texture_ids_count = BitConverter.ToInt32(_data, 0);
             Int32 tex_ids_length = texture_ids_count * 4;
@@ -68,7 +68,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             offset += header.x124_mat_count * 20;
 
             // if not materials, there's still 20 bytes of padding to skip
-            // see stg00_00 : level model number 23
+            // see stg00_00 : Stage model number 23
             if(header.x124_mat_count == 0 )
             {
                 offset += 20;
@@ -84,7 +84,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             /////////////////// TRIANGLE GROUPS  //////////////////////////////////////////////////////////////////////////////////////////////
             // get each header.x132_tri_groups_count get triangle group
             // 1 triangle group = 32 bytes
-            for (int i = 0; i < header.x132_tri_groups_count * 32; i += 32)
+            for (int i = 0; i < header.x132_mat_groups_count * 32; i += 32)
             {
                 materials_groups.Add((material_group)(Parsing.binary_to_struct(data, offset + i, typeof(material_group))));
 
@@ -93,16 +93,16 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             // set offset after triangles groups
-            offset += header.x132_tri_groups_count * 32;
+            offset += header.x132_mat_groups_count * 32;
 
 
             /////////////////// MATERIAL GROUP BOUNDING BOXES  //////////////////////////////////////////////////////////////////////////////////////////////
-            mat_group_BBoxes = new List<material_group_BBox>();
-            int mat_group_BBoxes_end = offset + (header.x132_tri_groups_count * 16);
+            mat_group_boundary_list = new List<material_group_boundary>();
+            int mat_group_BBoxes_end = offset + (header.x132_mat_groups_count * 16);
             // get each material group bouding box
             for (int i = offset; i < mat_group_BBoxes_end; i += 16)
             {
-                mat_group_BBoxes.Add((material_group_BBox)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_BBox))));
+                mat_group_boundary_list.Add((material_group_boundary)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_boundary))));
             }
 
             offset = mat_group_BBoxes_end;
@@ -162,6 +162,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 tri_indices.Add((tri_indx[i]).ToString() + " " + (tri_indx[i +1]).ToString() + " " + (tri_indx[i+2]).ToString());
             }
 
+            // debug data export
             System.IO.File.Delete(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stripped_tris.txt");
             System.IO.File.AppendAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stripped_tris.txt", tri_indices);
             */
@@ -289,10 +290,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 #endregion
             }
 
+            // debug data export
             //System.IO.File.Delete(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt");
             //System.IO.File.AppendAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt", tris_list);
-
-
         }
 
         public void export_model(string filepath)
@@ -330,13 +330,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 material_group grp = this.materials_groups[g];
                 tri_end += grp.triangle_count;
 
-                mat_group_indices.Add(Tuple.Create(tri_end, texture_ids[grp.material_ID]));
+                mat_group_indices.Add(Tuple.Create(tri_end, texture_ids[grp.material_num]));
 
                 tri_group_offset += grp.triangle_count;
 
                 // write mtl material
-                mtl_lines.Add("newmtl mat_" + texture_ids[grp.material_ID]);
-                mtl_lines.Add("map_Kd C:/Users/Mike/Desktop/JSRF/research/mdls_stg/export/textures/" + texture_ids[grp.material_ID] + ".bmp");
+                mtl_lines.Add("newmtl mat_" + texture_ids[grp.material_num]);
+                mtl_lines.Add("map_Kd C:/Users/Mike/Desktop/JSRF/research/mdls_stg/stg51/textures/" + texture_ids[grp.material_num] + ".bmp");
                 mtl_lines.Add("Ks 0 0 0");
                 mtl_lines.Add("");
             }
@@ -402,11 +402,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
 
-            // export level model
-            System.IO.File.Delete(filepath);
+            // export Stage model
+            //System.IO.File.Delete(filepath);
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
             System.IO.File.AppendAllLines(filepath, obj_lines);
 
-            System.IO.File.Delete(filepath.Replace(".obj", ".mtl"));
+            //System.IO.File.Delete(filepath.Replace(".obj", ".mtl"));
             System.IO.File.AppendAllLines(filepath.Replace(".obj", ".mtl"), mtl_lines);
 
         }
@@ -469,18 +470,18 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             public Int32 x124_mat_count { get; set; }
             public Int32 x128_unk { get; set; }
-            public Int32 x132_tri_groups_count { get; set; }
+            public Int32 x132_mat_groups_count { get; set; }
 
             public Int32 x136_unk { get; set; }
             public Int32 x140_unk { get; set; }
         }
 
         /// <summary>
-        ///  vertex buffer header
+        ///  vertex buffer header (28 bytes)
         /// </summary>
         public class vertex_triangles_buffers_header
         {
-            public Int32 last_MatGroupBbox_offset { get; set; } // gives position to last material_group_BBox
+            public Int32 last_MatGroupBbox_offset { get; set; } // gives position to last material_group_BBox (Material_group_boundary)
             public Int32 vertex_count { get; set; } 
             public Int32 vertex_struct { get; set; }
             public Int32 vertex_def_size { get; set; }
@@ -498,7 +499,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public Int32 triangle_count { get; set; } //
             public Int32 triangle_start_index { get; set; } // divide by 9
             public Int32 unk_08 { get; set; } // increases by +16 for each triangle group // first tri group start value seems th be the number of bytes from the start position to end of triangles group, minus -16
-            public Int32 material_ID { get; set; } // tri count
+            public Int32 material_num { get; set; } // tri count
 
             public Int32 unk_16 { get; set; } // divide this by 3 
             public Int32 unk_20 { get; set; } // 
@@ -507,9 +508,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// 
+        /// the material group has a point position for it's center(from the mesh vertices that are part of the material group)
+        /// as well as a radius which is used to define the drawing distance for the material group, when the player/camera position
+        /// is beyond the material's group radius distance, the material group stops rendering
+        /// TODO : re-test the radius and position parameters ingame, afaik the mesh's material group stops rendering if we around beyond the mat group radius
+        /// also todo: if that's how this works, inform users of the JSRF ModTool that if they're going to create Stages/stages, it is recommended that the parts of meshes using the same material
+        /// should preferabily be grouped close together (distance/space-wise), otherwise the calculated radius will be larger which means the material group
+        /// will be more likely to be constantly rendering, and if most of the materials groups have a large radius then nearly everything will be constantly rendering, it will add up and be costly on graphics performance
         /// </summary>
-        private class material_group_BBox
+        private class material_group_boundary
         {
             Vector3 position { get; set; }
             float radius { get; set; }

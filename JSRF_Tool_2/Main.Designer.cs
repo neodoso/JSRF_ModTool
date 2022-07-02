@@ -55,6 +55,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.panel_adv_mdl_nfo = new System.Windows.Forms.Panel();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lab_mdl_DrawDist = new System.Windows.Forms.Label();
             this.lab_mdl_mat_vtx = new System.Windows.Forms.Label();
             this.lab_mdl_mat_typex = new System.Windows.Forms.Label();
             this.lab_vtx_cnt = new System.Windows.Forms.Label();
@@ -89,6 +91,14 @@
             this.panel_mat_editor = new System.Windows.Forms.Panel();
             this.rtxtb_material = new System.Windows.Forms.RichTextBox();
             this.btn_save_mat_data = new System.Windows.Forms.Button();
+            this.tab_StageComp = new System.Windows.Forms.TabPage();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.btn_compile_stage = new System.Windows.Forms.Button();
+            this.label26 = new System.Windows.Forms.Label();
+            this.txtb_stage_num = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.txtb_stage_source_dir = new System.Windows.Forms.TextBox();
+            this.btn_sel_vis_mdl_dir = new System.Windows.Forms.Button();
             this.tab_Settings = new System.Windows.Forms.TabPage();
             this.cb_show_adv_mdlb_nfo = new System.Windows.Forms.CheckBox();
             this.panel5 = new System.Windows.Forms.Panel();
@@ -132,8 +142,9 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
-            this.label16 = new System.Windows.Forms.Label();
-            this.lab_mdl_DrawDist = new System.Windows.Forms.Label();
+            this.bgWorker_StageCompiler = new System.ComponentModel.BackgroundWorker();
+            this.panel_compiling_stage = new System.Windows.Forms.Panel();
+            this.label_compiling_stage = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
@@ -146,12 +157,15 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).BeginInit();
             this.tab_mat_editor.SuspendLayout();
             this.panel_mat_editor.SuspendLayout();
+            this.tab_StageComp.SuspendLayout();
+            this.panel6.SuspendLayout();
             this.tab_Settings.SuspendLayout();
             this.panel5.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel8.SuspendLayout();
             this.panel4.SuspendLayout();
+            this.panel_compiling_stage.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -198,6 +212,7 @@
             this.tabControl1.Controls.Add(this.tab_ModelViewer);
             this.tabControl1.Controls.Add(this.tab_TextureViewer);
             this.tabControl1.Controls.Add(this.tab_mat_editor);
+            this.tabControl1.Controls.Add(this.tab_StageComp);
             this.tabControl1.Controls.Add(this.tab_Settings);
             this.tabControl1.Location = new System.Drawing.Point(479, 25);
             this.tabControl1.Name = "tabControl1";
@@ -457,6 +472,28 @@
             this.panel_adv_mdl_nfo.Name = "panel_adv_mdl_nfo";
             this.panel_adv_mdl_nfo.Size = new System.Drawing.Size(120, 136);
             this.panel_adv_mdl_nfo.TabIndex = 11;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.label16.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.label16.Location = new System.Drawing.Point(5, 117);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(75, 12);
+            this.label16.TabIndex = 14;
+            this.label16.Text = "Draw distance:";
+            // 
+            // lab_mdl_DrawDist
+            // 
+            this.lab_mdl_DrawDist.AutoSize = true;
+            this.lab_mdl_DrawDist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
+            this.lab_mdl_DrawDist.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lab_mdl_DrawDist.Location = new System.Drawing.Point(88, 117);
+            this.lab_mdl_DrawDist.Name = "lab_mdl_DrawDist";
+            this.lab_mdl_DrawDist.Size = new System.Drawing.Size(10, 12);
+            this.lab_mdl_DrawDist.TabIndex = 15;
+            this.lab_mdl_DrawDist.Text = "0";
             // 
             // lab_mdl_mat_vtx
             // 
@@ -830,6 +867,89 @@
             this.btn_save_mat_data.Text = "Save material data";
             this.btn_save_mat_data.UseVisualStyleBackColor = true;
             this.btn_save_mat_data.Click += new System.EventHandler(this.btn_save_mat_data_Click_1);
+            // 
+            // tab_StageComp
+            // 
+            this.tab_StageComp.Controls.Add(this.panel6);
+            this.tab_StageComp.Location = new System.Drawing.Point(4, 22);
+            this.tab_StageComp.Name = "tab_StageComp";
+            this.tab_StageComp.Size = new System.Drawing.Size(742, 686);
+            this.tab_StageComp.TabIndex = 5;
+            this.tab_StageComp.Text = "Stage Compiler";
+            this.tab_StageComp.UseVisualStyleBackColor = true;
+            // 
+            // panel6
+            // 
+            this.panel6.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel6.Controls.Add(this.btn_compile_stage);
+            this.panel6.Controls.Add(this.label26);
+            this.panel6.Controls.Add(this.txtb_stage_num);
+            this.panel6.Controls.Add(this.label23);
+            this.panel6.Controls.Add(this.txtb_stage_source_dir);
+            this.panel6.Controls.Add(this.btn_sel_vis_mdl_dir);
+            this.panel6.Location = new System.Drawing.Point(-1, 0);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(747, 690);
+            this.panel6.TabIndex = 0;
+            // 
+            // btn_compile_stage
+            // 
+            this.btn_compile_stage.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_compile_stage.Location = new System.Drawing.Point(18, 599);
+            this.btn_compile_stage.Name = "btn_compile_stage";
+            this.btn_compile_stage.Size = new System.Drawing.Size(716, 75);
+            this.btn_compile_stage.TabIndex = 11;
+            this.btn_compile_stage.Text = "Compile Stage";
+            this.btn_compile_stage.UseVisualStyleBackColor = true;
+            this.btn_compile_stage.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Location = new System.Drawing.Point(321, 216);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(106, 18);
+            this.label26.TabIndex = 10;
+            this.label26.Text = "Compile as:";
+            // 
+            // txtb_stage_num
+            // 
+            this.txtb_stage_num.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtb_stage_num.Location = new System.Drawing.Point(18, 239);
+            this.txtb_stage_num.Name = "txtb_stage_num";
+            this.txtb_stage_num.Size = new System.Drawing.Size(716, 26);
+            this.txtb_stage_num.TabIndex = 9;
+            this.txtb_stage_num.Text = "stg00";
+            this.txtb_stage_num.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtb_stage_num.TextChanged += new System.EventHandler(this.Settings_save);
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(18, 16);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(346, 13);
+            this.label23.TabIndex = 2;
+            this.label23.Text = "Source files folder (where stage models and grind paths will be exported)";
+            // 
+            // txtb_stage_source_dir
+            // 
+            this.txtb_stage_source_dir.Location = new System.Drawing.Point(18, 35);
+            this.txtb_stage_source_dir.Name = "txtb_stage_source_dir";
+            this.txtb_stage_source_dir.Size = new System.Drawing.Size(638, 20);
+            this.txtb_stage_source_dir.TabIndex = 1;
+            this.txtb_stage_source_dir.TextChanged += new System.EventHandler(this.Settings_save);
+            // 
+            // btn_sel_vis_mdl_dir
+            // 
+            this.btn_sel_vis_mdl_dir.Location = new System.Drawing.Point(662, 33);
+            this.btn_sel_vis_mdl_dir.Name = "btn_sel_vis_mdl_dir";
+            this.btn_sel_vis_mdl_dir.Size = new System.Drawing.Size(72, 23);
+            this.btn_sel_vis_mdl_dir.TabIndex = 0;
+            this.btn_sel_vis_mdl_dir.Text = "Select dir";
+            this.btn_sel_vis_mdl_dir.UseVisualStyleBackColor = true;
+            this.btn_sel_vis_mdl_dir.Click += new System.EventHandler(this.btn_sel_vis_mdl_dir_Click);
             // 
             // tab_Settings
             // 
@@ -1285,27 +1405,34 @@
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
             // 
-            // label16
+            // bgWorker_StageCompiler
             // 
-            this.label16.AutoSize = true;
-            this.label16.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
-            this.label16.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
-            this.label16.Location = new System.Drawing.Point(5, 117);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(75, 12);
-            this.label16.TabIndex = 14;
-            this.label16.Text = "Draw distance:";
+            this.bgWorker_StageCompiler.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_StageCompiler_DoWork);
+            this.bgWorker_StageCompiler.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_StageCompiler_ProgressChanged);
+            this.bgWorker_StageCompiler.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgWorker_StageCompiler_RunWorkerCompleted);
             // 
-            // lab_mdl_DrawDist
+            // panel_compiling_stage
             // 
-            this.lab_mdl_DrawDist.AutoSize = true;
-            this.lab_mdl_DrawDist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(229)))), ((int)(((byte)(229)))));
-            this.lab_mdl_DrawDist.Font = new System.Drawing.Font("Consolas", 7.5F, System.Drawing.FontStyle.Bold);
-            this.lab_mdl_DrawDist.Location = new System.Drawing.Point(88, 117);
-            this.lab_mdl_DrawDist.Name = "lab_mdl_DrawDist";
-            this.lab_mdl_DrawDist.Size = new System.Drawing.Size(10, 12);
-            this.lab_mdl_DrawDist.TabIndex = 15;
-            this.lab_mdl_DrawDist.Text = "0";
+            this.panel_compiling_stage.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel_compiling_stage.Controls.Add(this.label_compiling_stage);
+            this.panel_compiling_stage.Location = new System.Drawing.Point(105, 6);
+            this.panel_compiling_stage.Name = "panel_compiling_stage";
+            this.panel_compiling_stage.Size = new System.Drawing.Size(36, 13);
+            this.panel_compiling_stage.TabIndex = 33;
+            this.panel_compiling_stage.Visible = false;
+            // 
+            // label_compiling_stage
+            // 
+            this.label_compiling_stage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_compiling_stage.AutoSize = true;
+            this.label_compiling_stage.Font = new System.Drawing.Font("Bebas Neue", 71.99999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_compiling_stage.Location = new System.Drawing.Point(296, 280);
+            this.label_compiling_stage.Name = "label_compiling_stage";
+            this.label_compiling_stage.Size = new System.Drawing.Size(600, 103);
+            this.label_compiling_stage.TabIndex = 0;
+            this.label_compiling_stage.Text = "Compiling Stage...";
             // 
             // Main
             // 
@@ -1313,6 +1440,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1231, 739);
+            this.Controls.Add(this.panel_compiling_stage);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.btn_remove_block);
             this.Controls.Add(this.btn_insert_block);
@@ -1332,8 +1460,9 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Main";
-            this.Text = "JSRF ModTool 2.6";
+            this.Text = "JSRF ModTool 2.8";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.Main_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
@@ -1351,6 +1480,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).EndInit();
             this.tab_mat_editor.ResumeLayout(false);
             this.panel_mat_editor.ResumeLayout(false);
+            this.tab_StageComp.ResumeLayout(false);
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
             this.tab_Settings.ResumeLayout(false);
             this.tab_Settings.PerformLayout();
             this.panel5.ResumeLayout(false);
@@ -1363,6 +1495,8 @@
             this.panel8.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            this.panel_compiling_stage.ResumeLayout(false);
+            this.panel_compiling_stage.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1477,6 +1611,17 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label lab_mdl_DrawDist;
+        private System.ComponentModel.BackgroundWorker bgWorker_StageCompiler;
+        private System.Windows.Forms.Panel panel_compiling_stage;
+        private System.Windows.Forms.Label label_compiling_stage;
+        private System.Windows.Forms.TabPage tab_StageComp;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Button btn_compile_stage;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.TextBox txtb_stage_num;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox txtb_stage_source_dir;
+        private System.Windows.Forms.Button btn_sel_vis_mdl_dir;
     }
 }
 

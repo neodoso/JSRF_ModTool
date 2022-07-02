@@ -33,6 +33,7 @@ namespace JSRF_ModTool
             this.ConvertModel();
         }
 
+       
         /// <summary>
         /// Import SMD model
         /// </summary>
@@ -60,6 +61,7 @@ namespace JSRF_ModTool
                 }
 
                 file.Close();
+                file.Dispose();
 
                 for (int i = 0; i < lines.Count; i++)
                 {
@@ -85,7 +87,7 @@ namespace JSRF_ModTool
                             // TODO throw an exception
                             if (args.Length < 3)
                             {
-                                System.Windows.MessageBox.Show("SMD Importer Error: unexpected number of node definition arguments.");
+                                System.Windows.MessageBox.Show("SMD Importer Error: unexpected number of node definition arguments." + "\n\n" + Path.GetFileName(filepath));
                                 return;
                             }
                             nodes.Add(new node(Convert.ToInt32(args[0]), Convert.ToInt32(args[2]), args[1].Replace("\"", string.Empty)));
@@ -119,7 +121,7 @@ namespace JSRF_ModTool
                                 // TODO throw an exception
                                 if (args.Length < 6)
                                 {
-                                    System.Windows.MessageBox.Show("SMD Importer Error: unexpected number of skeleton definition arguments.");
+                                    System.Windows.MessageBox.Show("SMD Importer Error: unexpected number of skeleton definition arguments." + "\n\n" + Path.GetFileName(filepath));
                                     return;
                                 }
 
@@ -130,7 +132,7 @@ namespace JSRF_ModTool
                         }
                         else
                         {
-                            System.Windows.MessageBox.Show("SMD Importer Error: could not find skeleton definition for 'time 0'.");
+                            System.Windows.MessageBox.Show("SMD Importer Error: could not find skeleton definition for 'time 0'." + "\n\n" + Path.GetFileName(filepath));
                         }
 
                     }
@@ -200,7 +202,7 @@ namespace JSRF_ModTool
         }
 
 
-
+        // TODO see if this can be optimized for faster processing
         /// <summary>
         /// converts SMD Triangles to generic vertex-index based triangle list
         /// </summary>
@@ -213,6 +215,7 @@ namespace JSRF_ModTool
 
             int tri_counter = 0;
 
+            
             //for each trianle in  SMD_triangles
             for (int t = 0; t < SMD_triangles.Count; t++)
             {
@@ -295,22 +298,6 @@ namespace JSRF_ModTool
         }
 
 
-
-
-        public class material_group
-        {
-            public UInt32 triangle_start_index { get; set; }
-            public UInt32 triangle_count { get; set; }
-            public String material_name { get; set; }
-
-            public material_group(UInt32 _tri_start_index, UInt32 _triangle_count, string _mat_name)
-            {
-                this.triangle_start_index = _tri_start_index;
-                this.triangle_count = _triangle_count;
-                this.material_name = _mat_name;
-            }
-        }
-
         #region SMD class definitions
 
         public class node
@@ -380,6 +367,20 @@ namespace JSRF_ModTool
 
             public string mat_name { get; set; }
             public List<vertex> verts { get; set; }
+        }
+
+        public class material_group
+        {
+            public UInt32 triangle_start_index { get; set; }
+            public UInt32 triangle_count { get; set; }
+            public String material_name { get; set; }
+
+            public material_group(UInt32 _tri_start_index, UInt32 _triangle_count, string _mat_name)
+            {
+                this.triangle_start_index = _tri_start_index;
+                this.triangle_count = _triangle_count;
+                this.material_name = _mat_name;
+            }
         }
 
         #endregion

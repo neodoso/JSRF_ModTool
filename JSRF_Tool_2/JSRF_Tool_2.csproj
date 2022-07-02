@@ -79,11 +79,17 @@
   <ItemGroup>
     <Compile Include="DataFormats\3D Model Formats\OBJ.cs" />
     <Compile Include="DataFormats\JSRF\File_Containers.cs" />
-    <Compile Include="DataFormats\JSRF\Level_bin_Compiler.cs" />
-    <Compile Include="DataFormats\JSRF\Level_Compiler.cs" />
-    <Compile Include="DataFormats\JSRF\Level_Model_Compiler.cs" />
-    <Compile Include="DataFormats\JSRF\mission_bin.cs" />
-    <Compile Include="DataFormats\JSRF\mission_dat.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Bin\block_00.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Bin\block_01.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Bin\block_02.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Bin\header.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Bin\Parser.cs" />
+    <Compile Include="DataFormats\JSRF\Compilers\Stage_bin_Compiler.cs" />
+    <Compile Include="DataFormats\JSRF\Compilers\Stage_Compiler.cs" />
+    <Compile Include="DataFormats\JSRF\Compilers\Stage_Model_Compiler.cs" />
+    <Compile Include="DataFormats\JSRF\Mission_bin.cs" />
+    <Compile Include="DataFormats\JSRF\Mission_dat.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Data_Metrics.cs" />
     <Compile Include="DataFormats\JSRF\Texture_header.cs" />
     <Compile Include="DataFormats\Xbox\TextureSwizzle.cs" />
     <Compile Include="Functions\FTP.cs" />
@@ -101,7 +107,7 @@
     </Compile>
     <Compile Include="Functions\ByteConvert.cs" />
     <Compile Include="Functions\Parsing.cs" />
-    <Compile Include="DataFormats\JSRF\Level_Model.cs" />
+    <Compile Include="DataFormats\JSRF\Stage_Model.cs" />
     <Compile Include="MDLB_Import\MDLB_classes.cs" />
     <Compile Include="MDLB_Import\Materials.cs" />
     <Compile Include="MDLB_Import\MDLB_compiler.cs" />
@@ -133,7 +139,6 @@
     <Compile Include="DataFormats\3D Model Formats\SMD.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DataFormats\JSRF\Level_bin.cs" />
     <Compile Include="DataFormats\JSRF\Material.cs" />
     <Compile Include="DataFormats\MeshData.cs" />
     <Compile Include="DataFormats\Vector.cs" />
@@ -165,6 +170,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <EmbeddedResource Include="DataFormats\JSRF\Compilers\Data\block_02_base.bin" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
