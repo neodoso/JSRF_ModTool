@@ -7,6 +7,27 @@ namespace JSRF_ModTool.DataFormats.Xbox
 {
     public static class TextureSwizzle
     {
+
+        public static byte[] QuadtreeUnswizzle(byte[] Body, int Resolution)
+        {
+            var length = Body.Length; //Body.Length - 0x20;
+            var pitch = length / Resolution;
+            var bytesPerPixel = pitch / Resolution;
+            var size = (int)Math.Sqrt(length / bytesPerPixel);
+            var depth = (int)Math.Log(size, 2);
+            var tree = new byte[length, depth];
+            byte[] result = new byte[length];
+            for (int i = 0; i < length; i += bytesPerPixel)
+            {
+                var iOut = UnswizzleOffset(i, size, bytesPerPixel);
+                for (int b = 0; b < bytesPerPixel; b++)
+                {
+                    result[iOut + b] = Body[i + b]; //Body[0x20 + i + b];
+                }
+            }
+            return result;
+        }
+
         public static int UnswizzleOffset(int offset, int size, int bytesPerPixel)
         {
             var ordinal = offset / bytesPerPixel;

@@ -17,7 +17,7 @@ namespace JSRF_ModTool.Vector
         // TODO test and if not needed, remove float.Parse() since setVals() already converts string to single
         public Vector2(string x, string y)
         {
-            setVals(float.Parse(x), float.Parse(y));
+            setVals(float.Parse(x, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(y, CultureInfo.CreateSpecificCulture("en-US")));
         }
 
         public Vector2(float x, float y)
@@ -56,7 +56,7 @@ namespace JSRF_ModTool.Vector
         // as string
         public Vector3(string x, string y, string z)
         {
-            setVals(float.Parse(x), float.Parse(y), float.Parse(z));
+            setVals(float.Parse(x, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(y, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(z, CultureInfo.CreateSpecificCulture("en-US")));
         }
 
         // as float

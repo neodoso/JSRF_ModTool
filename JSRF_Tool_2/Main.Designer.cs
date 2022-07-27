@@ -80,8 +80,6 @@
             this.btn_null_model = new System.Windows.Forms.Button();
             this.elementHost_model_editor = new System.Windows.Forms.Integration.ElementHost();
             this.tab_TextureViewer = new System.Windows.Forms.TabPage();
-            this.numupDown_tex_bitCount = new System.Windows.Forms.NumericUpDown();
-            this.numupDown_tex_depth = new System.Windows.Forms.NumericUpDown();
             this.btn_save_texture_edits = new System.Windows.Forms.Button();
             this.btn_edit_texture = new System.Windows.Forms.Button();
             this.rtxtb_textureinfo = new System.Windows.Forms.RichTextBox();
@@ -152,8 +150,6 @@
             this.panel_lvl_mdl_info.SuspendLayout();
             this.panel_adv_mdl_nfo.SuspendLayout();
             this.tab_TextureViewer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_bitCount)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_depth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).BeginInit();
             this.tab_mat_editor.SuspendLayout();
             this.panel_mat_editor.SuspendLayout();
@@ -738,8 +734,6 @@
             // tab_TextureViewer
             // 
             this.tab_TextureViewer.BackColor = System.Drawing.Color.Gainsboro;
-            this.tab_TextureViewer.Controls.Add(this.numupDown_tex_bitCount);
-            this.tab_TextureViewer.Controls.Add(this.numupDown_tex_depth);
             this.tab_TextureViewer.Controls.Add(this.btn_save_texture_edits);
             this.tab_TextureViewer.Controls.Add(this.btn_edit_texture);
             this.tab_TextureViewer.Controls.Add(this.rtxtb_textureinfo);
@@ -750,32 +744,6 @@
             this.tab_TextureViewer.Size = new System.Drawing.Size(742, 686);
             this.tab_TextureViewer.TabIndex = 3;
             this.tab_TextureViewer.Text = "Texture Viewer";
-            // 
-            // numupDown_tex_bitCount
-            // 
-            this.numupDown_tex_bitCount.Location = new System.Drawing.Point(482, 628);
-            this.numupDown_tex_bitCount.Name = "numupDown_tex_bitCount";
-            this.numupDown_tex_bitCount.Size = new System.Drawing.Size(45, 20);
-            this.numupDown_tex_bitCount.TabIndex = 5;
-            this.numupDown_tex_bitCount.Value = new decimal(new int[] {
-            32,
-            0,
-            0,
-            0});
-            this.numupDown_tex_bitCount.ValueChanged += new System.EventHandler(this.numupDown_tex_bitCount_ValueChanged);
-            // 
-            // numupDown_tex_depth
-            // 
-            this.numupDown_tex_depth.Location = new System.Drawing.Point(431, 628);
-            this.numupDown_tex_depth.Name = "numupDown_tex_depth";
-            this.numupDown_tex_depth.Size = new System.Drawing.Size(45, 20);
-            this.numupDown_tex_depth.TabIndex = 5;
-            this.numupDown_tex_depth.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numupDown_tex_depth.ValueChanged += new System.EventHandler(this.numupDown_tex_depth_ValueChanged);
             // 
             // btn_save_texture_edits
             // 
@@ -1475,8 +1443,6 @@
             this.panel_adv_mdl_nfo.PerformLayout();
             this.tab_TextureViewer.ResumeLayout(false);
             this.tab_TextureViewer.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_bitCount)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numupDown_tex_depth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_texture_editor)).EndInit();
             this.tab_mat_editor.ResumeLayout(false);
             this.panel_mat_editor.ResumeLayout(false);
@@ -1590,8 +1556,6 @@
         private System.Windows.Forms.RichTextBox rtxtb_material;
         private System.Windows.Forms.Button btn_save_mat_data;
         private System.Windows.Forms.Label lab_mdl_mat_vtx;
-        private System.Windows.Forms.NumericUpDown numupDown_tex_depth;
-        private System.Windows.Forms.NumericUpDown numupDown_tex_bitCount;
         private System.Windows.Forms.Panel panel_lvl_mdl_info;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;

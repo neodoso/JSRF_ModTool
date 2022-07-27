@@ -95,10 +95,15 @@ namespace JSRF_ModTool
             btn_fix_drawdist.Visible = true;
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
-
+            /*
             Stage_Compiler Stage_compiler = new Stage_Compiler();
             // arguments: export_dir, media_dir, stage_num
             Stage_compiler.Compile(@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_demo\", @"C:\Users\Mike\Desktop\JSRF\game_files\ModOR\", "stg00");
+            */
+
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
 
             #region loading methods
 
@@ -1191,7 +1196,7 @@ namespace JSRF_ModTool
                     pictureBox_texture_editor.Image = null;
                     Load_block_Texture(current_item_data, false, false);
                     pictureBox_texture_editor.Enabled = true;
-                    tabControl1.SelectedIndex = 01;
+                    tabControl1.SelectedIndex = 1;
                     break;
 
                 // MDLB Model
@@ -1903,6 +1908,7 @@ namespace JSRF_ModTool
         /// <param name="silent">load bitmap into picturebox</param>
         private string Load_block_Texture(byte[] data, bool silent, bool by_id) //string id,
         {
+            DDS_CompressionFormat compressionFormat = DDS_CompressionFormat.unknown1;
             string dxt_compression_type = "dxt unknown";
 
             // #region read texture header
@@ -1925,18 +1931,23 @@ namespace JSRF_ModTool
             {
                 case 1:
                     dxt_compression_type = "1";
+                    compressionFormat = DDS_CompressionFormat.DXT1;
                     break;
 
                 case 5:
                     dxt_compression_type = "dxt1";
+                    compressionFormat = DDS_CompressionFormat.DXT1;
                     break;
 
                 case 6:
                     dxt_compression_type = "dxt3";
+                    compressionFormat = DDS_CompressionFormat.DXT3;
                     break;
-                // if unknown type exit
-               // default:
-               //     return "";
+
+                case 7:
+                    dxt_compression_type = "dxt5"; // ?
+                    compressionFormat = DDS_CompressionFormat.DXT5;
+                    break;
             }
 
             // set texture info fox texbox
@@ -1992,6 +2003,12 @@ namespace JSRF_ModTool
 
             if (swizzled == 1)
             {
+                byte[] data_unswizz = DataFormats.Xbox.TextureSwizzle.QuadtreeUnswizzle(data_noheader, res_x);
+                byte[] dds_header_1 = GenerateDdsHeader(compressionFormat, res_x, mipmap_count);
+
+                System.Buffer.BlockCopy(dds_header_1, 0, texture_file, 0, dds_header_1.Length);
+                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
+
                 /*
                 byte[] data_unswizz = new byte[data.Length - 32];
                 data_unswizz = DataFormats.Xbox.TextureSwizzle.(data_noheader, 0, res_x, res_x, (int)numupDown_tex_depth.Value, (int)numupDown_tex_bitCount.Value, true);
@@ -2083,6 +2100,51 @@ namespace JSRF_ModTool
             }
 
             return id.ToString();
+        }
+
+        public enum DDS_CompressionFormat
+        {
+            DXT1 = 5,
+            DXT3 = 6,
+            DXT5 = 7,//?
+            unknown1 = 1
+        }
+
+        private byte[] GenerateDdsHeader(DDS_CompressionFormat _CompressionFormat, int _Resolution, int _MipmapCount)
+        {
+            var ms = new MemoryStream();
+            ms.Write(new byte[] { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x0A, 0x00, 0x00 }, 0, 0xC);
+            int linearSize = _Resolution * _Resolution;
+            if (_CompressionFormat == DDS_CompressionFormat.DXT1)
+                linearSize /= 2;
+            foreach (var value in new int[] { _Resolution, _Resolution, linearSize })
+                ms.Write(BitConverter.GetBytes(value), 0, 0x4);
+
+            ms.Write(new byte[0x4], 0, 0x4);
+            ms.Write(BitConverter.GetBytes((int)Math.Log(_Resolution, 2) + 1), 0, 0x4);
+
+            ms.Write(new byte[0x2C], 0, 0x2C);
+
+            ms.Write(BitConverter.GetBytes(32), 0, 0x4);
+            ms.Write(BitConverter.GetBytes(4), 0, 0x4);
+            ms.WriteByte(0x44);
+            ms.WriteByte(0x58);
+
+            ms.WriteByte(0x54);
+            if (_CompressionFormat == DDS_CompressionFormat.DXT1) ms.WriteByte(0x31);
+            else if (_CompressionFormat == DDS_CompressionFormat.DXT3) ms.WriteByte(0x33);
+            else if (_CompressionFormat == DDS_CompressionFormat.DXT5) ms.WriteByte(0x35);
+            else ms.WriteByte(0x31); // unknown fallback
+
+            ms.Write(new byte[0x14], 0, 0x14);
+
+            if (_CompressionFormat == DDS_CompressionFormat.DXT1 || (_CompressionFormat == DDS_CompressionFormat.DXT3 && _MipmapCount > 0))
+                ms.Write(BitConverter.GetBytes(4198408), 0, 0x4);
+            else if (_CompressionFormat == DDS_CompressionFormat.DXT3 && _MipmapCount == 0)
+                ms.Write(BitConverter.GetBytes(4096), 0, 0x4);
+            ms.Write(new byte[0x10], 0, 0x10);
+            if (ms.Length != 0x80) throw new InvalidDataException($"Generated header was {ms.Length.ToString("X")} bytes instead of 0x80.");
+            return ms.ToArray();
         }
 
         /// <summary>
