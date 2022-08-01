@@ -91,10 +91,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 obj.mesh.uv_buffer[i].Y = ((obj.mesh.uv_buffer[i].Y) * -1f) + 1;
             }
 
-            
 
 
-            #region process material groups and materials from the .mtl
+
+            #region process materials groups and textures  and materials from the .mtl
 
             List<Int32> texture_IDs_list = new List<int>();
             
@@ -119,6 +119,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     // if material group's texture filepath matches the texture filepath in .mtl material, create ID for the texture
                     if (obj.mesh.material_groups[i].texture_filepath.ToLower() == obj.mtl_materials_list[e].texture_filepath.ToLower())
                     {
+
+
                         // sleep for a bit, otherwise MathI.RandomDigits() keeps ouputting the same number in a short timeframe
                         System.Threading.Thread.Sleep(50);
 

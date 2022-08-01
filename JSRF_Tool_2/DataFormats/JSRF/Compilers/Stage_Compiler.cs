@@ -150,10 +150,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 string tex_filepath = Stage_model_Compiler.textures[i].texture_filepath;
                 string tex_extension = Path.GetFileName(tex_filepath).Split('.')[1].ToLower();
 
+                #region texture file validity checks
+
                 // check that texture file type is bmp or png, if not throw error and cancel compilation
-                if (tex_extension != "bmp" && tex_extension != "png")
+                if (tex_extension != "png")
                 {
-                    System.Windows.Forms.MessageBox.Show("Invalid texture file format, please make sure all textures are .png (and or) .bmp.\n\n" + tex_filepath + "\n\nCompile cancelled.");
+                    System.Windows.Forms.MessageBox.Show("Invalid texture file format, please make sure all textures are .png.\n\n" + tex_filepath + "\n\nCompile cancelled.");
                     return;
                 }
 
@@ -163,6 +165,52 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     System.Windows.Forms.MessageBox.Show("Error: cannot find texture file:\n\n" + tex_filepath);
                     return;
                 }
+
+                // check that texture is square
+                int tex_width, tex_height;
+                using (var fileStream = new FileStream(tex_filepath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    using (var image = System.Drawing.Image.FromStream(fileStream, false, false))
+                    {
+                        tex_width = image.Height;
+                        tex_height = image.Width;
+                    }
+                }
+
+                if(tex_width != tex_height)
+                {
+                    System.Windows.Forms.MessageBox.Show("Error: texture must have a square resolution(i.e; 512x512).\nThe following texture resolution need to be changed to a square resolution:\n" + tex_filepath);
+                    return;
+                }
+
+
+                // check if texture resolution is a power of two
+                int[] tex_resolutions = new int[] { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
+                bool res_valid = false;
+                for (int r = 0; r < tex_resolutions.Length; r++)
+                {
+                    if (tex_width == tex_resolutions[r])
+                    {
+                        res_valid = true;
+                        break;
+                    }
+                }
+                // if texture resolution is not a power of two
+                if(!res_valid)
+                {
+                    System.Windows.Forms.MessageBox.Show("Error: texture resolution is invalid, must be a power of two(i.e: 128x128 or 256x256 or 512x512).\n" + tex_filepath);
+                    return;
+                }
+
+                // check if texture resolution exceeds 2048
+                if (tex_width > 2048)
+                {
+                    System.Windows.Forms.MessageBox.Show("Error: maximum texture resolution is 2048 pixels\n" + tex_filepath);
+                    return;
+                }
+
+                #endregion
+
 
                 #region convert texture
 
