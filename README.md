@@ -3,4 +3,4 @@
 
 Tutorial about the tool: https://jsrf-inside.blogspot.com/2016/05/jsrf-tool-20b-model-viewer-texture.html
 
-More info and reverse engineer @ https://jsrf-inside.blogspot.com
+More info and reverse engineering @ https://jsrf-inside.blogspot.com
