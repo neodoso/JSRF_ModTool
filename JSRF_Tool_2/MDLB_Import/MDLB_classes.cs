@@ -181,14 +181,15 @@ namespace JSRF_ModTool.MDLB_Import
         {
             public color color { get; set; } // its BGRA instead of RGBA (invert color order)
             public Int32 shader_id { get; set; } // if this = FFFFFF color_0 is used // otherwise external material or texture?
-            public Int32 unk_id2 { get; set; }
-            public Int32 pad12 { get; set; }
+            public Int32 unk_id1 { get; set; }
+            public Int32 unk_id2 { get; set; }    
             public float HB { get; set; }
 
-            public material(color _color, Int32 _shader_id, Int32 _unk_id2, float _HB)
+            public material(color _color, Int32 _shader_id, Int32 _unk_id1, Int32 _unk_id2, float _HB)
             {
                 this.color = _color;
                 this.shader_id = _shader_id;
+                this.unk_id1 = _unk_id1;
                 this.unk_id2 = _unk_id2;
                 this.HB = _HB;
             }
@@ -198,8 +199,8 @@ namespace JSRF_ModTool.MDLB_Import
                 List<byte[]> b = new List<byte[]>();
                 b.Add(color.Serialize());
                 b.Add(BitConverter.GetBytes(shader_id));
+                b.Add(BitConverter.GetBytes(unk_id1));
                 b.Add(BitConverter.GetBytes(unk_id2));
-                b.Add(BitConverter.GetBytes(pad12));
                 b.Add(BitConverter.GetBytes(HB));
 
                 return b.SelectMany(byteArr => byteArr).ToArray();
@@ -367,8 +368,6 @@ namespace JSRF_ModTool.MDLB_Import
 
                 return b.SelectMany(byteArr => byteArr).ToArray();
             }
-
-
         }
 
 

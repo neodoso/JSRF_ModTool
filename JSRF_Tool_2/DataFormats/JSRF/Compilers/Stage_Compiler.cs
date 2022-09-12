@@ -21,6 +21,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// <param name="_stg_num">Name/Number of level, i.e. 'stg00' is the Garage</param>
         public void Compile(string _source_dir, string _media_dir, string _stg_num)
         {
+
+            string error_header = "JSRF Mod Tool Stage Compiler Error: \n";
             _stg_num = _stg_num + "_";
 
             string visual_dir = Path.GetFullPath(_source_dir + "\\Visual\\");
@@ -33,13 +35,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // check visual dir exists
             if (!Directory.Exists(visual_dir))
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find 'Visual' directory in: " + _source_dir);
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find 'Visual' directory in: " + _source_dir  + " \n\nCompile cancelled.");
                 return;
             }
             // check collision dir exists
             if (!Directory.Exists(collision_dir))
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find 'Collision' directory in: " + _source_dir);
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find 'Collision' directory in: " + _source_dir +  "\n\nCompile cancelled.");
                 return;
             }
             
@@ -56,7 +58,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if no visual model folders found
             if (vis_models_dirs.Length == 0)
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find model folders in \"Visual\" folder, please export the models in groups such as \\Visual\\ModelGroupFolder\\model_name.obj  \n\nCompile cancelled.");
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find model folders in \"Visual\" folder, please export the models in groups such as \\Visual\\ModelGroupFolder\\model_name.obj  \n\nCompile cancelled.");
                 return;
             }
 
@@ -73,7 +75,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if no models found
             if (Stage_models_count == 0)
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find any model files in \"Visual\" folder, please export the models in groups such as \\Visual\\aModelGroupFolder\\model_name.obj  \n\nCompile cancelled.");
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find any model files in \"Visual\" folder, please make sure there are models in the Blender outliner with groups such as \"Visual\"aGroup\"  \n\nCompile cancelled.");
                 return;
             }
 
@@ -89,7 +91,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if no visual model folders found
             if (vis_models_dirs.Length == 0)
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find collision model folders in \"Collision\" folder, please export the models in groups such as \\Collision\\aModelGroupFolder\\model_name.obj  \n\nCompile cancelled.");
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find collision model folders in \"Collision\" folder, please make sure there are models in the Blender outliner with groups such as \"Collision\"aGroup\"  \n\nCompile cancelled.");
                 return;
             }
 
@@ -105,7 +107,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if no models found
             if (coll_models_count == 0)
             {
-                System.Windows.Forms.MessageBox.Show("Error: could not find any model files in \"Collision\" folder, please export the models in groups such as \\Collision\\aModelGroupFolder\\model_name.obj  \n\nCompile cancelled.");
+                System.Windows.Forms.MessageBox.Show(error_header + "Could not find any model files in \"Collision\" folder, please make sure there are models in the Blender outliner with groups such as \"Collision\"aGroup\"  \n\nCompile cancelled.");
                 return;
             }
 
@@ -297,7 +299,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 tex_head.Texture_ID = Stage_model_Compiler.textures[j].texture_id;
                 byte[] jtex_head = tex_head.serialize();
 
-                byte[] dds_import = new byte[dds.Length - 96];
+                byte[] dds_import = new byte[dds.Length - 100]; // last 4 bytes we ignore the 4 zero bytes
 
                 // normally we'd skip 128 bytes to skip the DDS header
                 // but to avoid doing two heavy array operations

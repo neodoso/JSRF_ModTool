@@ -240,12 +240,15 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 					this.items = new List<surfprop_item>();
 					items.Add(new surfprop_item(0,    "surfprop_pass_through",  "90 45 109"));
 					items.Add(new surfprop_item(1,    "surfprop_floor",			"65 138 214"));
+					items.Add(new surfprop_item(2,	  "surfprop_unknown_2",		"126 147 147"));
 					items.Add(new surfprop_item(4,    "surfprop_wall",			"214 138 65"));
+					items.Add(new surfprop_item(8,	  "surfprop_unknown_8",		"126 147 147"));
 					items.Add(new surfprop_item(16,	  "surfprop_stairs",		"218 225 40"));
 					items.Add(new surfprop_item(32,   "surfprop_billboard",		"44 225 40"));
 					items.Add(new surfprop_item(128,  "surfprop_halfpipe",		"23 23 132"));
 					items.Add(new surfprop_item(256,  "surfprop_ceiling",		"0 254 232"));
 					items.Add(new surfprop_item(512,  "surfprop_untouchable",	"225 40 40"));
+					//items.Add(new surfprop_item(1024, "surfprop_unknown_1024", "90 45 109"));
 					items.Add(new surfprop_item(8192, "surfprop_ramp",			"205 40 225"));
 				}
 
@@ -273,8 +276,13 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 						case 1:
 							return "surfprop_floor";
 
+						case 2:
+							return "surfprop_unknown_2";
+
 						case 4:
 							return "surfprop_wall";
+						case 8:
+							return "surfprop_unknown_8";
 
 						case 16:
 							return "surfprop_stairs";
@@ -406,6 +414,8 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 								mtl_lines.Add("Ks 0.1 0.1 0.1");
 								mtl_lines.Add("Ns 50");
 								mtl_lines.Add("Tr 0");
+								mtl_lines.Add("illum 2");
+								mtl_lines.Add(@"map_Kd C:\Users\Mike\Desktop\JSRF\Stg_Demo_Assets\dev\" + surfprop_name + ".png");
 								mtl_lines.Add("illum 2");
 								mtl_lines.Add("");
 

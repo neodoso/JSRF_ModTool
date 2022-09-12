@@ -454,7 +454,7 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
                 lines = new List<string>();
                 potential_visibility_set pvs = this.potential_visibility_sets_list[i];
 
-                lines.Add("################################## PVS v00");
+                lines.Add("start");
                 lines.Add(pvs.v00.ToString());
                 lines.Add(pvs.v01.ToString());
                 lines.Add(pvs.v02.ToString());
@@ -463,7 +463,6 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
                 lines.Add(pvs.v05.ToString());
 
                 lines.Add("");
-                lines.Add("################################## PVS v06");
                 lines.Add(pvs.v06.ToString());
                 lines.Add(pvs.v07.ToString());
                 lines.Add(pvs.v08.ToString());
@@ -472,7 +471,6 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
                 lines.Add(pvs.v11.ToString());
 
                 lines.Add("");
-                lines.Add("################################## PVS links");
 
                 string links = String.Empty;
                 for (int d = 0; d < pvs.pvs_links.Count; d++)
@@ -496,40 +494,43 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
                 // add links line
                 if (pvs.pvs_links.Count > 0)
                 {
-                    lines.Add(links);
+                    lines.Add("pvs_Links:" + links);
                 }
 
-
+                /*
                 lines.Add("");
                 lines.Add("################################## data");
                 lines.Add("unk_2 " + pvs.unk_2.ToString());
                 lines.Add("unk_4 " + pvs.unk_4.ToString());
                 lines.Add("unk_6 " + pvs.unk_6.ToString());
                 lines.Add("unk_7 " + pvs.unk_7.ToString());
+                */
 
                 if (pvs.pvs_bounds != null)
                 {
-                    /*
-                    lines.Add("# pvs_bounds");
+                    lines.Add("");
+                    lines.Add("pvs_bounds a");
                     lines.Add(pvs.pvs_bounds.v00.ToString());
                     lines.Add(pvs.pvs_bounds.v01.ToString());
                     lines.Add(pvs.pvs_bounds.v02.ToString());
                     lines.Add(pvs.pvs_bounds.v03.ToString());
                     lines.Add(pvs.pvs_bounds.v04.ToString());
                     lines.Add(pvs.pvs_bounds.v05.ToString());
-                    lines.Add("# pvs_bounds vs");
+                    lines.Add("");
+                    lines.Add("pvs_bounds a");
                     lines.Add(pvs.pvs_bounds.vs00.ToString());
                     lines.Add(pvs.pvs_bounds.vs01.ToString());
                     lines.Add(pvs.pvs_bounds.vs02.ToString());
                     lines.Add(pvs.pvs_bounds.vs03.ToString());
                     lines.Add(pvs.pvs_bounds.vs04.ToString());
                     lines.Add(pvs.pvs_bounds.vs05.ToString());
-                    */
+                    
                 }
 
+                lines.Add("");
+                lines.Add("");
 
-
-                if(!Directory.Exists(export_dir + "\\PVS\\"))
+                if (!Directory.Exists(export_dir + "\\PVS\\"))
                 {
                     Directory.CreateDirectory(export_dir + "\\PVS\\");
                 }

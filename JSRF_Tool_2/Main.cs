@@ -87,6 +87,7 @@ namespace JSRF_ModTool
             if (cb_show_adv_mdlb_nfo.Checked)
             {
                 panel_adv_mdl_nfo.Visible = true;
+                panel_lvl_mdl_info.Visible = true;
             }
 
             #endregion
@@ -95,6 +96,29 @@ namespace JSRF_ModTool
             btn_fix_drawdist.Visible = true;
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
+
+            JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+
+            #region loading methods
+
+
+
+            //JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(@"C:\Users\Mike\Desktop\JSRF\game_files\Media\Stage\Stg23_.bin"); //13
+
+            /*
+            // extract all Stage collision meshes (from JSRF original dir)
+            foreach (string file in Directory.EnumerateFiles(txtb_jsrf_original_dir.Text + "\\Stage\\", "*.bin", SearchOption.AllDirectories))
+            {   
+                if (file.Contains("_t.bin")) { continue; } // skip skybox bin file
+                if (file.Contains("\\Custom\\")) { continue; } // skip Custom levels
+
+                JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(file);
+            }
+            */
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Bis.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
+
             /*
             Stage_Compiler Stage_compiler = new Stage_Compiler();
             // arguments: export_dir, media_dir, stage_num
@@ -105,7 +129,6 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
 
-            #region loading methods
 
             /*
             Stage_Compiler Stage_compiler = new Stage_Compiler();
@@ -123,7 +146,7 @@ namespace JSRF_ModTool
 
 
             /*
-            
+
             // Export Stage models
 
             Load_file(txtb_jsrf_mod_dir.Text + "\\" + @"Stage\stg52_00.dat");
@@ -147,10 +170,6 @@ namespace JSRF_ModTool
 
             // load stg00_.bin
             // DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
-
-            //stgBin_00.block_01.export_grind_path_data(@"C:\Users\Mike\Desktop\JSRF\Stg_Demo_Assets\Compiles\test.txt");
-
-
 
             #endregion
 
@@ -192,8 +211,8 @@ namespace JSRF_ModTool
                 jsrf_file.INDX_root.items[20].data = item_data;
                 jsrf_file.rebuild_file(jsrf_file.filepath);
             }
-           // Application.Exit();
-           */
+            // Application.Exit();
+            */
 
             /*
             //Load_file(game_dir + @"Stage\stg33_01.dat"); // stg22_01 - 0
@@ -219,142 +238,21 @@ namespace JSRF_ModTool
                 {
                     Stage_Model mdl = new Stage_Model(item.data);
 
-                   //if(mdl.vtx_tri_buff_head.is_stripped == 0)
-                  // {
+                    //if(mdl.vtx_tri_buff_head.is_stripped == 0)
+                    // {
                         mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Stage_Model_" + i + ".obj");
-                  // }
+                    // }
 
                 }
             }
             Application.Exit();
             */
 
-
-            //Load_file(game_dir + @"StgObj\StgObj00.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[1];
-
-            //Load_file(game_dir + @"People\People01.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
-
-            //Load_file(game_dir + @"\Progress\Progress.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
-
-            //Load_file(game_dir + @"Player\Beat.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[5];
-
-            //Load_file(game_dir + @"Disp\SprNorm.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0].Nodes[0];
-
-            // Load_file(game_dir + @"Stage\stg00_00.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
-
-            // Load_file(folder + @"People\People01.dat");
-            //  trv_file.SelectedNode =trv_file.Nodes[0].Nodes[1].Nodes[44];
-
-            //Load_file(game_dir + @"Event\Event\e000.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[0];
-
-
-
-            //   Stage_bin lvl = new Stage_bin(game_dir + "Stage\\stg10_.bin");
             #endregion
 
 #endif
         }
 
-
-        // searches textures by ids on all files
-        public void mass_search_texture_by_ID(string texture_id)
-        {
-            List<string> matches = new List<string>();
-
-            foreach (string file in Directory.EnumerateFiles(txtb_jsrf_mod_dir.Text, "*.dat", SearchOption.AllDirectories))
-            {
-                if (!file.Contains(".dat")) { continue; }
-                // ignore mission files (because they give out block nodes reading errors)
-                if(file.Contains("mssn")) { continue; }
-                Load_file(file, false);
-                if(jsrf_file.type == File_Containers.container_types.MULT)
-                {
-                    for (int i = 0; i < jsrf_file.MULT_root.items.Count; i++)
-                    {
-                        File_Containers.NORM norm = jsrf_file.MULT_root.items[i];
-                        for (int e = 0; e < norm.items.Count; e++)
-                        {
-                            if(norm.items[e].type == File_Containers.item_data_type.Texture)
-                            {
-                                int id = BitConverter.ToInt32(norm.items[e].data, 0);
-
-                                if(id.ToString() == texture_id)
-                                {
-                                    matches.Add(Path.GetFileName(file) + "   MULT:NORM[" + i + "] Item[" + e + "]");
-                                }
-                            }
-                        }
-                    }
-                }
-
-                
-                if (jsrf_file.type == File_Containers.container_types.NORM)
-                {
-                    for (int e = 0; e < jsrf_file.NORM_root.items.Count; e++)
-                    {
-                        if (jsrf_file.NORM_root.items[e].type == File_Containers.item_data_type.Texture)
-                        {
-                            int id = BitConverter.ToInt32(jsrf_file.NORM_root.items[e].data, 0);
-
-                            if (id.ToString() == texture_id)
-                            {
-                                matches.Add(Path.GetFileName(file) + "   MULT: Item[" + e + "]");
-                            }
-                        }
-                    }
-                }
-
-                if (jsrf_file.type == File_Containers.container_types.indexed)
-                {
-
-                }
-            }
-        }
-
-        /// <summary>
-        /// reset global variables and UI controls
-        /// </summary>
-        private void Reset_vars()
-        {
-            materials_dat_list.Clear();
-            materials_bin_list.Clear();
-
-            trv_file.Nodes.Clear();
-            container_type = null;
-
-            #region UI
-
-            lab_itemSel_length.Text = "";
-
-            // texture viewer
-            pictureBox_texture_editor.Image = null;
-            rtxtb_textureinfo.Text = "";
-
-            // model viewer4
-            lab_vert_count.Text = "0";
-            lab_tris_count.Text = "0";
-            txtb_mdl_partnum.Text = "0";
-            lab_vertBlockSize.Text = "0";
-            lab_triStrip.Text = "no";
-            lab_mdl_DrawDist.Text = "";
-
-            HelixModelViewer ModelViewer = new HelixModelViewer();
-            HelixViewport3D view = ModelViewer.view1;
-            ModelVisual3D model = new ModelVisual3D();
-            view.Children.Add(model);
-            elementHost_model_editor.Child = ModelViewer;
-
-            lab_filename.Text = "no file loaded";
-
-            #endregion
-        }
 
         #region Load file
 
@@ -393,6 +291,8 @@ namespace JSRF_ModTool
         {
             Stage_Model mdl = new Stage_Model(data);
 
+            panel_lvl_mdl_info.Visible = true;
+            panel_adv_mdl_nfo.Visible = false;
             ///mdl.export_model(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\Stage_Model_0.obj");
             // setup labels giving model info
             lab_lvlmdl_tex_ids.Text = mdl.texture_ids.Count.ToString();
@@ -422,10 +322,10 @@ namespace JSRF_ModTool
             {
                 Vector3 vert = mdl.vertices_list[i];
 
-                mesh_data.vertices.Add(new Point3D(vert.X, vert.Y, vert.Z));
-                bounds.add_point(vert);
+                mesh_data.vertices.Add(new Point3D(vert.X*-1, vert.Z, vert.Y));
+                bounds.add_point(new Vector3(vert.X * -1, vert.Z, vert.Y));
             }
-
+           
             mesh_data.mesh_center = new Point3D(bounds.center.X, bounds.center.Y, bounds.center.Z);
             mesh_data.avg_distance = new Point3D(Math.Abs((Math.Abs(bounds.Xmin) + bounds.Xmax)), Math.Abs((Math.Abs(bounds.Ymin) + bounds.Ymax)), Math.Abs((Math.Abs(bounds.Zmin) + bounds.Zmax)));
             mesh_data.mesh_bounds = new Point3D(bounds.Xmin + bounds.Xmax, bounds.Ymin + bounds.Xmax, bounds.Zmin + bounds.Zmax);
@@ -503,8 +403,16 @@ namespace JSRF_ModTool
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                string path = folderBrowserDialog1.SelectedPath;
-                txtb_jsrf_original_dir.Text = path;
+                txtb_jsrf_original_dir.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        // select cxbx folder
+        private void btn_sel_cxbx_dir_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                txtb_cxbx_dir.Text = folderBrowserDialog1.SelectedPath;
             }
         }
 
@@ -573,6 +481,7 @@ namespace JSRF_ModTool
             if (txtb_jsrf_original_dir.Text == "") { MessageBox.Show("Error: \"JSRF folder: original files\" in Settings is not defined, please select the folder."); return; }
             if (!Directory.Exists(txtb_jsrf_original_dir.Text)) { MessageBox.Show("Error: \"JSRF folder: original files\" in Settings does not exist."); return; }
 
+
             string subolfder = "";
             int split_dir_at = 0;
 
@@ -595,7 +504,6 @@ namespace JSRF_ModTool
             Load_file(current_filepath, true);
 
             // select the node that was select before resetting the file to its original state
-
             if(selected_node != null)
             {
                 if (selected_node.Level == 0)
@@ -613,6 +521,8 @@ namespace JSRF_ModTool
                     trv_file.SelectedNode = trv_file.Nodes[selected_node.Parent.Parent.Index].Nodes[selected_node.Parent.Index].Nodes[selected_node.Index];
                 }
             }
+
+            clear_cxbx_cache();
 
             System.Media.SystemSounds.Beep.Play();
         }
@@ -633,6 +543,8 @@ namespace JSRF_ModTool
 
             // rewrite array to disk file
             jsrf_file.rebuild_file(jsrf_file.filepath);
+
+            clear_cxbx_cache();
 
             // reselect node to reload MDLB
             TreeNode tn = trv_file.SelectedNode;
@@ -746,6 +658,8 @@ namespace JSRF_ModTool
             // rewrite array to disk file
             jsrf_file.rebuild_file(jsrf_file.filepath);
 
+            clear_cxbx_cache();
+
             // reselect node to reload MDLB
             TreeNode tn = trv_file.SelectedNode;
             trv_file.SelectedNode = null;
@@ -808,22 +722,6 @@ namespace JSRF_ModTool
         }
 
 
-
-        private void numupDown_tex_depth_ValueChanged(object sender, EventArgs e)
-        {
-            Load_block_Texture(current_item_data, false, false);
-        }
-
-        private void numupDown_tex_bitCount_ValueChanged(object sender, EventArgs e)
-        {
-            Load_block_Texture(current_item_data, false, false);
-        }
-
-        private void Main_Shown(object sender, EventArgs e)
-        {
-            //bgWorker_StageCompiler.RunWorkerAsync();
-        }
-
         private void btn_sel_vis_mdl_dir_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -834,11 +732,14 @@ namespace JSRF_ModTool
         }
 
 
-
+        // compile stage button event
         private void button4_Click(object sender, EventArgs e)
         {
             Stage_Compiler Stage_compiler = new Stage_Compiler();
             Stage_compiler.Compile(Path.GetFullPath(txtb_stage_source_dir.Text + "\\"), Path.GetFullPath(txtb_jsrf_mod_dir.Text + "\\"), txtb_stage_num.Text);
+
+            clear_cxbx_cache();
+
             System.Media.SystemSounds.Asterisk.Play();
         }
 
@@ -1282,6 +1183,9 @@ namespace JSRF_ModTool
                 System.Windows.MessageBox.Show("Error: MDLB has 0 model parts.");
                 return;
             }
+
+            panel_lvl_mdl_info.Visible = false;
+            panel_adv_mdl_nfo.Visible = true;
 
             // gets material from the previous parent node or node that contains materials and has the same count of child items as the textures nodes
             // if no materials in DAT  load materials list from bin
@@ -2911,32 +2815,45 @@ namespace JSRF_ModTool
 
                 string bone_weights;
 
-                string mat_name = "mat";
+                string mat_name = "mat_0";
+
+#if DEBUG
+
+                if(part_num == 20)
+                {
+                    string testx = "";
+                }
+#endif
 
 
                 for (int i = 0; i < mesh_data.triangles.Count; i += 3)
                 {
+
+
+
                     #region determine material group
 
-
+                    // for each triangle group
                     for (int g = 0; g < current_model.Model_Parts_header_List[part_num].triangle_groups_List.Count; g++)
                     {
                         MDLB.triangle_group tg = current_model.Model_Parts_header_List[part_num].triangle_groups_List[g];
 
-                        // if triangle index is over this group's then go to next
-                        if (i / 3 > tg.triangle_start_index + (tg.triangle_group_size - 1))
+                        // if triangle index <= triangle group size
+                        if (i / 3 <= (tg.triangle_start_index / 3 ) + (tg.triangle_group_size - 1))
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            mat_name = "mat_" + g.ToString();
+                            // set material name to triangle's group material index
+                            mat_name = "mat_" + tg.material_index; //g.ToString();
                             break;
-
+                        } else {
+                            // keep the same material name if we're still inside the triangle group
+                           
+                            continue;
                         }
                     }
 
                     #endregion
+
+
 
                     file.WriteLine(mat_name);
 
@@ -3363,6 +3280,8 @@ namespace JSRF_ModTool
             // reload node/block
             Load_TreeView_item(last_selected_node);
 
+            clear_cxbx_cache();
+
             System.Media.SystemSounds.Beep.Play();
         }
 
@@ -3459,7 +3378,8 @@ namespace JSRF_ModTool
                 }
             }
 
-            //trv_file.SelectedNode = tn;
+            // clear cache
+            clear_cxbx_cache();
 
             if (play_sound)
                 System.Media.SystemSounds.Beep.Play();
@@ -3621,6 +3541,127 @@ namespace JSRF_ModTool
 
         #endregion
 
+        #region misc functions
+
+
+        // reset global variables and UI controls
+        private void Reset_vars()
+        {
+            materials_dat_list.Clear();
+            materials_bin_list.Clear();
+
+            trv_file.Nodes.Clear();
+            container_type = null;
+
+            #region UI
+
+            lab_itemSel_length.Text = "";
+
+            // texture viewer
+            pictureBox_texture_editor.Image = null;
+            rtxtb_textureinfo.Text = "";
+
+            // model viewer4
+            lab_vert_count.Text = "0";
+            lab_tris_count.Text = "0";
+            txtb_mdl_partnum.Text = "0";
+            lab_vertBlockSize.Text = "0";
+            lab_triStrip.Text = "no";
+            lab_mdl_DrawDist.Text = "";
+
+            HelixModelViewer ModelViewer = new HelixModelViewer();
+            HelixViewport3D view = ModelViewer.view1;
+            ModelVisual3D model = new ModelVisual3D();
+            view.Children.Add(model);
+            elementHost_model_editor.Child = ModelViewer;
+
+            lab_filename.Text = "no file loaded";
+
+            #endregion
+        }
+
+        // searches textures by ID on all .dat files (except indexed ones)
+        public void mass_search_texture_by_ID(string texture_id)
+        {
+            List<string> matches = new List<string>();
+
+            foreach (string file in Directory.EnumerateFiles(txtb_jsrf_mod_dir.Text, "*.dat", SearchOption.AllDirectories))
+            {
+                if (!file.Contains(".dat")) { continue; }
+                // ignore mission files (because they give out block nodes reading errors)
+                if (file.Contains("mssn")) { continue; }
+                Load_file(file, false);
+                if (jsrf_file.type == File_Containers.container_types.MULT)
+                {
+                    for (int i = 0; i < jsrf_file.MULT_root.items.Count; i++)
+                    {
+                        File_Containers.NORM norm = jsrf_file.MULT_root.items[i];
+                        for (int e = 0; e < norm.items.Count; e++)
+                        {
+                            if (norm.items[e].type == File_Containers.item_data_type.Texture)
+                            {
+                                int id = BitConverter.ToInt32(norm.items[e].data, 0);
+
+                                if (id.ToString() == texture_id)
+                                {
+                                    matches.Add(Path.GetFileName(file) + "   MULT:NORM[" + i + "] Item[" + e + "]");
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                if (jsrf_file.type == File_Containers.container_types.NORM)
+                {
+                    for (int e = 0; e < jsrf_file.NORM_root.items.Count; e++)
+                    {
+                        if (jsrf_file.NORM_root.items[e].type == File_Containers.item_data_type.Texture)
+                        {
+                            int id = BitConverter.ToInt32(jsrf_file.NORM_root.items[e].data, 0);
+
+                            if (id.ToString() == texture_id)
+                            {
+                                matches.Add(Path.GetFileName(file) + "   MULT: Item[" + e + "]");
+                            }
+                        }
+                    }
+                }
+
+                if (jsrf_file.type == File_Containers.container_types.indexed)
+                {
+
+                }
+            }
+        }
+
+        // deletes cache files in Cxbx cache folders so mod file changes are reloaded when restarting the game
+        private void clear_cxbx_cache()
+        {
+            // clear cache (for PC platform cxbx)
+            if (!Directory.Exists(txtb_cxbx_dir.Text)) { return; }
+                      
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition2\\");
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition3\\");
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition4\\");
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition5\\");
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition6\\");
+            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition7\\");
+
+            string cxbx_roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Cxbx-Reloaded\\";
+
+            if (!Directory.Exists(cxbx_roaming)) { return; }
+
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition2\\");
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition3\\");
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition4\\");
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition5\\");
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition6\\");
+            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition7\\");
+        }
+
+
+        #endregion
 
     }
 }

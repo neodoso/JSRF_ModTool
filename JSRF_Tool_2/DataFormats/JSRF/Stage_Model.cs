@@ -67,7 +67,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // calculate offset after materials (1 material definition = 20 bytes)
             offset += header.x124_mat_count * 20;
 
-            // if not materials, there's still 20 bytes of padding to skip
+            // if no materials, there's still 20 bytes of padding to skip
             // see stg00_00 : Stage model number 23
             if(header.x124_mat_count == 0 )
             {

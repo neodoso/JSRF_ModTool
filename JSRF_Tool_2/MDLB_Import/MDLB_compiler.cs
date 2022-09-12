@@ -10,7 +10,7 @@ namespace JSRF_ModTool
     class MDLB_compiler
     {
         // build JSRF MDLB model
-        public byte[] build(List<MDLB_Import.ModelPart_Import_Settings> mdl_list, List<MDLB_Import.MDLB_classes.material> materials) //, vertex_type vert_type
+        public byte[] build(List<MDLB_Import.ModelPart_Import_Settings> mdl_list, List<MDLB_Import.MDLB_classes.material> materials, int src_mat_count) //, vertex_type vert_type
         {
             #region import each SMD
 
@@ -246,7 +246,24 @@ namespace JSRF_ModTool
 
             // list to store generated triangle_group definition byte arrays
             List<byte[]> bytes_triangle_groups_list = new List<byte[]>();
-            MDLB_Import.MDLB_classes.triangle_group tg; 
+            MDLB_Import.MDLB_classes.triangle_group tg;
+
+
+            /*
+            bool prev_mdl_parts_have_material = false;
+            // check if lower model part have a material
+            if (Main.current_model.Model_Parts_header_List.Count > 1)
+            {
+                for (int p = 0; p < Main.current_model.Model_Parts_header_List.Count - 2; p++)
+                {
+                    if (Main.current_model.Model_Parts_header_List[p].triangle_groups_count == 0)
+                    {
+                        prev_mdl_parts_have_material = true;
+                        break;
+                    }
+                }
+            }
+            */
 
             // for each model part
             for (int i = 0; i < mdl_parts_count; i++)
@@ -263,23 +280,41 @@ namespace JSRF_ModTool
                     return null;
                 }
 
+                // do not write material group for model_type = 1
+                if(Main.current_model.Model_Parts_header_List[i].model_type == 1 && Main.current_model.Model_Parts_header_List[i].materials_count == 1)
+                {
+                    continue;
+                }
 
                 // for each material group from the imported SMD file
                 for (int m = 0; m < SMD_parts[i].mat_groups_list.Count; m++)
                 {
+                    // if original's Model_Parts_header_List[i] has no mat/tri group defined 
+                    // skip
+
                     int mesh_type = 1;
-                    // if its a visual mesh  set mesh_type to 0
-                    if (i == mdl_parts_count - 1)
-                    {
-                        mesh_type = 0;
-                    }
-                    Int32 mat_num = 0;
 
+                    int mat_num = 0;
 
-                    if (SMD_parts[i].mat_groups_list[m].material_name == "mat_")
+                    if (SMD_parts[i].mat_groups_list[m].material_name.Contains("mat_"))
                     {
                         mat_num = Convert.ToInt32(SMD_parts[i].mat_groups_list[m].material_name.Replace("mat_", ""));
                     }
+
+                    // if its a visual mesh  set mesh_type to 0
+                    if (i == mdl_parts_count - 1)
+                    {
+                        /*
+                        // if it's a head model the material index must be increased by one
+                        if (prev_mdl_parts_have_material)
+                        {
+                           // mat_num++;
+                        }
+                        */
+                        mesh_type = 0;
+                    }
+
+
 
                     // TODO : determine if mat_index in triangle_group(_mat_index) needs to be shifted of +1 or not
                     // instance triangle group with SMD data and (mesh_type, material_index) default values
@@ -757,8 +792,15 @@ namespace JSRF_ModTool
             List<byte[]> file_bytes = new List<byte[]>();
 
             //include main start header (16 bytes)
-            //file_bytes.Add(new header(mdl_parts_count, materials.Count).serialize());
-            file_bytes.Add(new MDLB_Import.MDLB_classes.header(mdl_parts_count, materials.Count).serialize());
+
+
+            int mat_count = materials.Count;
+            if (src_mat_count == 0)
+            {
+                mat_count = 0;
+            }
+        
+            file_bytes.Add(new MDLB_Import.MDLB_classes.header(mdl_parts_count, mat_count).serialize()); //new MDLB_Import.MDLB_classes.header(mdl_parts_count, materials.Count).serialize()
 
 
             file_bytes.Add(mdl_part_headers_Serialized_List.SelectMany(byteArr => byteArr).ToArray());

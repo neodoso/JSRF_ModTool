@@ -49,23 +49,14 @@ namespace JSRF_ModTool.DataFormats.JSRF
             header.block_00_start_offset = 160;
             header.block_00_size = block_00_data.Length;
 
-            // File.WriteAllBytes(Path.Combine(@"C:\Users\Mike\Desktop\JSRF\research\Stg_Collision\block_00_compiled_test.dat"), block_00_data);
-
             // import and build grind paths (block_01)
-            byte[] block_01_data = new block_01().build(Path.Combine(source_dir + "grind_paths.txt")); //@"C:\Users\Mike\Desktop\JSRF\Stg_Compiles\Stg_SkatePark\GrindPaths\grind_paths.txt"
-
-            // File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\Stg_Collision\block_01_compiled_test.dat", block_01_data);
-
-
-            // block sizes do not account for the 8 byte flags after the block
-            header.block_01_start_offset = header.block_00_start_offset + header.block_00_size + 8; // +8 bytes are: NaN + Uknown number(this number increases of +1 per Stage)
+            byte[] block_01_data = new block_01().build(Path.Combine(source_dir + "grind_paths.txt"));
             header.block_01_size = block_01_data.Length;
 
 
-
             #region load block_2 from binary resource file
-
-
+            
+            /*
             System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
             System.IO.Stream fs;
             fs = asm.GetManifestResourceStream("JSRF_ModTool.DataFormats.JSRF.Compilers.Data.block_02_base.bin");
@@ -86,75 +77,122 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             // import block_02 copied & extracted from Stg00_.bin
             byte[] block_02_data = result;//File.ReadAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\Stg_bin_block_02\stg52_bin__block_02.bin");
-            header.block_02_start_offset = header.block_01_start_offset + header.block_01_size + 8; // +8 bytes are: NaN + Uknown number(the number increase of +1 per Stage)
-            header.block_02_size = block_02_data.Length; // -4 substract NaN flag
-
+            
+            */
 
             #endregion
 
             #region create block_2 from scratch
-            /*
+            
             block_02 block_02 = new block_02();
             // import block_02 copied & extracted from Stg00_.bin
             byte[] block_02_data = block_02.build(vis_models_count);
             header.block_02_start_offset = header.block_01_start_offset + header.block_01_size + 8; // +8 bytes are: NaN + Uknown number(the number increase of +1 per Stage)
             header.block_02_size = block_02_data.Length; // -4 substract NaN flag
-            */
-
-            /*
-            // write block to file for debugging
-            try
-            {
-                File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\Stg_Collision\block_02_compiled_test.dat", block_02_data);
-            }
-            catch(Exception ex)
-            {
-                //throw ex;
-            }
-            */
-
+            
+            
             #endregion
+
+            // set header infor for block_02
+            header.block_02_start_offset = header.block_01_start_offset + header.block_01_size + 8; // +8 bytes are: NaN + Uknown number(the number increase of +1 per Stage)
+            header.block_02_size = block_02_data.Length; // -4 substract NaN flag
+
 
             #region serialize and write to file
 
             List<byte[]> buffer = new List<byte[]>();
 
+            #region calculate main blocks length and padding
+
+            // calculate the remainder bytes needed to align the data block to a 16 bytes structure
+            // and get the padding data
+            List<byte[]> padding_00 = get_padding_data(Parsing.calc_remainder_padding_full(block_00_data.Length));
+            int padding_00_len = Parsing.calc_length_bytes_list(padding_00);
+
+            List<byte[]> padding_01 = get_padding_data(Parsing.calc_remainder_padding_full(block_01_data.Length));
+            int padding_01_len = Parsing.calc_length_bytes_list(padding_01);
+
+            List<byte[]> padding_02 = get_padding_data(Parsing.calc_remainder_padding_full(block_02_data.Length));
+
+            // in StgXX_.bin header and 3 main blocks of data must have padding to align to a 16 bytes structure
+            // the padding is not just 0000 0000, but specific padding data defined in the method 'get_padding_data(size)'
+            // header.block_xx_size does not include padding
+            // header.block_xx_start_offset includes padding
+            // main header is always 160 bytes (where the 4 last bytes are padding)
+            header.block_01_start_offset = header.block_00_start_offset + header.block_00_size + padding_00_len;
+            header.block_02_start_offset = header.block_01_start_offset + header.block_01_size + padding_01_len;
+            
+            #endregion
+
+
             // serialize and add header to byte[] list
             buffer.Add(header.Serialize());
-            // unknown NaN (1.#QNAN) flag indicating end/start? of block
-            buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+            // header padding
+            buffer.AddRange(get_padding_data(4)); //Parsing.calc_remainder_padding_full(160)
 
 
             // add block_00 to byte[] list
             buffer.Add(block_00_data);
-            // unknown NaN (1.#QNAN) flag indicating end/start? of block
-            buffer.Add(BitConverter.GetBytes((Int32)2147347457));
-            // unknown value, seems to increase as we get to higher number of StgXX_.bin, Stg00_.bin has 66 for this value
-            buffer.Add(BitConverter.GetBytes((Int32)66));
+            if (padding_00 != null)
+            {
+                buffer.AddRange(padding_00);
+            }
 
 
             // add block_01 to byte[] list
             buffer.Add(block_01_data);
-            // unknown NaN (1.#QNAN) flag indicating end/start? of block
-            buffer.Add(BitConverter.GetBytes((Int32)2147347457));
-            // unknown value, seems to increase as we get to higher number of StgXX_.bin, Stg00_.bin has 66 for this value
-            buffer.Add(BitConverter.GetBytes((Int32)66));
+            if (padding_01 != null)
+            {
+                buffer.AddRange(padding_01);
+            }
 
-
-            //File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\research\Stg_bin_block_02\block_02_compiled_test.dat", block_02_data);
 
             // add block_02 to byte[] list
             buffer.Add(block_02_data);
-            // unknown NaN (1.#QNAN) flag indicating end/start? of block
-            // disabled for now, since block_02_data is sampled from Stg00_.bin and already contains NaN end flag
-            //buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+            if (padding_02 != null)
+            {
+                buffer.AddRange(padding_02);
+            }
+
 
             File.WriteAllBytes(media_dir + @"Stage\" + stage_num + ".bin", buffer.SelectMany(byteArr => byteArr).ToArray());
-            // File.WriteAllBytes(@"C:\Users\Mike\Desktop\JSRF\game_files\ModOR\Stage\stg00_.bin", buffer.SelectMany(byteArr => byteArr).ToArray());
 
             #endregion
         }
 
+        // returns padding data, based on the input padding 'size'(length)
+        private List<byte[]> get_padding_data(int size)
+        {
+            List<byte[]> buffer = new List<byte[]>();
+
+            switch (size)
+            {
+                case 16:
+                    // unknown NaN (1.#QNAN) flag indicating end/start? of block
+                    buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+                    // unknown value, seems to increase as we get to higher number of StgXX_.bin, Stg00_.bin has 66 for this value
+                    buffer.Add(BitConverter.GetBytes((Int32)66));
+                    buffer.Add(BitConverter.GetBytes((Int32)1));
+                    buffer.Add(BitConverter.GetBytes((Int32)0));
+                    break;
+                case 12:
+                    buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+                    buffer.Add(BitConverter.GetBytes((Int32)66));
+                    buffer.Add(BitConverter.GetBytes((Int32)1));
+                    break;
+                case 8:
+                    buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+                    buffer.Add(BitConverter.GetBytes((Int32)66));
+                    break;
+                case 4:
+                    buffer.Add(BitConverter.GetBytes((Int32)2147347457));
+                    break;
+                case 0:
+                    return null;
+            }
+
+            return buffer;
+        }
 
         #region header
 
@@ -1030,15 +1068,18 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 public surface_properties_list()
                 {
                     this.items = new List<surfprop_item>();
-                    items.Add(new surfprop_item(0,    "surfprop_pass_through",  "90 45 109"));
-                    items.Add(new surfprop_item(1,    "surfprop_floor",         "65 138 214"));
-                    items.Add(new surfprop_item(4,    "surfprop_wall",          "214 138 65"));
-                    items.Add(new surfprop_item(16,   "surfprop_stairs",        "218 225 40"));
-                    items.Add(new surfprop_item(32,   "surfprop_billboard",     "44 225 40"));
-                    items.Add(new surfprop_item(128,  "surfprop_halfpipe",      "23 23 132"));
-                    items.Add(new surfprop_item(256,  "surfprop_ceiling",       "0 254 232"));
-                    items.Add(new surfprop_item(512,  "surfprop_untouchable",   "225 40 40"));
-                    items.Add(new surfprop_item(8192, "surfprop_ramp",          "205 40 225"));
+                    items.Add(new surfprop_item(0, "surfprop_pass_through", "90 45 109"));
+                    items.Add(new surfprop_item(1, "surfprop_floor", "65 138 214"));
+                    items.Add(new surfprop_item(2, "surfprop_unknown_2", "126 147 147"));
+                    items.Add(new surfprop_item(4, "surfprop_wall", "214 138 65"));
+                    items.Add(new surfprop_item(8, "surfprop_unknown_8", "126 147 147"));
+                    items.Add(new surfprop_item(16, "surfprop_stairs", "218 225 40"));
+                    items.Add(new surfprop_item(32, "surfprop_billboard", "44 225 40"));
+                    items.Add(new surfprop_item(128, "surfprop_halfpipe", "23 23 132"));
+                    items.Add(new surfprop_item(256, "surfprop_ceiling", "0 254 232"));
+                    items.Add(new surfprop_item(512, "surfprop_untouchable", "225 40 40"));
+                    //items.Add(new surfprop_item(1024, "surfprop_unknown_1024", "90 45 109"));
+                    items.Add(new surfprop_item(8192, "surfprop_ramp", "205 40 225"));
                 }
 
                 public struct surfprop_item
@@ -1061,7 +1102,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     if (name.Contains("surfprop_passthrough")) { return 0; }
                     if (name.Contains("surfprop_floor"))       { return 1; }
+                    if (name.Contains("surfprop_unknown_2"))   { return 2; }
                     if (name.Contains("surfprop_wall"))        { return 4; }
+                    if (name.Contains("surfprop_unknown_8"))   { return 8; }
                     if (name.Contains("surfprop_stairs"))      { return 16; }
                     if (name.Contains("surfprop_billboard"))   { return 32; }
                     if (name.Contains("surfprop_halfpipe"))    { return 128; }
@@ -1659,12 +1702,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // for now we create a single gigantic 30k bound PVS 
             // so right now a new stage will not be optimize and all visual models
             // will be rendering constantly
-            public byte[] build(int vis_models_count)
+            public byte[] build(int vis_models_count)   
             {
                 // list of byte array where we add blocks of data to seralize
                 List<byte[]> buffer = new List<byte[]>();
 
-                int PVS_count = 1;
+                int PVS_count = vis_models_count;
 
                 #region main header
 
@@ -1698,12 +1741,30 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 for (int i = 0; i < vis_models_count; i++)
                 {
-                    object_spawn obj_spawn = new object_spawn();
-                    obj_spawn.num_c = 1;
-                    obj_spawn.padding_3 = 1;
-                    obj_spawn.resource_ID = i;
 
-                    buffer.Add(obj_spawn.Serialize());
+                    object_spawn obj_spawn = new object_spawn();
+
+                    obj_spawn.num_c = 1;
+                    obj_spawn.padding_3 = 0;
+                    obj_spawn.resource_ID = i;
+                        /*
+                        object_spawn obj_spawn = new object_spawn();
+                        if (i == 0)
+                        {
+
+                            obj_spawn.num_c =0;
+                            obj_spawn.padding_3 = 0;
+                            obj_spawn.resource_ID = 0;
+                        } else {
+                            obj_spawn.num_c = 1;
+                            obj_spawn.padding_3 = 0;
+                            obj_spawn.resource_ID = i;
+                        }
+                        */
+
+
+
+                        buffer.Add(obj_spawn.Serialize());
                 }
                 
 
@@ -1720,24 +1781,32 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     // 340 bytes per pvs block
                     potential_visibility_set pvs = new potential_visibility_set();
-                    pvs.pvs_bounds_offset = 108 + 340 + ((PVS_count-1) * 340);
-
-
-                    pvs.pvs_links_offset = 108 + 340 + 144 + ((PVS_count - 1) * 340);
+                    pvs.pvs_bounds_offset = 108 + (vis_models_count * 80)  + (PVS_count * 340);
+                    pvs.pvs_links_offset = 108 + (vis_models_count * 80) + (PVS_count * 340) + 144;
 
                     if (i == 0)
                     {
                         pvs.pvs_bounds_count = 1;
                         pvs.pvs_links_count = PVS_count;
+
+
                     }
                     else // set link to first PVS
                     {
+                        if (i == 10)
+                        {
+                            bound_range = 1;
+                        } else
+                        {
+                            bound_range = 30000;
+                        }
                         pvs.pvs_bounds_count = 0;
                         pvs.pvs_links_count = 0;
                     }
 
 
-                    int block_02_size = 108 + 340 + 144 + ((PVS_count - 1) * 340); //+ 4 
+                    int block_02_size = 108 + (vis_models_count * 80) + (PVS_count * 340) + 144 + (pvs.pvs_links_count * 4); //+ 4 
+
 
                     // set block_02 file size in PVS header
                     pvs.unk_16_block02_size = block_02_size;
@@ -1756,15 +1825,31 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     pvs.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
                     pvs.v05 = new Vector3(-bound_range, bound_range, -bound_range);
 
+                    /*
+                    pvs.v06 = new Vector3(1, 0, 0);
+                    pvs.v07 = new Vector3(0, 1, 0);
+                    pvs.v08 = new Vector3(0, 0, 1);
+
+                    pvs.v09 = new Vector3(1, 0, 0);
+                    pvs.v10 = new Vector3(0, 1, 0);
+                    pvs.v11 = new Vector3(0, 0, 1);
+                    */
+
+                    
                     pvs.v06 = new Vector3(0, -1, 0);
                     pvs.v07 = new Vector3(0, 0, -1);
                     pvs.v08 = new Vector3(1, 0, 0);
+
                     pvs.v09 = new Vector3(0, 0, 1);
                     pvs.v10 = new Vector3(-1, 0, 0);
                     pvs.v11 = new Vector3(0, 1, 0);
 
+                    // if set to zero, player's reflective materials become bright white
                     pvs.v12 = new Vector3(-0.4163f, -0.7199f, -0.6334f);
                     pvs.v13 = new Vector3(-0.4163f, -0.7199f, -0.6334f);
+                    
+                    //pvs.v12 = new Vector3();
+                    //pvs.v13 = new Vector3();
 
                     // default values (same values accross multiple files)
                     pvs.unk_2 = 2130706432;
@@ -1790,12 +1875,31 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 pvs_bbox.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
                 pvs_bbox.v05 = new Vector3(-bound_range, bound_range, -bound_range);
 
+                /*
                 pvs_bbox.vs00 = new Vector3(0, -1, 0);
                 pvs_bbox.vs01 = new Vector3(0, 0, -1);
                 pvs_bbox.vs02 = new Vector3(1, 0, 0);
                 pvs_bbox.vs03 = new Vector3(0, 0, 1);
                 pvs_bbox.vs04 = new Vector3(-1, 0, 0);
                 pvs_bbox.vs05 = new Vector3(0, 1, 0);
+                */
+
+                pvs_bbox.vs00 = new Vector3(0, -1, 0);
+                pvs_bbox.vs01 = new Vector3(0, 0, -1);
+                pvs_bbox.vs02 = new Vector3(1, 0, 0);
+                pvs_bbox.vs03 = new Vector3(0, 0, 1);
+                pvs_bbox.vs04 = new Vector3(-1, 0, 0);
+                pvs_bbox.vs05 = new Vector3(0, 1, 0);
+
+                /*
+                pvs_bbox.vs00 = new Vector3(1, 0, 0);
+                pvs_bbox.vs01 = new Vector3(0, 1, 0);
+                pvs_bbox.vs02 = new Vector3(0, 0, 1);
+
+                pvs_bbox.vs03 = new Vector3(1, 0, 0);
+                pvs_bbox.vs04 = new Vector3(0, 1, 0);
+                pvs_bbox.vs05 = new Vector3(0, 0, 1);
+                */
 
                 #endregion
 
@@ -1815,8 +1919,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     buffer.Add(BitConverter.GetBytes((Int32)i));
                 }
 
+#if DEBUG
+                BinaryWriter br = new BinaryWriter(File.OpenWrite(@"C:\Users\Mike\Desktop\JSRF\research\Stg_bin_block_02\custom_compile\block_02_compile_test_2.dat"));
+                br.Write(buffer.SelectMany(byteArr => byteArr).ToArray());
+#endif
                 return buffer.SelectMany(byteArr => byteArr).ToArray();
-
                 #endregion
 
 

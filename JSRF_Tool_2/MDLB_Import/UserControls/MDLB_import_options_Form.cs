@@ -17,6 +17,7 @@ namespace JSRF_ModTool.MDLB_Import
         public byte[] MDLB_import;
         public string main_SMD_filepath;
         public int srcMDLB_vert_size; // vertex def size of last part
+        public int srcMDLB_mat_count;
         //public int srcMDLB_model_parts_cnt;
         //public int srcMDLB_materials_count;
 
@@ -40,6 +41,8 @@ namespace JSRF_ModTool.MDLB_Import
             panel_models.VerticalScroll.Visible = true;
 
             srcMDLB_vert_size = Main.current_model.VertexBlock_header_List[Main.current_model.Model_Parts_header_List.Count-1].vertex_def_size;
+            srcMDLB_mat_count = Main.current_model.header.materials_count;
+
 
             txtb_drawDist_w.Text = Main.current_model.Model_Parts_header_List[Main.current_model.Model_Parts_header_List.Count - 1].draw_distance.ToString();
             //srcMDLB_materials_count = Main.model.materials_List.Count;
@@ -320,12 +323,12 @@ namespace JSRF_ModTool.MDLB_Import
                     {
                         Material_Inspector mi_last = mat_inspector_list[mat_inspector_list.Count - 1];
                         // set material inspector values taken from last material inspector
-                       ((Material_Inspector)ct).set_values(mi_last.get_color(), mi_last.get_shader_type(), mi_last.get_unk_id(), mi_last.get_hb());
+                       ((Material_Inspector)ct).set_values(mi_last.get_color(), mi_last.get_shader_type(), mi_last.get_unk_id1(), mi_last.get_unk_id2(), mi_last.get_hb());
 
                     } else {
                         // set material inspector values from input Material (mat)
                         Materials.color color = new Materials.color(mat.color.R, mat.color.G, mat.color.B, mat.color.A);
-                        ((Material_Inspector)ct).set_values(color, mat.shader_id, mat.unk_id2, mat.HB);
+                        ((Material_Inspector)ct).set_values(color, mat.shader_id, mat.unk_id1, mat.unk_id2, mat.HB);
                     }
 
                  
@@ -394,11 +397,11 @@ namespace JSRF_ModTool.MDLB_Import
 
                 #endregion
 
-                materials.Add(new MDLB_Import.MDLB_classes.material(new MDLB_Import.MDLB_classes.color(c.B, c.G, c.R, c.A), shader_id, Convert.ToInt32(mi.txtb_unk_id2.Text), Convert.ToSingle(mi.txtb_hb.Text)));
+                materials.Add(new MDLB_Import.MDLB_classes.material(new MDLB_Import.MDLB_classes.color(c.B, c.G, c.R, c.A), shader_id, Convert.ToInt32(mi.txtb_unk_id1.Text), Convert.ToInt32(mi.txtb_unk_id2.Text), Convert.ToSingle(mi.txtb_hb.Text)));
             }
 
             MDLB_compiler MDLB_build = new MDLB_compiler();
-            MDLB_import = MDLB_build.build(mdlPart_import_settings_List, materials); // 
+            MDLB_import = MDLB_build.build(mdlPart_import_settings_List, materials, srcMDLB_mat_count); // 
 
             this.DialogResult = DialogResult.OK;
            // this.Close();

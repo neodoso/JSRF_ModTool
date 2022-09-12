@@ -20,7 +20,7 @@ namespace JSRF_ModTool.MDLB_Import
             InitializeComponent();
         }
 
-        public void set_values(Materials.color c, int shader_id, int unk_id, float hb)
+        public void set_values(Materials.color c, int shader_id, int unk_id1, int unk_id2, float hb)
         {
             // set color
             color_0.set_colors(c.R, c.G, c.B, c.A);
@@ -63,7 +63,8 @@ namespace JSRF_ModTool.MDLB_Import
             }
             #endregion
 
-            txtb_unk_id2.Text = unk_id.ToString();
+            txtb_unk_id1.Text = unk_id1.ToString();
+            txtb_unk_id2.Text = unk_id2.ToString();
             txtb_hb.Text = hb.ToString();
             lab_id.Text = "[mat_" + id.ToString() + "]";
         }
@@ -95,7 +96,12 @@ namespace JSRF_ModTool.MDLB_Import
 
         }
 
-        public int get_unk_id()
+        public int get_unk_id1()
+        {
+            return Convert.ToInt32(txtb_unk_id1.Text);
+        }
+
+        public int get_unk_id2()
         {
             return Convert.ToInt32(txtb_unk_id2.Text);
         }

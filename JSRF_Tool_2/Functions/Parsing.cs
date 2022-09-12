@@ -29,6 +29,11 @@ namespace JSRF_ModTool.Functions
             }
         }
 
+        public static int calc_remainder_padding_full(int byte_count)
+        {
+            return (int)((1 - ((byte_count / 16f) % 1)) * 16);
+        }
+
 
         public static Int32 calc_length_bytes_list(List<byte[]> buff)
         {

@@ -43,7 +43,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
     public class MDLB 
     { 
-       public MDLB_header header = new MDLB_header();
+        public MDLB_header header = new MDLB_header();
         public List<Model_Part_header> Model_Parts_header_List = new List<Model_Part_header>();
 
         public List<material> materials_List = new List<material>();
@@ -278,8 +278,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             public color color { get; set; } // its BGRA instead of RGBA (invert color order)
             public Int32 shader_id { get; set; } // if this = FFFFFF color_0 is used // otherwise external material or texture?
+            public Int32 unk_id1 { get; set; }
             public Int32 unk_id2 { get; set; }
-            public Int32 pad12 { get; set; }
             public float HB { get; set; }
 
             public byte[] serialize()
@@ -288,8 +288,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 b.Add(color.Serialize());
                 b.Add(BitConverter.GetBytes(shader_id));
+                b.Add(BitConverter.GetBytes(unk_id1));
                 b.Add(BitConverter.GetBytes(unk_id2));
-                b.Add(BitConverter.GetBytes(pad12));
                 b.Add(BitConverter.GetBytes(HB));
 
                 return b.SelectMany(byteArr => byteArr).ToArray();

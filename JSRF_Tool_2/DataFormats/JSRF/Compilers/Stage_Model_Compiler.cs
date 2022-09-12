@@ -7,6 +7,7 @@ using JSRF_ModTool.Vector;
 using JSRF_ModTool.DataFormats._3D_Model_Formats;
 using System.IO;
 using System.Text.RegularExpressions;
+using JSRF_ModTool.Functions.Math;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
@@ -19,7 +20,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             textures = new List<texture_info>();
         }
 
-        private bool debug_draw_distance = true;
+        private bool debug_draw_distance = false;
 
         public class texture_info
         {
@@ -81,18 +82,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #endregion
 
-            //obj.flip_model_for_Stage();
-
             
             // flip UV map     
             for (int i = 0; i < obj.mesh.uv_buffer.Count; i++)
             {
-                //obj.mesh.uv_buffer[i].X = ((obj.mesh.uv_buffer[i].X) * -1f) + 1;
                 obj.mesh.uv_buffer[i].Y = ((obj.mesh.uv_buffer[i].Y) * -1f) + 1;
             }
-
-
-
 
             #region process materials groups and textures  and materials from the .mtl
 
@@ -116,8 +111,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 // for each material form the mtl file
                 for (int e = 0; e < obj.mtl_materials_list.Count; e++)
                 {
+                    if (obj.mesh.material_groups[i].texture_filepath == "")
+                    {
+                        System.Windows.Forms.MessageBox.Show("Error: OBJ material has no texture defined:\n OBJ File: " + obj.filepath + "\n Mesh: " + obj.mesh.name + "\n" + "Material: " + obj.mesh.material_groups[i].mat_name);
+                        //obj.mesh.material_groups[i].texture_filepath = "C:\\Users\\Mike\\Desktop\\JSRF\\stg_demo_assets\\dev\\surfprop_unknown_2.png";
+                        return new byte[0];
+                    }
+
                     // if material group's texture filepath matches the texture filepath in .mtl material, create ID for the texture
-                    if (obj.mesh.material_groups[i].texture_filepath.ToLower() == obj.mtl_materials_list[e].texture_filepath.ToLower())
+                    if (obj.mesh.material_groups[i].texture_filepath.ToLower() == obj.mtl_materials_list[e].texture_filepath.ToLower()) // || obj.mesh.material_groups[i].texture_filepath == ""
                     {
 
 
@@ -194,27 +196,35 @@ namespace JSRF_ModTool.DataFormats.JSRF
             //Vector3 model_center = new Vector3();
             bounds bbox = new bounds();
 
+            List<System.Numerics.Vector3> verts = new List<System.Numerics.Vector3>();  
+
             // loop through the mesh vertex buffer
             // to get all vertices positions to calculate min/max bouding box and center of the material group mesh
             for (int o = 0 ; o < obj.mesh.vertex_buffer.Count; o++)
             {
                 Vector3 vert = obj.mesh.vertex_buffer[o];
-
+                verts.Add(new System.Numerics.Vector3(vert.X, vert.Y, vert.Z));
                 bbox.add_point(vert);
 
                 //model_center = new Vector3(model_center.X + vert.X, model_center.Y + vert.Y, model_center.Z + vert.Z);
             }
 
+            BoundingSphere sphere = new BoundingSphere();
 
+            (System.Numerics.Vector3 center, float radius) = BoundingSphere.GetMinimumBoundingSphere(verts);
             // divide ctr floats by number of vertices
-           // model_center = new Vector3(model_center.X / obj.mesh_.vertex_buffer.Count, model_center.Y / obj.mesh_.vertex_buffer.Count, model_center.Z / obj.mesh_.vertex_buffer.Count);
+            // model_center = new Vector3(model_center.X / obj.mesh_.vertex_buffer.Count, model_center.Y / obj.mesh_.vertex_buffer.Count, model_center.Z / obj.mesh_.vertex_buffer.Count);
 
 
             head.model_center = bbox.center;
 
             // TODO : maybe have the possiblity to set a custom model_radius in case it's rendering turns off in some cases if the player goes out of that radius
             // calculate mesh draw distance radius from it's bounding box min/max and multiply by a factor (of 1.55f right now)
-            head.model_radius = (Math.Abs((Math.Abs(bbox.Xmax) - Math.Abs(bbox.Xmin))) + Math.Abs((Math.Abs(bbox.Ymax) - Math.Abs(bbox.Ymin))) + Math.Abs((Math.Abs(bbox.Zmax) - Math.Abs(bbox.Zmin)))) * (1.55f);
+            //head.model_radius = (Math.Abs((Math.Abs(bbox.Xmax) - Math.Abs(bbox.Xmin))) + Math.Abs((Math.Abs(bbox.Ymax) - Math.Abs(bbox.Ymin))) + Math.Abs((Math.Abs(bbox.Zmax) - Math.Abs(bbox.Zmin)))) * (1.55f); //
+            //
+            head.model_radius = radius * 2f;
+
+
 
 #if DEBUG
             // force mesh draw distance radius
@@ -292,7 +302,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
             //List<byte[]> mat_groups_list = new List<byte[]>();
             for (int i = 0; i < obj.mesh.material_groups.Count; i++)
             {
-                //material_group mat_group = new material_group();
                 OBJ.obj_mesh.material_group mg = obj.mesh.material_groups[i];
                 material_group mat_group  = new material_group();
                 mat_group.triangle_count = mg.size;
@@ -319,25 +328,34 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 // get mesh's material group
                 OBJ.obj_mesh.material_group mg = obj.mesh.material_groups[i];
 
+                verts = new List<System.Numerics.Vector3>();
                 // loop through the mat's triangles (from mg.start_index; to  mg.start_index + mg.size) * 3
                 // (times 3 since we need 3 vertices for one triangle from face indices)
                 // to get all vertices positions to calculate min/max bouding box and center of the material group mesh
-                for (int o = mg.start_index * 3; o < (mg.start_index  + mg.size) * 3; o++)
+                for (int o = mg.start_index * 3; o < (mg.start_index + mg.size) * 3; o++)
                 {
                     if (o >= obj.mesh.face_indices.Count) { break; }
 
                     Vector3 vert = obj.mesh.vertex_buffer[obj.mesh.face_indices[o] - 1];
+                    verts.Add(new System.Numerics.Vector3(vert.X, vert.Y, vert.Z));
                     bounds.add_point(vert);
                 }
 
+                
+                //float radius = (Math.Abs((Ma(System.Numerics.Vector3 center, float radius) = BoundingSphere.GetMinimumBoundingSphere(verts);th.Abs(bounds.Xmax) - Math.Abs(bounds.Xmin))) + Math.Abs((Math.Abs(bounds.Ymax) - Math.Abs(bounds.Ymin))) + Math.Abs((Math.Abs(bounds.Zmax) - Math.Abs(bounds.Zmin)))) * (1.55f); // 
 
-                float radius = Math.Abs((Math.Abs(bounds.Xmax) - Math.Abs(bounds.Xmin))) + Math.Abs((Math.Abs(bounds.Ymax) - Math.Abs(bounds.Ymin))) + Math.Abs((Math.Abs(bounds.Zmax) - Math.Abs(bounds.Zmin)));
-
+#if DEBUG
+                if (debug_draw_distance)
+                {
+                    radius = 4000f;
+                }
+#endif
+                (center, radius) = BoundingSphere.GetMinimumBoundingSphere(verts);
                 material_group_boundary mat_group_Boundary = new material_group_boundary();
 
                 mat_group_Boundary.position = bounds.center;
 
-                mat_group_Boundary.radius = radius;
+                mat_group_Boundary.radius = radius * 2f;
  
                 file_buffers_list.Add(mat_group_Boundary.Serialize());
             }

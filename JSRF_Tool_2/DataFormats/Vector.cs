@@ -157,16 +157,16 @@ namespace JSRF_ModTool.Vector
 
         private int point_count { get; set; } // count points added, to calculate the center of thee mesh by dividing the sum of XYZ's components
 
-        private Vector3 mCenter = new Vector3();
+        private Vector3 mesh_center = new Vector3();
 
         // center of the mesh
         public Vector3 center
         {
             get 
             {
-                if (mCenter != null)
+                if (mesh_center != null)
                 {
-                    return new Vector3(mCenter.X / point_count, mCenter.Y / point_count, mCenter.Z / point_count);
+                    return mesh_center / point_count; //new Vector3(mesh_center.X / point_count, mesh_center.Y / point_count, mesh_center.Z / point_count);
                 } else
                 {
                     return new Vector3(0f, 0f, 0f);
@@ -198,7 +198,7 @@ namespace JSRF_ModTool.Vector
             Ymax = pnt.Y > Ymax ? Ymax = pnt.Y : Ymax;
             Zmax = pnt.Z > Zmax ? Zmax = pnt.Z : Zmax;
 
-            mCenter = new Vector3(mCenter.X + pnt.X, mCenter.Y + pnt.Y, mCenter.Z + pnt.Z);
+            mesh_center = new Vector3(mesh_center.X + pnt.X, mesh_center.Y + pnt.Y, mesh_center.Z + pnt.Z);
             point_count++;
         }
 
@@ -221,10 +221,10 @@ namespace JSRF_ModTool.Vector
             public Vector3 A { get; set; } = new Vector3();
             public Vector3 B { get; set; } = new Vector3();
 
-            public bbox(Vector3 _A, Vector3 _B)
+            public bbox(Vector3 A, Vector3 B)
             {
-                this.A = _A;
-                this.B = _B;
+                this.A = A;
+                this.B = B;
             }
         }
     }

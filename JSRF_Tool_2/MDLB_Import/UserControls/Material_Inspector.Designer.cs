@@ -41,16 +41,18 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
             this.color_0 = new JSRF_ModTool.MDLB_Import.Color();
+            this.txtb_unk_id1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtb_hb
             // 
-            this.txtb_hb.Location = new System.Drawing.Point(511, 50);
+            this.txtb_hb.Location = new System.Drawing.Point(526, 50);
             this.txtb_hb.Name = "txtb_hb";
-            this.txtb_hb.Size = new System.Drawing.Size(42, 20);
+            this.txtb_hb.Size = new System.Drawing.Size(73, 20);
             this.txtb_hb.TabIndex = 3;
-            this.txtb_hb.Text = "50";
+            this.txtb_hb.Text = "0";
             this.txtb_hb.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtb_hb.TextChanged += new System.EventHandler(this.txtb_hb_TextChanged);
             this.txtb_hb.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_hb_KeyPress);
@@ -58,13 +60,13 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label4.Location = new System.Drawing.Point(485, 34);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.Black;
+            this.label4.Location = new System.Drawing.Point(533, 34);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(95, 13);
+            this.label4.Size = new System.Drawing.Size(50, 13);
             this.label4.TabIndex = 1;
-            this.label4.Text = "Unknown value";
+            this.label4.Text = "Unk ID 3";
             // 
             // label2
             // 
@@ -90,21 +92,21 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label3.Location = new System.Drawing.Point(381, 33);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.Black;
+            this.label3.Location = new System.Drawing.Point(451, 34);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 13);
+            this.label3.Size = new System.Drawing.Size(50, 13);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Unknown ID";
+            this.label3.Text = "Unk ID 2";
             // 
             // txtb_unk_id2
             // 
-            this.txtb_unk_id2.Location = new System.Drawing.Point(379, 49);
+            this.txtb_unk_id2.Location = new System.Drawing.Point(444, 50);
             this.txtb_unk_id2.Name = "txtb_unk_id2";
-            this.txtb_unk_id2.Size = new System.Drawing.Size(81, 20);
+            this.txtb_unk_id2.Size = new System.Drawing.Size(73, 20);
             this.txtb_unk_id2.TabIndex = 2;
-            this.txtb_unk_id2.Text = "16777215";
+            this.txtb_unk_id2.Text = "0";
             this.txtb_unk_id2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtb_unk_id2.TextChanged += new System.EventHandler(this.txtb_hb_TextChanged);
             this.txtb_unk_id2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_hb_KeyPress);
@@ -174,10 +176,34 @@
             this.color_0.Size = new System.Drawing.Size(166, 47);
             this.color_0.TabIndex = 0;
             // 
+            // txtb_unk_id1
+            // 
+            this.txtb_unk_id1.Location = new System.Drawing.Point(363, 50);
+            this.txtb_unk_id1.Name = "txtb_unk_id1";
+            this.txtb_unk_id1.Size = new System.Drawing.Size(73, 20);
+            this.txtb_unk_id1.TabIndex = 11;
+            this.txtb_unk_id1.Text = "0";
+            this.txtb_unk_id1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtb_unk_id1.TextChanged += new System.EventHandler(this.txtb_hb_TextChanged);
+            this.txtb_unk_id1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_hb_KeyPress);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Black;
+            this.label1.Location = new System.Drawing.Point(374, 34);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(50, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Unk ID 1";
+            // 
             // Material_Inspector
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.txtb_unk_id1);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -214,5 +240,7 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
+        public System.Windows.Forms.TextBox txtb_unk_id1;
+        private System.Windows.Forms.Label label1;
     }
 }

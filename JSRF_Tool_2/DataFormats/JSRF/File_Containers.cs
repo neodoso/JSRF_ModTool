@@ -1009,6 +1009,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             bool first_texture = true;
 
+
             // for each child item inside nNORM
             for (int c = 0; c < nIndexed.items.Count; c++)
             {
@@ -1029,31 +1030,38 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     // Int32 : data block size 
                     // data block size minus length of header [texture_ids_counts + texture_ids_list]
                     item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length - (4 + textures_ids_count * 4)));
-                    item_data_list.Add(BitConverter.GetBytes(0)); // unk_ID
+                    item_data_list.Add(BitConverter.GetBytes(1)); // unk_ID
 
                 }
                 // Texture: if child.type == 0  then this is the start of a list of textures
                 // the first block has a different (8 bytes) header: [int32 = 0]  [int32 = block_size]
                 else if (item.type == File_Containers.item_data_type.Texture)
                 {
+
+                    // first texture has 4 zero bytes
                     if (first_texture)
                     {
                         item_data_list.Add(BitConverter.GetBytes((Int32)0)); // Int32 : item_type
                         item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
                         first_texture = false;
-                    } 
+                    }
                     else
                     {   // Texture: 4 byte header defining block_size
                         item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length)); //  Int32 : size
                     }
+
                 }
-
-
 
                 #endregion
 
                 // add item data
                 item_data_list.Add(item.data);
+
+                // end of file by texture should end with 4 zero bytes
+                if (item.type == File_Containers.item_data_type.Texture && c == nIndexed.items.Count - 1)
+                {
+                    item_data_list.Add(BitConverter.GetBytes((Int32)0)); // Int32 : padding??
+                }
             }
 
             // merge list of byte arrays into a single array and return it
