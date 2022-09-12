@@ -1,5 +1,5 @@
 # JSRF ModTool
- Jet Set Radio Future game modding tool
+Modding tool for the original xbox game Jet Set Radio Future (JSRF)
 
 Tutorial about the tool: https://jsrf-inside.blogspot.com/2016/05/jsrf-tool-20b-model-viewer-texture.html
 
