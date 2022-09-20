@@ -13,6 +13,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
 {
     class Stage_Model_Compiler
     {
+        private int render_radius_multiplier = 5;
+
         public List<texture_info> textures { get; set; }
 
         public Stage_Model_Compiler()
@@ -222,7 +224,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // calculate mesh draw distance radius from it's bounding box min/max and multiply by a factor (of 1.55f right now)
             //head.model_radius = (Math.Abs((Math.Abs(bbox.Xmax) - Math.Abs(bbox.Xmin))) + Math.Abs((Math.Abs(bbox.Ymax) - Math.Abs(bbox.Ymin))) + Math.Abs((Math.Abs(bbox.Zmax) - Math.Abs(bbox.Zmin)))) * (1.55f); //
             //
-            head.model_radius = radius * 2f;
+            head.model_radius = radius * render_radius_multiplier;
 
 
 
@@ -355,7 +357,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 mat_group_Boundary.position = bounds.center;
 
-                mat_group_Boundary.radius = radius * 2f;
+                mat_group_Boundary.radius = radius * render_radius_multiplier;
  
                 file_buffers_list.Add(mat_group_Boundary.Serialize());
             }

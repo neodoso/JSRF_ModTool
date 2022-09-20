@@ -97,7 +97,13 @@ namespace JSRF_ModTool
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
 
-            JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+            //JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Disp\SprNorm1.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[82];
 
             #region loading methods
 

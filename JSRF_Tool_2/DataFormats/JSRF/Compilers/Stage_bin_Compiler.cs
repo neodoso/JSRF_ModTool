@@ -1793,6 +1793,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     }
                     else // set link to first PVS
                     {
+                        /*
                         if (i == 10)
                         {
                             bound_range = 1;
@@ -1800,9 +1801,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         {
                             bound_range = 30000;
                         }
+                        */
                         pvs.pvs_bounds_count = 0;
                         pvs.pvs_links_count = 0;
                     }
+
 
 
                     int block_02_size = 108 + (vis_models_count * 80) + (PVS_count * 340) + 144 + (pvs.pvs_links_count * 4); //+ 4 
