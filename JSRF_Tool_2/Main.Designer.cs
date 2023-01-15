@@ -89,7 +89,7 @@
             this.pictureBox_texture_editor = new System.Windows.Forms.PictureBox();
             this.tab_mat_editor = new System.Windows.Forms.TabPage();
             this.panel_mat_editor = new System.Windows.Forms.Panel();
-            this.rtxtb_material = new System.Windows.Forms.RichTextBox();
+            this.rtxtb_materials = new System.Windows.Forms.RichTextBox();
             this.btn_save_mat_data = new System.Windows.Forms.Button();
             this.tab_StageComp = new System.Windows.Forms.TabPage();
             this.panel6 = new System.Windows.Forms.Panel();
@@ -148,6 +148,31 @@
             this.bgWorker_StageCompiler = new System.ComponentModel.BackgroundWorker();
             this.panel_compiling_stage = new System.Windows.Forms.Panel();
             this.label_compiling_stage = new System.Windows.Forms.Label();
+            this.tab_SoundEditor = new System.Windows.Forms.TabPage();
+            this.btn_play_sound = new System.Windows.Forms.Button();
+            this.btn_import_sound = new System.Windows.Forms.Button();
+            this.btn_export_sound = new System.Windows.Forms.Button();
+            this.btn_export_all_sounds = new System.Windows.Forms.Button();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.panel9 = new System.Windows.Forms.Panel();
+            this.panel10 = new System.Windows.Forms.Panel();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.cb_auto_play_sound = new System.Windows.Forms.CheckBox();
+            this.tab_About = new System.Windows.Forms.TabPage();
+            this.linkLabel_jsrf_inside = new System.Windows.Forms.LinkLabel();
+            this.label31 = new System.Windows.Forms.Label();
+            this.label32 = new System.Windows.Forms.Label();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.panel11 = new System.Windows.Forms.Panel();
+            this.label38 = new System.Windows.Forms.Label();
+            this.linkLabel_github = new System.Windows.Forms.LinkLabel();
+            this.label39 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
@@ -167,6 +192,12 @@
             this.panel8.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel_compiling_stage.SuspendLayout();
+            this.tab_SoundEditor.SuspendLayout();
+            this.panel7.SuspendLayout();
+            this.panel9.SuspendLayout();
+            this.panel10.SuspendLayout();
+            this.tab_About.SuspendLayout();
+            this.panel11.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -213,8 +244,10 @@
             this.tabControl1.Controls.Add(this.tab_ModelViewer);
             this.tabControl1.Controls.Add(this.tab_TextureViewer);
             this.tabControl1.Controls.Add(this.tab_mat_editor);
+            this.tabControl1.Controls.Add(this.tab_SoundEditor);
             this.tabControl1.Controls.Add(this.tab_StageComp);
             this.tabControl1.Controls.Add(this.tab_Settings);
+            this.tabControl1.Controls.Add(this.tab_About);
             this.tabControl1.Location = new System.Drawing.Point(479, 25);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -676,7 +709,7 @@
             this.btn_import_mdl.Name = "btn_import_mdl";
             this.btn_import_mdl.Size = new System.Drawing.Size(106, 25);
             this.btn_import_mdl.TabIndex = 10;
-            this.btn_import_mdl.Text = "Import MDL";
+            this.btn_import_mdl.Text = "Import model";
             this.btn_import_mdl.UseVisualStyleBackColor = true;
             this.btn_import_mdl.Click += new System.EventHandler(this.Btn_import_mdl_Click);
             // 
@@ -700,7 +733,7 @@
             this.btn_extract_mdl.Name = "btn_extract_mdl";
             this.btn_extract_mdl.Size = new System.Drawing.Size(105, 23);
             this.btn_extract_mdl.TabIndex = 6;
-            this.btn_extract_mdl.Text = "Export MDL";
+            this.btn_extract_mdl.Text = "Export model";
             this.btn_extract_mdl.UseVisualStyleBackColor = false;
             this.btn_extract_mdl.Click += new System.EventHandler(this.Btn_extract_mdl_lastp_Click);
             // 
@@ -840,21 +873,21 @@
             // panel_mat_editor
             // 
             this.panel_mat_editor.BackColor = System.Drawing.Color.LightGray;
-            this.panel_mat_editor.Controls.Add(this.rtxtb_material);
+            this.panel_mat_editor.Controls.Add(this.rtxtb_materials);
             this.panel_mat_editor.Controls.Add(this.btn_save_mat_data);
             this.panel_mat_editor.Location = new System.Drawing.Point(-1, 2);
             this.panel_mat_editor.Name = "panel_mat_editor";
             this.panel_mat_editor.Size = new System.Drawing.Size(743, 683);
             this.panel_mat_editor.TabIndex = 9;
             // 
-            // rtxtb_material
+            // rtxtb_materials
             // 
-            this.rtxtb_material.BackColor = System.Drawing.SystemColors.Menu;
-            this.rtxtb_material.Location = new System.Drawing.Point(0, -2);
-            this.rtxtb_material.Name = "rtxtb_material";
-            this.rtxtb_material.Size = new System.Drawing.Size(247, 682);
-            this.rtxtb_material.TabIndex = 7;
-            this.rtxtb_material.Text = "";
+            this.rtxtb_materials.BackColor = System.Drawing.SystemColors.Menu;
+            this.rtxtb_materials.Location = new System.Drawing.Point(0, -2);
+            this.rtxtb_materials.Name = "rtxtb_materials";
+            this.rtxtb_materials.Size = new System.Drawing.Size(247, 682);
+            this.rtxtb_materials.TabIndex = 7;
+            this.rtxtb_materials.Text = "";
             // 
             // btn_save_mat_data
             // 
@@ -1465,6 +1498,276 @@
             this.label_compiling_stage.TabIndex = 0;
             this.label_compiling_stage.Text = "Compiling Stage...";
             // 
+            // tab_SoundEditor
+            // 
+            this.tab_SoundEditor.BackColor = System.Drawing.Color.LightGray;
+            this.tab_SoundEditor.Controls.Add(this.cb_auto_play_sound);
+            this.tab_SoundEditor.Controls.Add(this.panel10);
+            this.tab_SoundEditor.Controls.Add(this.panel9);
+            this.tab_SoundEditor.Controls.Add(this.panel7);
+            this.tab_SoundEditor.Controls.Add(this.btn_import_sound);
+            this.tab_SoundEditor.Controls.Add(this.btn_export_all_sounds);
+            this.tab_SoundEditor.Controls.Add(this.btn_export_sound);
+            this.tab_SoundEditor.Controls.Add(this.btn_play_sound);
+            this.tab_SoundEditor.Location = new System.Drawing.Point(4, 22);
+            this.tab_SoundEditor.Name = "tab_SoundEditor";
+            this.tab_SoundEditor.Size = new System.Drawing.Size(742, 686);
+            this.tab_SoundEditor.TabIndex = 6;
+            this.tab_SoundEditor.Text = "Sound Editor";
+            // 
+            // btn_play_sound
+            // 
+            this.btn_play_sound.Location = new System.Drawing.Point(14, 41);
+            this.btn_play_sound.Name = "btn_play_sound";
+            this.btn_play_sound.Size = new System.Drawing.Size(126, 38);
+            this.btn_play_sound.TabIndex = 32;
+            this.btn_play_sound.Text = "Play Sound";
+            this.btn_play_sound.UseVisualStyleBackColor = true;
+            this.btn_play_sound.Click += new System.EventHandler(this.btn_play_sound_Click);
+            // 
+            // btn_import_sound
+            // 
+            this.btn_import_sound.Location = new System.Drawing.Point(14, 239);
+            this.btn_import_sound.Name = "btn_import_sound";
+            this.btn_import_sound.Size = new System.Drawing.Size(126, 38);
+            this.btn_import_sound.TabIndex = 32;
+            this.btn_import_sound.Text = "Import Sound(s)";
+            this.btn_import_sound.UseVisualStyleBackColor = true;
+            this.btn_import_sound.Click += new System.EventHandler(this.btn_import_sound_Click);
+            // 
+            // btn_export_sound
+            // 
+            this.btn_export_sound.Location = new System.Drawing.Point(14, 136);
+            this.btn_export_sound.Name = "btn_export_sound";
+            this.btn_export_sound.Size = new System.Drawing.Size(126, 38);
+            this.btn_export_sound.TabIndex = 32;
+            this.btn_export_sound.Text = "Export as .wav";
+            this.btn_export_sound.UseVisualStyleBackColor = true;
+            this.btn_export_sound.Click += new System.EventHandler(this.btn_export_sound_Click);
+            // 
+            // btn_export_all_sounds
+            // 
+            this.btn_export_all_sounds.Location = new System.Drawing.Point(144, 136);
+            this.btn_export_all_sounds.Name = "btn_export_all_sounds";
+            this.btn_export_all_sounds.Size = new System.Drawing.Size(120, 38);
+            this.btn_export_all_sounds.TabIndex = 32;
+            this.btn_export_all_sounds.Text = "Export all as .wav";
+            this.btn_export_all_sounds.UseVisualStyleBackColor = true;
+            this.btn_export_all_sounds.Click += new System.EventHandler(this.btn_export_all_sounds_Click);
+            // 
+            // panel7
+            // 
+            this.panel7.BackColor = System.Drawing.Color.DimGray;
+            this.panel7.Controls.Add(this.label28);
+            this.panel7.Location = new System.Drawing.Point(0, 1);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(783, 25);
+            this.panel7.TabIndex = 33;
+            // 
+            // panel9
+            // 
+            this.panel9.BackColor = System.Drawing.Color.DimGray;
+            this.panel9.Controls.Add(this.label29);
+            this.panel9.Location = new System.Drawing.Point(0, 94);
+            this.panel9.Name = "panel9";
+            this.panel9.Size = new System.Drawing.Size(783, 25);
+            this.panel9.TabIndex = 34;
+            // 
+            // panel10
+            // 
+            this.panel10.BackColor = System.Drawing.Color.DimGray;
+            this.panel10.Controls.Add(this.label30);
+            this.panel10.Location = new System.Drawing.Point(0, 198);
+            this.panel10.Name = "panel10";
+            this.panel10.Size = new System.Drawing.Size(783, 25);
+            this.panel10.TabIndex = 35;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.label30.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label30.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label30.Location = new System.Drawing.Point(3, 3);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(161, 20);
+            this.label30.TabIndex = 1;
+            this.label30.Text = "Import Sound Files";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.label29.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label29.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label29.Location = new System.Drawing.Point(3, 3);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(166, 20);
+            this.label29.TabIndex = 1;
+            this.label29.Text = "Extract Sound Files";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.label28.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label28.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label28.Location = new System.Drawing.Point(3, 3);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(99, 20);
+            this.label28.TabIndex = 1;
+            this.label28.Text = "Play Sound";
+            // 
+            // cb_auto_play_sound
+            // 
+            this.cb_auto_play_sound.AutoSize = true;
+            this.cb_auto_play_sound.Location = new System.Drawing.Point(496, 71);
+            this.cb_auto_play_sound.Name = "cb_auto_play_sound";
+            this.cb_auto_play_sound.Size = new System.Drawing.Size(240, 17);
+            this.cb_auto_play_sound.TabIndex = 36;
+            this.cb_auto_play_sound.Text = "Automatically play sound when selected in list";
+            this.cb_auto_play_sound.UseVisualStyleBackColor = true;
+            // 
+            // tab_About
+            // 
+            this.tab_About.BackColor = System.Drawing.Color.Gainsboro;
+            this.tab_About.Controls.Add(this.panel11);
+            this.tab_About.Controls.Add(this.label39);
+            this.tab_About.Controls.Add(this.label37);
+            this.tab_About.Controls.Add(this.label36);
+            this.tab_About.Controls.Add(this.label35);
+            this.tab_About.Controls.Add(this.label34);
+            this.tab_About.Controls.Add(this.label33);
+            this.tab_About.Controls.Add(this.label32);
+            this.tab_About.Controls.Add(this.label31);
+            this.tab_About.Controls.Add(this.linkLabel_github);
+            this.tab_About.Controls.Add(this.linkLabel_jsrf_inside);
+            this.tab_About.Location = new System.Drawing.Point(4, 22);
+            this.tab_About.Name = "tab_About";
+            this.tab_About.Size = new System.Drawing.Size(742, 686);
+            this.tab_About.TabIndex = 7;
+            this.tab_About.Text = "About";
+            // 
+            // linkLabel_jsrf_inside
+            // 
+            this.linkLabel_jsrf_inside.AutoSize = true;
+            this.linkLabel_jsrf_inside.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabel_jsrf_inside.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.linkLabel_jsrf_inside.Location = new System.Drawing.Point(268, 652);
+            this.linkLabel_jsrf_inside.Name = "linkLabel_jsrf_inside";
+            this.linkLabel_jsrf_inside.Size = new System.Drawing.Size(250, 20);
+            this.linkLabel_jsrf_inside.TabIndex = 0;
+            this.linkLabel_jsrf_inside.TabStop = true;
+            this.linkLabel_jsrf_inside.Text = "www.jsrf-insinde.blogspot.com";
+            this.linkLabel_jsrf_inside.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_jsrf_inside_LinkClicked);
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(6, 32);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(96, 13);
+            this.label31.TabIndex = 1;
+            this.label31.Text = "Created by neodos";
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label32.Location = new System.Drawing.Point(6, 48);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(110, 13);
+            this.label32.TabIndex = 1;
+            this.label32.Text = "Additional Credits:";
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(6, 63);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(39, 13);
+            this.label33.TabIndex = 1;
+            this.label33.Text = "Gurten";
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(6, 78);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(61, 13);
+            this.label34.TabIndex = 1;
+            this.label34.Text = "Ycarcomed";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(6, 93);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(73, 13);
+            this.label35.TabIndex = 1;
+            this.label35.Text = "DuckSquared";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(6, 107);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(33, 13);
+            this.label36.TabIndex = 1;
+            this.label36.Text = "Daft7";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(6, 120);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(66, 13);
+            this.label37.TabIndex = 1;
+            this.label37.Text = "Fusecavator";
+            // 
+            // panel11
+            // 
+            this.panel11.BackColor = System.Drawing.Color.DimGray;
+            this.panel11.Controls.Add(this.label38);
+            this.panel11.Location = new System.Drawing.Point(0, 1);
+            this.panel11.Name = "panel11";
+            this.panel11.Size = new System.Drawing.Size(783, 25);
+            this.panel11.TabIndex = 32;
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.label38.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label38.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label38.Location = new System.Drawing.Point(3, 3);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(66, 20);
+            this.label38.TabIndex = 1;
+            this.label38.Text = "Credits";
+            // 
+            // linkLabel_github
+            // 
+            this.linkLabel_github.AutoSize = true;
+            this.linkLabel_github.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabel_github.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.linkLabel_github.Location = new System.Drawing.Point(182, 611);
+            this.linkLabel_github.Name = "linkLabel_github";
+            this.linkLabel_github.Size = new System.Drawing.Size(454, 20);
+            this.linkLabel_github.TabIndex = 0;
+            this.linkLabel_github.TabStop = true;
+            this.linkLabel_github.Text = "Source Code: www.github.com/neodoso/JSRF_ModTool";
+            this.linkLabel_github.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_github_LinkClicked);
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(6, 133);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(56, 13);
+            this.label39.TabIndex = 1;
+            this.label39.Text = "Sergeanur";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1491,7 +1794,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Main";
-            this.Text = "JSRF ModTool 2.8";
+            this.Text = "JSRF ModTool 2.8.4";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -1525,6 +1828,18 @@
             this.panel4.PerformLayout();
             this.panel_compiling_stage.ResumeLayout(false);
             this.panel_compiling_stage.PerformLayout();
+            this.tab_SoundEditor.ResumeLayout(false);
+            this.tab_SoundEditor.PerformLayout();
+            this.panel7.ResumeLayout(false);
+            this.panel7.PerformLayout();
+            this.panel9.ResumeLayout(false);
+            this.panel9.PerformLayout();
+            this.panel10.ResumeLayout(false);
+            this.panel10.PerformLayout();
+            this.tab_About.ResumeLayout(false);
+            this.tab_About.PerformLayout();
+            this.panel11.ResumeLayout(false);
+            this.panel11.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1615,7 +1930,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btn_fix_drawdist;
         private System.Windows.Forms.Label lab_mdl_mat_typex;
-        private System.Windows.Forms.RichTextBox rtxtb_material;
+        private System.Windows.Forms.RichTextBox rtxtb_materials;
         private System.Windows.Forms.Button btn_save_mat_data;
         private System.Windows.Forms.Label lab_mdl_mat_vtx;
         private System.Windows.Forms.Panel panel_lvl_mdl_info;
@@ -1653,6 +1968,31 @@
         public System.Windows.Forms.TextBox txtb_cxbx_dir;
         private System.Windows.Forms.Button btn_sel_cxbx_dir;
         private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TabPage tab_SoundEditor;
+        private System.Windows.Forms.Panel panel10;
+        private System.Windows.Forms.Panel panel9;
+        private System.Windows.Forms.Panel panel7;
+        private System.Windows.Forms.Button btn_import_sound;
+        private System.Windows.Forms.Button btn_export_all_sounds;
+        private System.Windows.Forms.Button btn_export_sound;
+        private System.Windows.Forms.Button btn_play_sound;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.CheckBox cb_auto_play_sound;
+        private System.Windows.Forms.TabPage tab_About;
+        private System.Windows.Forms.Panel panel11;
+        private System.Windows.Forms.Label label38;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.LinkLabel linkLabel_jsrf_inside;
+        private System.Windows.Forms.LinkLabel linkLabel_github;
+        private System.Windows.Forms.Label label39;
     }
 }
 

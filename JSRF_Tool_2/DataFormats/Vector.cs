@@ -84,6 +84,12 @@ namespace JSRF_ModTool.Vector
             return new Vector3(a.X / d, a.Y / d, a.Z / d);
         }
 
+        // Vector3 multiplication by float
+        public static Vector3 operator *(Vector3 a, float d)
+        {
+            return new Vector3(a.X * d, a.Y * d, a.Z * d);
+        }
+
         public override string ToString()
         {
             return this.X.ToString() + " " + this.Y.ToString() + " " + this.Z.ToString();

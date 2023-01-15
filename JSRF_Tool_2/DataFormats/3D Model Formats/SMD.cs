@@ -292,7 +292,9 @@ namespace JSRF_ModTool
 
             for (int i = 0; i < this.vertices_list.Count; i++)
             {
-                this.vertices_list[i].uv.Y = (-1f * (this.vertices_list[i].uv.Y)) - 1f;
+                //this.vertices_list[i].uv.Y = (-1f * (this.vertices_list[i].uv.Y)) - 1f;
+
+                this.vertices_list[i].uv.Y = (-1f * (this.vertices_list[i].uv.Y));
             }
 
         }

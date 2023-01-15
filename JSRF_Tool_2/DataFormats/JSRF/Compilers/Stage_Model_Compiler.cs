@@ -229,12 +229,13 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
 
 #if DEBUG
+            /*
             // force mesh draw distance radius
             if (debug_draw_distance)
             {
                 head.model_radius = 4000f;
             }
-
+            */
 #endif
             #endregion
 

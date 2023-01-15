@@ -10,6 +10,7 @@ using JSRF_ModTool.Vector;
 using JSRF_ModTool.DataFormats._3D_Model_Formats;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
@@ -86,7 +87,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             
             block_02 block_02 = new block_02();
             // import block_02 copied & extracted from Stg00_.bin
-            byte[] block_02_data = block_02.build(vis_models_count);
+            byte[] block_02_data = block_02.build(source_dir, vis_models_count);
             header.block_02_start_offset = header.block_01_start_offset + header.block_01_size + 8; // +8 bytes are: NaN + Uknown number(the number increase of +1 per Stage)
             header.block_02_size = block_02_data.Length; // -4 substract NaN flag
             
@@ -1702,18 +1703,70 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // for now we create a single gigantic 30k bound PVS 
             // so right now a new stage will not be optimize and all visual models
             // will be rendering constantly
-            public byte[] build(int vis_models_count)   
+            public byte[] build(string source_dir, int vis_models_count)   
             {
-                // list of byte array where we add blocks of data to seralize
-                List<byte[]> buffer = new List<byte[]>();
 
-                int PVS_count = vis_models_count;
+                bool valid_pvs_txt = true;
+
+                PVS_bound pvs_bounds = new PVS_bound();
+
+                #region parse PVS text file
+
+                // if file doesn't exist, return empty gp_list
+                if (!File.Exists(source_dir + "PVS.txt"))
+                {
+
+                    valid_pvs_txt = false;
+                }
+
+               
+                string[] lines = System.IO.File.ReadAllLines(source_dir + "PVS.txt");
+
+                try
+                {
+                    
+
+                    // for every line of the .obj
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        
+                        string l = lines[i].ToLower();
+                        if (string.IsNullOrEmpty(l)) { continue; }
+                        List<Vector3> vector_list = new List<Vector3>();
+                        // for every six lines get coordinates
+                        for (int p = 0; p < 6; p++)
+                        {
+                            l = lines[i + p];
+                            string[] xyz = l.Split(' ');
+                            vector_list.Add(new Vector3(xyz[0], xyz[1], xyz[2]));
+                           
+                        }
+
+                        pvs_bounds.bounds.Add(vector_list);
+
+                        i += 5;
+
+                    }
+
+                }
+                catch
+                {
+                    System.Windows.Forms.MessageBox.Show("Error: could not read the PVS file.");
+                }
+
+
+                 #endregion
+
+                 // list of byte array where we add blocks of data to seralize
+                 List<byte[]> buffer = new List<byte[]>();
+
+                
 
                 #region main header
 
                 header head = new header();
 
-                head.potential_visibility_sets_count = PVS_count;
+                head.potential_visibility_sets_count = vis_models_count;
                 head.potential_visibility_sets_starto = 108 + (vis_models_count * 80);
 
                 // no spawns, so we set all the start offsets to the end of the main header (108)
@@ -1739,41 +1792,26 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 #endregion
 
+
+
+                // set model spawn
                 for (int i = 0; i < vis_models_count; i++)
                 {
-
                     object_spawn obj_spawn = new object_spawn();
 
                     obj_spawn.num_c = 1;
                     obj_spawn.padding_3 = 0;
                     obj_spawn.resource_ID = i;
-                        /*
-                        object_spawn obj_spawn = new object_spawn();
-                        if (i == 0)
-                        {
 
-                            obj_spawn.num_c =0;
-                            obj_spawn.padding_3 = 0;
-                            obj_spawn.resource_ID = 0;
-                        } else {
-                            obj_spawn.num_c = 1;
-                            obj_spawn.padding_3 = 0;
-                            obj_spawn.resource_ID = i;
-                        }
-                        */
-
-
-
-                        buffer.Add(obj_spawn.Serialize());
+                    buffer.Add(obj_spawn.Serialize());
                 }
-                
+
 
                 #region build Potential visibility sets
 
-                // visiblity range of PVS (range at which Stage models will be displayed while the player is standing inside this PVS)
                 float bound_range = 30000;
 
-                for (int i = 0; i < PVS_count; i++)
+                for (int i = 0; i < vis_models_count; i++)
                 {
                     // calculating total block_02 size
                     // 108 + 340 + 144 + 4
@@ -1781,34 +1819,27 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     // 340 bytes per pvs block
                     potential_visibility_set pvs = new potential_visibility_set();
-                    pvs.pvs_bounds_offset = 108 + (vis_models_count * 80)  + (PVS_count * 340);
-                    pvs.pvs_links_offset = 108 + (vis_models_count * 80) + (PVS_count * 340) + 144;
+                    pvs.pvs_bounds_offset = 108 + (vis_models_count * 80)  + (vis_models_count * 340) + (144 * i);
+                    pvs.pvs_links_offset = 108 + (vis_models_count * 80) + (vis_models_count * 340) + (144 * vis_models_count);
 
+                    // test
+                    //pvs.pvs_bounds_count = 1;
+                    //pvs.pvs_links_count = vis_models_count;
+
+                    
                     if (i == 0)
                     {
                         pvs.pvs_bounds_count = 1;
-                        pvs.pvs_links_count = PVS_count;
-
-
+                        pvs.pvs_links_count = vis_models_count;
                     }
                     else // set link to first PVS
                     {
-                        /*
-                        if (i == 10)
-                        {
-                            bound_range = 1;
-                        } else
-                        {
-                            bound_range = 30000;
-                        }
-                        */
                         pvs.pvs_bounds_count = 0;
                         pvs.pvs_links_count = 0;
                     }
+                    
 
-
-
-                    int block_02_size = 108 + (vis_models_count * 80) + (PVS_count * 340) + 144 + (pvs.pvs_links_count * 4); //+ 4 
+                    int block_02_size = 108 + (vis_models_count * 80) + (vis_models_count * 340) + (144 * vis_models_count) + (pvs.pvs_links_count * 4); //+ 4 
 
 
                     // set block_02 file size in PVS header
@@ -1818,27 +1849,50 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     pvs.unk_22_block02_size = block_02_size;
 
 
-                    // TODO : calculare or ask the user to define the PVS bounding boxes ranges
-                    // for now we create one big PVS so everything is rendering constantly
-                    pvs.v00 = new Vector3(-bound_range, -bound_range, -bound_range);
-                    pvs.v01 = new Vector3(bound_range, -bound_range, -bound_range);
-                    pvs.v02 = new Vector3(bound_range, -bound_range, bound_range);
-                    pvs.v03 = new Vector3(-bound_range, -bound_range, bound_range);
+                    
 
-                    pvs.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
-                    pvs.v05 = new Vector3(-bound_range, bound_range, -bound_range);
+                    // if 'i' for visual model count is not greater(or equal) than the number of PVS 'pvs_bounds'
+                    if (i  <= pvs_bounds.bounds.Count)
+                    {
+                        pvs.v00 = pvs_bounds.bounds[i][0];
+                        
+                        pvs.v01 = pvs_bounds.bounds[i][1];
+                        pvs.v02 = pvs_bounds.bounds[i][2];
+                        pvs.v03 = pvs_bounds.bounds[i][3];
+
+                        pvs.v04 = pvs_bounds.bounds[i][4];
+                        pvs.v05 = pvs_bounds.bounds[i][5];
+
+
+                    } else { // else create PVS or large size as placeholder PVS
+
+                        // visiblity range of PVS (range at which Stage models will be displayed while the player is standing inside this PVS)
+                        
+                        // set a large bounding box for PVS
+                        // TODO : warn user if there is no PVS for this model part (i)
+                        pvs.v00 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs.v01 = new Vector3(bound_range, -bound_range, -bound_range);
+                        pvs.v02 = new Vector3(bound_range, -bound_range, bound_range);
+                        pvs.v03 = new Vector3(-bound_range, -bound_range, bound_range);
+
+                        pvs.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs.v05 = new Vector3(-bound_range, bound_range, -bound_range);
+
+                    }
 
                     /*
-                    pvs.v06 = new Vector3(1, 0, 0);
-                    pvs.v07 = new Vector3(0, 1, 0);
-                    pvs.v08 = new Vector3(0, 0, 1);
+                    if(i == 0)
+                    {
+                        pvs.v00 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs.v01 = new Vector3(bound_range, -bound_range, -bound_range);
+                        pvs.v02 = new Vector3(bound_range, -bound_range, bound_range);
+                        pvs.v03 = new Vector3(-bound_range, -bound_range, bound_range);
 
-                    pvs.v09 = new Vector3(1, 0, 0);
-                    pvs.v10 = new Vector3(0, 1, 0);
-                    pvs.v11 = new Vector3(0, 0, 1);
+                        pvs.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs.v05 = new Vector3(-bound_range, bound_range, -bound_range);
+                    }
                     */
 
-                    
                     pvs.v06 = new Vector3(0, -1, 0);
                     pvs.v07 = new Vector3(0, 0, -1);
                     pvs.v08 = new Vector3(1, 0, 0);
@@ -1850,7 +1904,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     // if set to zero, player's reflective materials become bright white
                     pvs.v12 = new Vector3(-0.4163f, -0.7199f, -0.6334f);
                     pvs.v13 = new Vector3(-0.4163f, -0.7199f, -0.6334f);
-                    
+
                     //pvs.v12 = new Vector3();
                     //pvs.v13 = new Vector3();
 
@@ -1862,74 +1916,86 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     // serialize and add to buffer
                     buffer.Add(pvs.Serialize());
+
+
                 }
 
 
                 #region create PVS_bounds
 
-                // 144 bytes per PVS_bounds
-                PVS_bounds pvs_bbox = new PVS_bounds();
-                // TODO get bounding box scales from user defined data (import PVS bboxes created in the 3D DCC)
-                pvs_bbox.v00 = new Vector3(-bound_range, -bound_range, -bound_range);
-                pvs_bbox.v01 = new Vector3(bound_range, -bound_range, -bound_range);
-                pvs_bbox.v02 = new Vector3(bound_range, -bound_range, bound_range);
-                pvs_bbox.v03 = new Vector3(-bound_range, -bound_range, bound_range);
+                for (int i = 0; i < vis_models_count; i++)
+                {
 
-                pvs_bbox.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
-                pvs_bbox.v05 = new Vector3(-bound_range, bound_range, -bound_range);
+                    // 144 bytes per PVS_bounds
+                    PVS_bounds pvs_bbox = new PVS_bounds();
 
-                /*
-                pvs_bbox.vs00 = new Vector3(0, -1, 0);
-                pvs_bbox.vs01 = new Vector3(0, 0, -1);
-                pvs_bbox.vs02 = new Vector3(1, 0, 0);
-                pvs_bbox.vs03 = new Vector3(0, 0, 1);
-                pvs_bbox.vs04 = new Vector3(-1, 0, 0);
-                pvs_bbox.vs05 = new Vector3(0, 1, 0);
-                */
+                    // if 'i' for visual model count is not greater(or equal) than the number of PVS 'pvs_bounds'
+                    if (pvs_bounds.bounds.Count > 0)
+                    {
+                        pvs_bbox.v00 = pvs_bounds.bounds[i][0];
+                        pvs_bbox.v01 = pvs_bounds.bounds[i][1];
+                        pvs_bbox.v02 = pvs_bounds.bounds[i][2];
+                        pvs_bbox.v03 = pvs_bounds.bounds[i][3];
+                        pvs_bbox.v04 = pvs_bounds.bounds[i][4];
 
-                pvs_bbox.vs00 = new Vector3(0, -1, 0);
-                pvs_bbox.vs01 = new Vector3(0, 0, -1);
-                pvs_bbox.vs02 = new Vector3(1, 0, 0);
-                pvs_bbox.vs03 = new Vector3(0, 0, 1);
-                pvs_bbox.vs04 = new Vector3(-1, 0, 0);
-                pvs_bbox.vs05 = new Vector3(0, 1, 0);
+                        pvs_bbox.v05 = pvs_bounds.bounds[0][5];
 
-                /*
-                pvs_bbox.vs00 = new Vector3(1, 0, 0);
-                pvs_bbox.vs01 = new Vector3(0, 1, 0);
-                pvs_bbox.vs02 = new Vector3(0, 0, 1);
+                    }
+                    else
+                    { // else create PVS or large size as placeholder PVS
 
-                pvs_bbox.vs03 = new Vector3(1, 0, 0);
-                pvs_bbox.vs04 = new Vector3(0, 1, 0);
-                pvs_bbox.vs05 = new Vector3(0, 0, 1);
-                */
+                        // TODO get bounding box scales from user defined data (import PVS bboxes created in the 3D DCC)
+                        pvs_bbox.v00 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs_bbox.v01 = new Vector3(bound_range, -bound_range, -bound_range);
+                        pvs_bbox.v02 = new Vector3(bound_range, -bound_range, bound_range);
+                        pvs_bbox.v03 = new Vector3(-bound_range, -bound_range, bound_range);
+
+                        pvs_bbox.v04 = new Vector3(-bound_range, -bound_range, -bound_range);
+                        pvs_bbox.v05 = new Vector3(-bound_range, bound_range, -bound_range);
+
+                    }
+
+                    pvs_bbox.vs00 = new Vector3(0, -1, 0);
+                    pvs_bbox.vs01 = new Vector3(0, 0, -1);
+                    pvs_bbox.vs02 = new Vector3(1, 0, 0);
+                    pvs_bbox.vs03 = new Vector3(0, 0, 1);
+                    pvs_bbox.vs04 = new Vector3(-1, 0, 0);
+                    pvs_bbox.vs05 = new Vector3(0, 1, 0);
+
+
+                    buffer.Add(pvs_bbox.Serialize());
+
+                }
+
+                #endregion
 
                 #endregion
 
 
-                #endregion
-
-
-                #region serialize and return bytes block
-
-
-                buffer.Add(pvs_bbox.Serialize());
+                #region build PVS links
 
                 // PVS links list, we make it just one since we only have one PVS
-
-                for (int i = 0; i < PVS_count; i++)
+                for (int i = 0; i < vis_models_count; i++)
                 {
                     buffer.Add(BitConverter.GetBytes((Int32)i));
                 }
 
+                #endregion
 #if DEBUG
+                /*
                 BinaryWriter br = new BinaryWriter(File.OpenWrite(@"C:\Users\Mike\Desktop\JSRF\research\Stg_bin_block_02\custom_compile\block_02_compile_test_2.dat"));
                 br.Write(buffer.SelectMany(byteArr => byteArr).ToArray());
+                */
 #endif
                 return buffer.SelectMany(byteArr => byteArr).ToArray();
-                #endregion
+              
 
 
+            }
+
+            private class PVS_bound
+            {
+                public List<List<Vector3>> bounds { get; set; } = new List<List<Vector3>>();
             }
 
             public class header
