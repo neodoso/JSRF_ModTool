@@ -113,7 +113,7 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
 
-           // Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
+            Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[157];
 
 
@@ -3923,7 +3923,7 @@ namespace JSRF_ModTool
                 StartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = tmp_dir,
-                    FileName = Application.StartupPath + "\\resources\\tools\\XboxADPCM.exe", // xbadpdec.exe
+                    FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
                     Arguments = args,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
