@@ -3892,7 +3892,7 @@ namespace JSRF_ModTool
             if (!File.Exists(tmp_dir + "tmp.wav")) { return; }
 
             SoundPlayer sp = new SoundPlayer(tmp_dir + "tmp.wav");
-            sp.PlaySync();
+            sp.Play();
             sp.Dispose();
         }
 
@@ -3916,6 +3916,8 @@ namespace JSRF_ModTool
             // export raw sound file to tmp directory
             File.WriteAllBytes(tmp_dir + "snd_raw.wav", sound_data);
 
+            Thread.Sleep(500);
+
             // convert sound file
             string args = "snd_raw.wav" + " " + "tmp.wav";
             Process proc = new Process
@@ -3923,7 +3925,7 @@ namespace JSRF_ModTool
                 StartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = tmp_dir,
-                    FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
+                    FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // xbadpdec XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
                     Arguments = args,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
