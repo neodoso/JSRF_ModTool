@@ -3737,13 +3737,18 @@ namespace JSRF_ModTool
                     return;
                 }
 
-
                 export_sound_file(current_item_data);
 
                 if (File.Exists(tmp_dir + "tmp.wav"))
                 {
-                    File.Copy(tmp_dir + "tmp.wav", saveFileDialog1.FileName, true);
-
+                    try
+                    {
+                        File.Copy(tmp_dir + "tmp.wav", saveFileDialog1.FileName, true);
+                    }
+                    catch (Exception error)
+                    {
+                        throw new InvalidOperationException("(btn_export_sound)\n\nCould not delete file:" + tmp_dir + "tmp.wav" + "\n\n" + error.Message);
+                    }
                 }
             }
             System.Media.SystemSounds.Beep.Play();
@@ -3758,7 +3763,6 @@ namespace JSRF_ModTool
                 MessageBox.Show("Error: current file doesn't seem to be a sounds file.");
                 return;
             }
-
 
             #region setup file save dialog
 
@@ -3802,8 +3806,18 @@ namespace JSRF_ModTool
 
                     if (item.type == File_Containers.item_data_type.Sound)
                     {
-                        export_sound_file(item.data);
-                        File.Copy(tmp_dir + "tmp.wav", save_dir + lab_filename.Text.Replace(".dat", "") + "_" + i + ".wav", true );
+                        bool soundFileExportedSuccessfully = export_sound_file(item.data);
+                        if(!soundFileExportedSuccessfully) {  return; }
+
+                        try
+                        {
+                            File.Copy(tmp_dir + "tmp.wav", save_dir + lab_filename.Text.Replace(".dat", "") + "_" + i + ".wav", true);
+                        } 
+                        catch (Exception error)
+                        {
+                            throw new InvalidOperationException("(Export all sound files)\n\n Could not copy file:\n\n"+ tmp_dir + "tmp.wav" + " .\n\n" + error.Message);
+                        }
+                    
                     }
                 }
             }
@@ -3863,7 +3877,6 @@ namespace JSRF_ModTool
 
                     #endregion
 
-
                     byte[] array = File.ReadAllBytes(filepath);
                     if(BitConverter.ToInt16(array, 34) != 16 )
                     {
@@ -3871,8 +3884,9 @@ namespace JSRF_ModTool
                         return;
                     }
 
-
                     import_sound_file(filepath);
+
+                    Thread.Sleep(500);  
 
                     jsrf_file.set_item_data(0, num, File.ReadAllBytes(tmp_dir + "tmp_import.wav"));
                 }
@@ -3897,47 +3911,92 @@ namespace JSRF_ModTool
         }
 
 
-        private void export_sound_file(byte[] sound_data)
+        private bool export_sound_file(byte[] sound_data)
         {
+            try
+            {
+                File.Delete(tmp_dir + "tmp_import.wav");
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("(export_sound_file)\n\nCould not delete file:" + tmp_dir + "tmp_import.wav" + "\n\n" + e.Message);
+            }
+
+
             // if audio is not encoded export raw wav
             if(BitConverter.ToInt32(sound_data, 16) == 16)
             {
-                File.WriteAllBytes(tmp_dir + "tmp.wav", sound_data);
+                try
+                {
+                    File.WriteAllBytes(tmp_dir + "tmp.wav", sound_data);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException("(export_sound_file)\n\nCould not write file:" + tmp_dir + "tmp.wav" + "\n\n" + e.Message);
+                }
 
-                return;
+                return true;
             }
 
 
             if (File.Exists(tmp_dir + "tmp.wav"))
             {
-                File.Delete(tmp_dir + "tmp.wav");
+                try
+                {
+                    File.Delete(tmp_dir + "tmp.wav");
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException("(export_sound_file)\n\nCould not delete file:" + tmp_dir + "tmp.wav" + "\n\n" + e.Message);
+                }
             }
 
-            // export raw sound file to tmp directory
-            File.WriteAllBytes(tmp_dir + "snd_raw.wav", sound_data);
 
-            Thread.Sleep(500);
-
-            // convert sound file
-            string args = "snd_raw.wav" + " " + "tmp.wav";
-            Process proc = new Process
+            try
             {
-                StartInfo = new ProcessStartInfo
+                // export raw sound file to tmp directory
+                File.WriteAllBytes(tmp_dir + "snd_raw.wav", sound_data);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("(export_sound_file)\n\nCould not write file:" + tmp_dir + "snd_raw.wav" + "\n\n" + e.Message);
+            }
+
+            try
+            {
+                Thread.Sleep(500);
+                string VerbArg = "";
+                if (System.Environment.OSVersion.Version.Major >= 6)
                 {
-                    WorkingDirectory = tmp_dir,
-                    FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // xbadpdec XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    VerbArg = "runas";
                 }
-            };
 
-            proc.Start();
-            proc.WaitForExit();
-            proc.Dispose();
+                // convert sound file
+                string args = "snd_raw.wav" + " " + "tmp.wav";
+                Process proc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        WorkingDirectory = tmp_dir,
+                        FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // xbadpdec XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
+                        Arguments = args,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                        Verb = VerbArg
+                    }
+                };
 
-       
+                proc.Start();
+                proc.WaitForExit();
+                proc.Dispose();
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("(export_sound_file)\n\nCould not run audio conversion tool.\n\n" + e.Message);
+            }
         }
 
 
@@ -3948,22 +4007,37 @@ namespace JSRF_ModTool
 
             // convert sound file
             string args = GetShortPath(filepath) + " " + "tmp_import.wav";
-            Process proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = tmp_dir,
-                    FileName = Application.StartupPath + "\\resources\\tools\\XboxADPCM.exe", // xbadpdec.exe
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
 
-            proc.Start();
-            proc.WaitForExit();
-            proc.Dispose();
+            string VerbArg = "";
+            if (System.Environment.OSVersion.Version.Major >= 6)
+            {
+                VerbArg = "runas";
+            }
+
+            try
+            {
+                Process proc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        WorkingDirectory = tmp_dir,
+                        FileName = Application.StartupPath + "\\resources\\tools\\XboxADPCM.exe", // xbadpdec.exe
+                        Arguments = args,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                        Verb = VerbArg
+                    }
+                };
+
+                proc.Start();
+                proc.WaitForExit();
+                proc.Dispose();
+            }
+            catch (Exception error)
+            {
+                throw new InvalidOperationException("(import_sound_file())\n\n Could not import wav file." + " .\n\n" + error.Message);
+            }
         }
 
 
