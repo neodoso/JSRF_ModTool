@@ -235,7 +235,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// </summary>
         public class Indexed_item
         {
-            //public Int32 type { get; set; } 
             public Int32 ID { get; set; } 
             public Int32 block_size { get; set; } 
             public Int32 unk_ID { get; set; }
@@ -256,7 +255,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             public void get_Childs(byte[] buff)
             {
-
                 int offset = 0;
                 while (offset < buff.Length - 28)
                 {
@@ -322,7 +320,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         child.item_type = File_Containers.get_item_data_type(buff, child.block_start);
                     }
 
-
                     this.Add(child);
                     offset = child.block_end;
                 }
@@ -332,16 +329,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public void add_child(File_Containers.item_data_type type, byte[] buff)
             {
                 Indexed_item child = new Indexed_item();
-
-
             }
         }
 
         #endregion
-
-
-       
-
     }
 }
 

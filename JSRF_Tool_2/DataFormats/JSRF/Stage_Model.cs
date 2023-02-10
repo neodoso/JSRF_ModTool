@@ -198,7 +198,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             if (vtx_tri_buff_head.is_stripped == 0)
             {
                 // for each triangle vertex index
-                for (int i = 0; i < tri_indx.Count-1; i += 3)
+                for (int i = 0; i < tri_indx.Count-3; i += 3)
                 {
                     triangles_list.Add(new triangle(tri_indx[i], tri_indx[i + 1], tri_indx[i + 2]));
                 }
@@ -217,7 +217,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 // for each triangle vertex index
                 // convert strip to list
-                for (int i = 0; i < tri_indx.Count - 2; i++)
+                for (int i = 0; i < tri_indx.Count - 3; i++)
                 {
                     a = tri_indx[i]; b = tri_indx[i + 1]; c = tri_indx[i + 2];
 
@@ -279,7 +279,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             invalid_count = 0;
                         }
 
-                         curr_valid_count++;
+                        curr_valid_count++;
                     }
 
 
@@ -287,7 +287,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                     if (i % 2 == 0)
                     {
-                       triangles_list.Add(new triangle(a, b, c));
+                        triangles_list.Add(new triangle(a, b, c));
                     }
                     else
                     {

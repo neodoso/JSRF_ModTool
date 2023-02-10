@@ -113,7 +113,7 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
 
-            Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
+           // Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[157];
 
 
@@ -1099,7 +1099,7 @@ namespace JSRF_ModTool
             // if item is empty
             if (item.data.Length == 0)
             {
-                if (item.type != File_Containers.item_data_type.empty && item.type != File_Containers.item_data_type.unkown)
+                if (item.type != File_Containers.item_data_type.empty && item.type != File_Containers.item_data_type.unknown)
                 {
                     MessageBox.Show("Item data is empty.");
                     return;
@@ -3499,7 +3499,7 @@ namespace JSRF_ModTool
                 return;
             }
 
-            jsrf_file.insert_item_after(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, File_Containers.item_data_type.unkown, block_copy_clipboard);
+            jsrf_file.insert_item_after(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, File_Containers.item_data_type.unknown, block_copy_clipboard);
 
             Rebuild_file(true, true, true);
         }
@@ -3652,26 +3652,29 @@ namespace JSRF_ModTool
         // deletes cache files in Cxbx cache folders so mod file changes are reloaded when restarting the game
         private void clear_cxbx_cache()
         {
+            string cxbx_dir = txtb_cxbx_dir.Text;
             // clear cache (for PC platform cxbx)
-            if (!Directory.Exists(txtb_cxbx_dir.Text)) { return; }
-                      
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition2\\");
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition3\\");
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition4\\");
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition5\\");
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition6\\");
-            IO.DeleteDirectoryContent(txtb_cxbx_dir.Text + "EmuDisk\\Partition7\\");
+            if (Directory.Exists(cxbx_dir + "EmuDisk\\"))
+            {
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition2\\");
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition3\\");
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition4\\");
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition5\\");
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition6\\");
+                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition7\\");
+            }
 
-            string cxbx_roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Cxbx-Reloaded\\";
+            string cxbx_roaming_dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Cxbx-Reloaded\\";
 
-            if (!Directory.Exists(cxbx_roaming)) { return; }
-
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition2\\");
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition3\\");
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition4\\");
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition5\\");
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition6\\");
-            IO.DeleteDirectoryContent(cxbx_roaming + "EmuDisk\\Partition7\\");
+            if (Directory.Exists(cxbx_roaming_dir))
+            {
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition2\\");
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition3\\");
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition4\\");
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition5\\");
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition6\\");
+                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition7\\");
+            }
         }
 
 

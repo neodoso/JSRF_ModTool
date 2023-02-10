@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using JSRF_ModTool.Functions;
+using static JSRF_ModTool.DataFormats.JSRF.Stage_Data_Metrics;
 
 namespace JSRF_ModTool.DataFormats.JSRF
 {
@@ -48,14 +49,15 @@ namespace JSRF_ModTool.DataFormats.JSRF
         {
             empty,
             invalid,
-            unkown,
+            unknown,
             MDLB,
             Stage_MDLB,
             Stage_Model,
             Material,
             Texture,
             NCAM,
-            Sound
+            Sound,
+            Dialogue
         };
 
 
@@ -216,12 +218,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 INDX_root = new INDEXED();
                 INDX_root.items = new List<item>();
 
-                Int32 offset = 0;
-
+          
                 try
                 {
-
-
                     for (int i = 0; i < indexed_items.childs.Count; i++)
                     {
                         item indx_item;
@@ -234,7 +233,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
                         indx_item = new item(indexed_items.childs[i].item_type, childs_buffer, indexed_items.childs[i]);
                         INDX_root.items.Add(indx_item);
 
-                        offset += indexed_items.childs[i].block_size + indexed_items.childs[i].block_start;
                     }
                 } catch { 
 
@@ -724,6 +722,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
             */
 
+            if (head == 18 || head == 20 || head == 21 || head == 30)
+            {
+                return item_data_type.Dialogue;
+            }
+
             // sound
             if (head == 1179011410) 
             {
@@ -763,7 +766,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             // else
-            return item_data_type.unkown;
+            return item_data_type.unknown;
         }
 
         #endregion
@@ -878,7 +881,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             if (this.type == container_types.indexed)
             {
                 // get byte array of each item
-                byte[] item_data = build_Indexed_children(this.INDX_root);
+                byte[] item_data = build_Indexed_children(this.INDX_root, get_stg_part_items_count(filepath_output));
 
                 // write item data
                 file_buffer.Add(item_data);
@@ -886,9 +889,59 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
             #endregion
 
+            try
+            {
+                File.WriteAllBytes(filepath_output, file_buffer.SelectMany(a => a).ToArray());
+            }
+            catch (Exception err)
+            {
+                throw new IOException(err.Message);
+            }
+        }
 
-            File.WriteAllBytes(filepath_output, file_buffer.SelectMany(a => a).ToArray());
+        /// <summary>
+        /// Gets previous StgXX_YY part and gets the last item's ID
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
+        private int get_stg_part_items_count(string filepath)
+        {
+            int stg_part_num = 0;
+            string stage_num = "";
+            string filename = Path.GetFileName(filepath).ToLower();
+            string filenameNoExt = Path.GetFileNameWithoutExtension(filepath).ToLower();        
 
+            // if file is a Stage and .dat file
+            if (filename.Contains("stg") && filename.Contains("_") && filename.Contains(".dat"))
+            {
+                stg_part_num = Int32.Parse(filenameNoExt.Split('_')[1]);
+               
+                if (stg_part_num == 0)
+                {
+                    return 0;
+                }
+            }
+
+            // get item count in file
+            stage_num = Path.GetFileNameWithoutExtension(filepath).Split('_')[0];
+
+
+            string stg_part_filepath = Path.GetDirectoryName(filepath) + "\\" + stage_num + "_0" + (stg_part_num - 1) + ".dat";
+
+            // if Stg file previous part doesn't exist
+            if (!File.Exists(stg_part_filepath))
+            {
+                return 0;
+            }
+
+            File_Containers jsrf_file = new File_Containers(stg_part_filepath);
+
+            // if file structure is not of container type "indexed" skip to next file
+            if (jsrf_file.type != File_Containers.container_types.indexed) { return 0; }
+
+            int indexLast = jsrf_file.INDX_root.items.Count - 1;
+
+            return jsrf_file.INDX_root.items[indexLast].indexed_item.ID;
         }
 
         /// <summary>
@@ -940,8 +993,9 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// takes in list of items contained in a NORM node and builds JSRF binary of NORM children
         /// </summary>
         /// <param name="nNORM"></param>
+        /// /// <param name="itemFilePartRelativeIndex">index of item to add to item index (generally only Stage_Models and Stage_MDLBs)</param>
         /// <returns></returns>
-        public byte[] build_Indexed_children(INDEXED nIndexed)
+        public byte[] build_Indexed_children(INDEXED nIndexed, int itemFilePartRelativeIndex)
         {
             List<byte[]> item_data_list = new List<byte[]>();
 
@@ -958,7 +1012,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 if (item.indexed_item.block_type == 1)
                 {    
                     item_data_list.Add(BitConverter.GetBytes((Int32)1)); // Int32 : item_type // item.indexed_item.type
-                    item_data_list.Add(BitConverter.GetBytes((Int32)c)); // Int32 : item ID
+                    item_data_list.Add(BitConverter.GetBytes((Int32)c + itemFilePartRelativeIndex + 1)); // Int32 : item ID
 
                     // get texture ids count from item data
                     int textures_ids_count = BitConverter.ToInt32(item.data, 0);
@@ -1002,7 +1056,12 @@ namespace JSRF_ModTool.DataFormats.JSRF
             return item_data_list.SelectMany(a => a).ToArray();
         }
 
-
+        /// <summary>
+        /// Used for Stage Compiler
+        /// </summary>
+        /// <param name="nIndexed"></param>
+        /// <param name="itemFilePartGlobalIndex"></param>
+        /// <returns></returns>
         public byte[] build_Indexed_file(INDEXED nIndexed)
         {
             List<byte[]> item_data_list = new List<byte[]>();
@@ -1031,13 +1090,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     // data block size minus length of header [texture_ids_counts + texture_ids_list]
                     item_data_list.Add(BitConverter.GetBytes((Int32)item.data.Length - (4 + textures_ids_count * 4)));
                     item_data_list.Add(BitConverter.GetBytes(1)); // unk_ID
-
                 }
                 // Texture: if child.type == 0  then this is the start of a list of textures
                 // the first block has a different (8 bytes) header: [int32 = 0]  [int32 = block_size]
                 else if (item.type == File_Containers.item_data_type.Texture)
                 {
-
                     // first texture has 4 zero bytes
                     if (first_texture)
                     {

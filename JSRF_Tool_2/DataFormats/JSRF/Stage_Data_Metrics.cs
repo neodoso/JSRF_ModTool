@@ -73,7 +73,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                     if (jsrf_file.type != File_Containers.container_types.indexed) { continue; }
 
                     stages_info[f_pos].stage_parts.Add(new Stage_part_file());
-                    int index = 0;
+               
                     // for each item contained
                     for (int j = 0; j < jsrf_file.INDX_root.items.Count; j++)
                     {
@@ -98,8 +98,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             stages_info[f_pos].stage_parts[i].items[stages_info[f_pos].stage_parts[i].items.Count - 1].MDLB = true;
                         }
                     }
-                    index++;
-
+  
                 }
                 stages_info[stages_info.Count - 1].total_stage_file_parts--;
                 f_pos++;
