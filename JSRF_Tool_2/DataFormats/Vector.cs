@@ -14,11 +14,13 @@ namespace JSRF_ModTool.Vector
         {
         }
 
+        
         // TODO test and if not needed, remove float.Parse() since setVals() already converts string to single
         public Vector2(string x, string y)
         {
-            setVals(float.Parse(x, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(y, CultureInfo.CreateSpecificCulture("en-US")));
+            setVals(x, y);
         }
+        
 
         public Vector2(float x, float y)
         {
@@ -27,8 +29,8 @@ namespace JSRF_ModTool.Vector
 
         private void setVals(object x, object y)
         {
-            if (x is string) { X = Convert.ToSingle(x.ToString().Replace('.', ',')); }
-            if (y is string) { Y = Convert.ToSingle(y.ToString().Replace('.', ',')); }
+            if (x is string) { X = Convert.ToSingle(x.ToString().Replace(",", ",")); }
+            if (y is string) { Y = Convert.ToSingle(y.ToString().Replace(",", ",")); }
 
             if ((x is float) || (x is Single) || (x is int)) { X = Convert.ToSingle(x); }
             if ((y is float) || (y is Single) || (y is int)) { Y = Convert.ToSingle(y); }
@@ -52,12 +54,13 @@ namespace JSRF_ModTool.Vector
             this.Z = (float)Math.Round(this.Z, digits, MidpointRounding.AwayFromZero);
         }
 
-
+        
         // as string
         public Vector3(string x, string y, string z)
         {
             setVals(float.Parse(x, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(y, CultureInfo.CreateSpecificCulture("en-US")), float.Parse(z, CultureInfo.CreateSpecificCulture("en-US")));
         }
+        
 
         // as float
         public Vector3(float x, float y, float z)
@@ -99,34 +102,38 @@ namespace JSRF_ModTool.Vector
         /// <summary>
         /// converts float to string, also truncate the float precision and use dot instead of comma(with CultureInfo)
         /// </summary>
-        public List<String> Vector_to_StringList(int float_precision, bool to_radians)
-        {
-            List<String> v = new List<String>();
+        //public List<String> Vector_to_StringList(int float_precision, bool to_radians)
+        //{
+        //    List<String> v = new List<String>();
 
-            if (!to_radians)
-            {
-                v.Add(this.X.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                v.Add(this.Y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                v.Add(this.Z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-            }
-            else
-            {
-                float x = (float)(Math.PI / 180) * this.X;
-                float y = (float)(Math.PI / 180) * this.Y;
-                float z = (float)(Math.PI / 180) * this.Z;
-                v.Add(x.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                v.Add(y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-                v.Add(z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
-            }
+        //    if (!to_radians)
+        //    {
+        //        v.Add(this.X.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //        v.Add(this.Y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //        v.Add(this.Z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //    }
+        //    else
+        //    {
+        //        float x = (float)(Math.PI / 180) * this.X;
+        //        float y = (float)(Math.PI / 180) * this.Y;
+        //        float z = (float)(Math.PI / 180) * this.Z;
+        //        v.Add(x.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //        v.Add(y.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //        v.Add(z.ToString("N" + float_precision.ToString(), CultureInfo.CreateSpecificCulture("en-US")));
+        //    }
 
-            return v;
-        }
+        //    return v;
+        //}
 
         private void setVals(object x, object y, object z)
         {
-            if (x is string) { X = Convert.ToSingle(x.ToString().Replace('.', ',')); }
-            if (y is string) { Y = Convert.ToSingle(y.ToString().Replace('.', ',')); }
-            if (z is string) { Z = Convert.ToSingle(z.ToString().Replace('.', ',')); }
+            if (x is string) { X = Convert.ToSingle(x.ToString().Replace(",", ",")); } 
+            if (y is string) { Y = Convert.ToSingle(y.ToString().Replace(",", ",")); }
+            if (z is string) { Z = Convert.ToSingle(z.ToString().Replace(",", ",")); }
+
+            //if (x is string) { X = Convert.ToSingle(x.ToString().Replace('.', ',')); }
+            //if (y is string) { Y = Convert.ToSingle(y.ToString().Replace('.', ',')); }
+            //if (z is string) { Z = Convert.ToSingle(z.ToString().Replace('.', ',')); }
 
             if ((x is float) || (x is Single) || (x is int)) { X = Convert.ToSingle(x); }
             if ((y is float) || (y is Single) || (y is int)) { Y = Convert.ToSingle(y); }

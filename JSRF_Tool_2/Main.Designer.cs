@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.exploreFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trv_explorer = new System.Windows.Forms.TreeView();
             this.imageList1_explorer = new System.Windows.Forms.ImageList(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -170,10 +169,6 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
-            this.bgWorker_StageCompiler = new System.ComponentModel.BackgroundWorker();
-            this.panel_compiling_stage = new System.Windows.Forms.Panel();
-            this.label_compiling_stage = new System.Windows.Forms.Label();
-            this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -197,25 +192,16 @@
             this.tab_About.SuspendLayout();
             this.panel11.SuspendLayout();
             this.panel4.SuspendLayout();
-            this.panel_compiling_stage.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.Color.Gainsboro;
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exploreFolderToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1231, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "0";
-            // 
-            // exploreFolderToolStripMenuItem
-            // 
-            this.exploreFolderToolStripMenuItem.Name = "exploreFolderToolStripMenuItem";
-            this.exploreFolderToolStripMenuItem.Size = new System.Drawing.Size(92, 20);
-            this.exploreFolderToolStripMenuItem.Text = "Explore folder";
             // 
             // trv_explorer
             // 
@@ -1739,42 +1725,12 @@
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
             // 
-            // bgWorker_StageCompiler
-            // 
-            this.bgWorker_StageCompiler.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_StageCompiler_DoWork);
-            this.bgWorker_StageCompiler.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_StageCompiler_ProgressChanged);
-            this.bgWorker_StageCompiler.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgWorker_StageCompiler_RunWorkerCompleted);
-            // 
-            // panel_compiling_stage
-            // 
-            this.panel_compiling_stage.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.panel_compiling_stage.Controls.Add(this.label_compiling_stage);
-            this.panel_compiling_stage.Location = new System.Drawing.Point(105, 6);
-            this.panel_compiling_stage.Name = "panel_compiling_stage";
-            this.panel_compiling_stage.Size = new System.Drawing.Size(36, 13);
-            this.panel_compiling_stage.TabIndex = 33;
-            this.panel_compiling_stage.Visible = false;
-            // 
-            // label_compiling_stage
-            // 
-            this.label_compiling_stage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_compiling_stage.AutoSize = true;
-            this.label_compiling_stage.Font = new System.Drawing.Font("Bebas Neue", 71.99999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label_compiling_stage.Location = new System.Drawing.Point(296, 280);
-            this.label_compiling_stage.Name = "label_compiling_stage";
-            this.label_compiling_stage.Size = new System.Drawing.Size(600, 103);
-            this.label_compiling_stage.TabIndex = 0;
-            this.label_compiling_stage.Text = "Compiling Stage...";
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1231, 739);
-            this.Controls.Add(this.panel_compiling_stage);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.btn_remove_block);
             this.Controls.Add(this.btn_insert_block);
@@ -1794,10 +1750,8 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Main";
-            this.Text = "JSRF ModTool 2.8.8";
+            this.Text = "JSRF ModTool 2.8.9";
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tab_ModelViewer.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -1838,8 +1792,6 @@
             this.panel11.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
-            this.panel_compiling_stage.ResumeLayout(false);
-            this.panel_compiling_stage.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1850,7 +1802,6 @@
 
 
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem exploreFolderToolStripMenuItem;
         private System.Windows.Forms.TreeView trv_explorer;
         private System.Windows.Forms.ImageList imageList1_explorer;
         private System.Windows.Forms.TabControl tabControl1;
@@ -1952,9 +1903,6 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label lab_mdl_DrawDist;
-        private System.ComponentModel.BackgroundWorker bgWorker_StageCompiler;
-        private System.Windows.Forms.Panel panel_compiling_stage;
-        private System.Windows.Forms.Label label_compiling_stage;
         private System.Windows.Forms.TabPage tab_StageComp;
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Button btn_compile_stage;

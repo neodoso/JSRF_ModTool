@@ -130,6 +130,7 @@
     <Compile Include="DataFormats\JSRF\Stage_Model.cs" />
     <Compile Include="MDLB_Import\MDLB_classes.cs" />
     <Compile Include="MDLB_Import\Materials.cs" />
+    <Compile Include="MDLB_Import\MDLB_compiler_flip_X.cs" />
     <Compile Include="MDLB_Import\MDLB_compiler.cs" />
     <Compile Include="MDLB_Import\UserControls\Color.cs">
       <SubType>UserControl</SubType>
@@ -166,6 +167,7 @@
     <Compile Include="DataFormats\JSRF\MDLB.cs" />
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MDLB_Import\UserControls\Color.resx">
       <DependentUpon>Color.cs</DependentUpon>

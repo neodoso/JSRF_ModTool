@@ -16,16 +16,7 @@ namespace JSRF_ModTool.MDLB_Import
         {
             InitializeComponent();
         }
-        /*
-        public Color(int R, int G, int B, int A)
-        {
-            this.txtb_R.Text = R.ToString();
-            this.txtb_G.Text = G.ToString();
-            this.txtb_B.Text = B.ToString();
-            this.txtb_A.Text = A.ToString();
 
-        }
-        */
         public void set_colors(int R, int G, int B, int A)
         {
             this.txtb_R.Text = R.ToString();
@@ -39,13 +30,6 @@ namespace JSRF_ModTool.MDLB_Import
         {
             return new Materials.color(Convert.ToByte(txtb_R.Text), Convert.ToByte(txtb_G.Text), Convert.ToByte(txtb_B.Text), Convert.ToByte(txtb_A.Text));
         }
-
-
-        private void txtb_B_KeyPress(object sender, KeyPressEventArgs e)
-        {
-
-        }
-
 
         private void txtb_numeric_KeyPress(object sender, KeyPressEventArgs e)
         {

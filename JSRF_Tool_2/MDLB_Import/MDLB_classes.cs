@@ -136,24 +136,23 @@ namespace JSRF_ModTool.MDLB_Import
             public UInt32 triangle_group_size { get; set; } // start index = (triangle_start_index /3) + (triangle_group_size -1)
             public UInt32 triangle_start_offset { get; set; } // divide this by 3
             public Int32 flag_8 { get; set; }
-            public Int32 mesh_type { get; set; } // =texture id????
+            public Int32 flag_12 { get; set; } // =texture id????
 
             public Int32 material_index { get; set; } // gives material number index (0, 1, 2...) from materials list
             public Int32 mesh_type_1 { get; set; } // if = 1 is a bone?  // if = 0 is a visual mesh?
             public Int32 flag_24 { get; set; } //
             public Int32 flag_28 { get; set; } // if 1 = bone? 
 
-            public triangle_group(UInt32 _tri_group_size, UInt32 _tri_start_offset, Int32 _mesh_type, Int32 _mat_index)
+            public triangle_group(UInt32 _tri_group_size, UInt32 _tri_start_offset, Int32 _flag_12, Int32 _mat_index)
             {
                 this.triangle_group_size = _tri_group_size;
                 this.triangle_start_offset = _tri_start_offset;
 
-                this.mesh_type = _mesh_type;
+                this.flag_12 = _flag_12;
                 this.material_index = _mat_index;
-                //this.mesh_type_1 = _mesh_type;
 
-                this.flag_24 = -1;
-                this.flag_28 = -1;
+                this.flag_24 = 0;
+                this.flag_28 = 0;
             }
 
             public byte[] serialize()
@@ -162,7 +161,7 @@ namespace JSRF_ModTool.MDLB_Import
                 b.Add(BitConverter.GetBytes(triangle_group_size));
                 b.Add(BitConverter.GetBytes(triangle_start_offset));
                 b.Add(BitConverter.GetBytes(flag_8));
-                b.Add(BitConverter.GetBytes(mesh_type));
+                b.Add(BitConverter.GetBytes(flag_12));
 
                 b.Add(BitConverter.GetBytes(material_index));
                 b.Add(BitConverter.GetBytes(mesh_type_1));

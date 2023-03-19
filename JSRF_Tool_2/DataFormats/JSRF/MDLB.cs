@@ -263,7 +263,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             public Int32 triangle_group_size { get; set; } // start index = (triangle_start_index /3) + (triangle_group_size -1)
             public Int32 triangle_start_index { get; set; } // divide this by 3
             public Int32 flag_8 { get; set; }
-            public Int32 mesh_type { get; set; } // =texture id????
+            public Int32 flag_12 { get; set; } // =texture id????
 
             public Int32 material_index { get; set; } // gives material number from materials list
             public Int32 mesh_type_1 { get; set; } // if = 1 is a bone?  // if = 0 is a visual mesh?

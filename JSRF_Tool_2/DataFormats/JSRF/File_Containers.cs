@@ -939,9 +939,26 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // if file structure is not of container type "indexed" skip to next file
             if (jsrf_file.type != File_Containers.container_types.indexed) { return 0; }
 
-            int indexLast = jsrf_file.INDX_root.items.Count - 1;
+            int num = 0;
 
-            return jsrf_file.INDX_root.items[indexLast].indexed_item.ID;
+            for (int i = 0; i < jsrf_file.INDX_root.items.Count; i++)
+            {
+                item_data_type t = jsrf_file.INDX_root.items[i].type;
+
+                if(t == item_data_type.Stage_Model || t == item_data_type.Stage_MDLB)
+                {
+                    if(jsrf_file.INDX_root.items[i].indexed_item.ID > num)
+                    {
+                        num = jsrf_file.INDX_root.items[i].indexed_item.ID;
+                    }  
+                }
+
+            }
+
+            return num;
+
+            //int indexLast = jsrf_file.INDX_root.items.Count - 1;
+            // return jsrf_file.INDX_root.items[indexLast].indexed_item.ID;
         }
 
         /// <summary>

@@ -107,18 +107,23 @@ namespace JSRF_ModTool
             btn_fix_drawdist.Visible = true;
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
+            Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
+            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[12];
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
 
             //JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
 
-           // Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
-           //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[157];
+            // Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[157];
 
 
             // load stg00_.bin
-             //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+            //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
 
             #region loading methods
 
@@ -147,8 +152,6 @@ namespace JSRF_ModTool
             */
 
 
-            //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
 
 
             /*
@@ -574,6 +577,7 @@ namespace JSRF_ModTool
 
         }
 
+        OpenFileDialog dialog_impSMD = new System.Windows.Forms.OpenFileDialog();
         // import model
         private void Btn_import_mdl_Click(object sender, EventArgs e)
         {
@@ -586,14 +590,14 @@ namespace JSRF_ModTool
             #region select SMD file dialog
 
             string filepath = String.Empty;
-            System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
-            dialog.Filter = "dat files (*.smd)|*.smd";
-            dialog.RestoreDirectory = true;
-            dialog.Title = "Select an SMD file";
+            //System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
+            dialog_impSMD.Filter = "dat files (*.smd)|*.smd";
+            dialog_impSMD.RestoreDirectory = true;
+            dialog_impSMD.Title = "Select an SMD file";
             //dialog.Multiselect = true;
-            if (dialog.ShowDialog() == DialogResult.OK)
+            if (dialog_impSMD.ShowDialog() == DialogResult.OK)
             {
-                filepath = dialog.FileName;
+                filepath = dialog_impSMD.FileName;
             }
             else
             {
@@ -706,42 +710,6 @@ namespace JSRF_ModTool
         }
 
        
-        // bgWorker_StageCompiler: Do Work
-        private void bgWorker_StageCompiler_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
-        {
-
-       /*
-            //Invoke(new Action(() => { items_loading = true; }));
-
-            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Location = new Point(9, 4); }));
-            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Size = new Size(1222, 733); }));
-            panel_compiling_stage.Invoke(new MethodInvoker(delegate { panel_compiling_stage.Visible = true; ; }));
-
-            Stage_Compiler lvl_compiler = new Stage_Compiler();
-            lvl_compiler.compile();
-            */
-
-            
-        }
-        // bgWorker_StageCompiler: Progress
-        private void bgWorker_StageCompiler_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-
-        }
-        // bgWorker_StageCompiler: Completed
-        private void bgWorker_StageCompiler_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
-        {
-            label_compiling_stage.Location = new Point(130,276);
-
-            System.Media.SystemSounds.Beep.Play();
-            string message = "Stage compilation complete";
-            string title = "JSRF ModTool";
-            label_compiling_stage.Text = "Stage Compilation Complete";
-
-            //MessageBox.Show(message, title);
-            Application.Exit();
-
-        }
 
 
         private void btn_sel_vis_mdl_dir_Click(object sender, EventArgs e)
@@ -1393,7 +1361,7 @@ namespace JSRF_ModTool
 
 
                 // add point to bounds to calculate the mesh'es bounding box
-                bounds.add_point(new Vector3(vert.X.ToString(), vert.Y.ToString(), vert.Z.ToString()));
+                bounds.add_point(new Vector3((float)x, (float)z, (float)y));
 
                 // Normals
                 if (norm_offset != -1)
@@ -1946,7 +1914,7 @@ namespace JSRF_ModTool
                 byte[] dds_header_1 = GenerateDdsHeader(compressionFormat, res_x, mipmap_count);
 
                 System.Buffer.BlockCopy(dds_header_1, 0, texture_file, 0, dds_header_1.Length);
-                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
+                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header_1.Length, data_unswizz.Length);
 
                 /*
                 byte[] data_unswizz = new byte[data.Length - 32];
@@ -2529,16 +2497,6 @@ namespace JSRF_ModTool
         // export model part
         private void Export_model_part(string save_dir, string filename, int part_num)
         {
-
-#if DEBUG
-
-            if(part_num >= 20)
-            {
-                string stop = "";
-            }
-
-#endif
-
             if (current_model == null)
             {
                 MessageBox.Show("export_model_part(" + part_num + ") Error, could not export model part (model is null)");
@@ -2830,16 +2788,7 @@ namespace JSRF_ModTool
                 file.WriteLine("triangles");
 
                 string bone_weights;
-
                 string mat_name = "mat_0";
-
-#if DEBUG
-
-                if(part_num == 20)
-                {
-                    string testx = "";
-                }
-#endif
 
 
                 for (int i = 0; i < mesh_data.triangles.Count; i += 3)
@@ -2930,7 +2879,6 @@ namespace JSRF_ModTool
             }
 
             #endregion
-
         }
 
 

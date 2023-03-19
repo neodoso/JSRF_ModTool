@@ -32,7 +32,6 @@ namespace JSRF_ModTool.MDLB_Import
             int[] values = (int[])Enum.GetValues(typeof(Materials.materials));
             bool mat_found = false;
 
-
             // find corresponding material id and select item in combobox
             for (int i = 0; i < names.Length; i++)
             {
@@ -49,7 +48,7 @@ namespace JSRF_ModTool.MDLB_Import
             {
                 /// search to select the material
                 cb_material_id.Items.Add(shader_id.ToString());
-                int index = 0;
+
                 for (int i = 0; i < cb_material_id.Items.Count-1; i++)
                 {
                    
@@ -59,7 +58,6 @@ namespace JSRF_ModTool.MDLB_Import
                         break;
                     }
                 }
-                //cb_material_id.SelectedIndex = cb_material_id.Items.Count-1;
             }
             #endregion
 

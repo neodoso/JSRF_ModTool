@@ -18,8 +18,8 @@ namespace JSRF_ModTool.MDLB_Import
             Metal = 1122978, 
             Semi_Transparent = 4612770,
             Self_illuminated = 524287,
-           // UV_scroll_X_ticking = 4661255,
-           // UV_scroll_X_sliding = 459263,
+            UV_scroll_X_ticking = 4661255,
+            UV_scroll_X_sliding = 459263,
         }
 
 

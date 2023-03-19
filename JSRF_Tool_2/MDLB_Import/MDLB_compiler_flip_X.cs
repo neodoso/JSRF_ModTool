@@ -7,22 +7,44 @@ using JSRF_ModTool.Functions;
 
 namespace JSRF_ModTool
 {
-    class MDLB_compiler
+    class MDLB_compiler_flip_X
     {
         // build JSRF MDLB model
         public byte[] build(List<MDLB_Import.ModelPart_Import_Settings> mdl_list, List<MDLB_Import.MDLB_classes.material> materials, int src_mat_count) //, vertex_type vert_type
         {
+
+            bool flip_on_X = false;
+
             #region import each SMD
 
             // create array for each SMD
             SMD[] SMD_parts = new SMD[mdl_list.Count];
             int mdl_parts_count = mdl_list.Count;
+            SMD smd_lastPart = SMD_parts[mdl_list.Count - 1];
 
-            // import each model parts's SMD file and store it in list SMD_parts[]
+   
+
+            #region import lower model parts SMDs
+
+            List<string> smd_not_found = new List<string>();
+
+            // import model parts if SMD file exists
             for (int i = 0; i < mdl_parts_count; i++)
             {
-                SMD_parts[i] = new SMD(mdl_list[i].filepath);
+                if (File.Exists(mdl_list[i].filepath))
+                {
+                    SMD_parts[i] = new SMD(mdl_list[i].filepath);
+                }
+                else
+                {
+                   System.Windows.MessageBox.Show("MDLB_builder Error: could not find SMD model part " + i + "\n\nExpecting file: " + mdl_list[i].filepath);
+                    return new byte[0];
+                }
             }
+
+            #endregion
+
+       
 
             #endregion
 
@@ -51,195 +73,216 @@ namespace JSRF_ModTool
 
             #endregion
 
+            
+
+            #region flip skeleton along X axis ( X * -1 )
+
+            if(flip_on_X)
+            {
+                // flip skeleton nodes on X axis
+                for (int i = 0; i < SMD_parts.Length; i++)
+                {
+                    for (int j = 0; j < SMD_parts[i].skeleton_nodes.Count; j++)
+                    {
+                        SMD.skeleton_node nd = SMD_parts[i].skeleton_nodes[j];
+                        nd.pos = new Vector3(nd.pos.X * -1, nd.pos.Y, nd.pos.Z);
+                        SMD_parts[i].skeleton_nodes[j] = nd;
+                    }
+                }
+            }
+            #endregion
+
+
+            smd_lastPart = SMD_parts[SMD_parts.Length - 1];
+
+
             #region convert nodes to JSRF format and import lower SMD model parts
 
-            List<node_jsrf> nodes_jsrf = new List<node_jsrf>();
-            SMD smd_lastPart = SMD_parts[mdl_list.Count - 1];
-
             // rigged models (multiple model parts, has bones/rigging)
-            if (mdl_list.Count > 1)
+
+            #region convert nodes to JSRF format 
+
+            List<node_jsrf> nodes_jsrf = new List<node_jsrf>();
+
+            // re-organize nodes to JSRF format list of: (child_node_id, shared_parent_node_id)
+            #region get list of nodes that share the same parent node
+
+            List<shared_parent> shared_parents = new List<shared_parent>();
+            int[] shared_parent_cnt = new int[smd_lastPart.nodes.Count];
+
+            // count how many times a node is used as a parent
+            for (int i = 1; i < smd_lastPart.nodes.Count; i++)
             {
-                #region convert nodes to JSRF format 
+                if (smd_lastPart.nodes[i].parent_ID >= 0)
+                {
+                    shared_parent_cnt[smd_lastPart.nodes[i].parent_ID] += 1;
+                }
+            }
 
-                // re-organize nodes to JSRF format list of: (child_node_id, shared_parent_node_id)
-                #region get list of nodes that share the same parent node
+            // count how many times a node is used as a parent
+            for (int i = 1; i < shared_parent_cnt.Length - 1; i++)
+            {
+                if (shared_parent_cnt[i] > 1)
+                {
+                    shared_parents.Add(new shared_parent(i));
+                }
+            }
 
-                List<shared_parent> shared_parents = new List<shared_parent>();
-                int[] shared_parent_cnt = new int[smd_lastPart.nodes.Count];
-
-                // count how many times a node is used as a parent
+            // add shared children for each parent node in shared_parents
+            for (int x = 0; x < shared_parents.Count; x++)
+            {
                 for (int i = 1; i < smd_lastPart.nodes.Count; i++)
                 {
-                    if (smd_lastPart.nodes[i].parent_ID >= 0)
+                    if (shared_parents[x].parent == smd_lastPart.nodes[i].parent_ID)
                     {
-                        shared_parent_cnt[smd_lastPart.nodes[i].parent_ID] += 1;
+                        shared_parents[x].children.Add(smd_lastPart.nodes[i].ID);
                     }
                 }
-
-                // count how many times a node is used as a parent
-                for (int i = 1; i < shared_parent_cnt.Length - 1; i++)
-                {
-                    if (shared_parent_cnt[i] > 1)
-                    {
-                        shared_parents.Add(new shared_parent(i));
-                    }
-                }
-
-                // add shared children for each parent node in shared_parents
-                for (int x = 0; x < shared_parents.Count; x++)
-                {
-                    for (int i = 1; i < smd_lastPart.nodes.Count; i++)
-                    {
-                        if (shared_parents[x].parent == smd_lastPart.nodes[i].parent_ID)
-                        {
-                            shared_parents[x].children.Add(smd_lastPart.nodes[i].ID);
-                        }
-                    }
-                }
-
-                #endregion
-
-
-
-                #region copy smd nodes to list for JSRF nodes format
-                // generate nodes list for JSRF format
-                for (int i = 0; i < smd_lastPart.nodes.Count; i++)
-                {
-
-                    if (smd_lastPart.nodes[i].parent_ID == -1)
-                    {
-                        nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, smd_lastPart.nodes[i].parent_ID)); //smd_data.nodes[i].parent_ID
-                    }
-                    else
-                    {
-                        nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, 0));
-                    }
-
-
-                    // if parent id is negative make last part the parent
-                    if (nodes_jsrf[i].shared_parent_id == -1)
-                    {
-                        nodes_jsrf[i].shared_parent_id = smd_lastPart.nodes.Count;
-                    }
-
-                    // get/set children node
-                    if (i + 1 < smd_lastPart.nodes.Count)
-                    {
-                        // if parent id is negative make last part the parent
-                        if (smd_lastPart.nodes[i + 1].parent_ID == i)
-                        {
-                            nodes_jsrf[i].child_id = i + 1;
-                        }
-
-                        if (nodes_jsrf[i].child_id == i)
-                        {
-                            nodes_jsrf[i].child_id = 0;
-                        }
-                    }
-                }
-
-                // set last node's child = 0 (aka none)
-                nodes_jsrf[nodes_jsrf.Count - 1].child_id = 0;
-
-                #endregion
-
-                #region setup shared parent nodes ids
-                // for each list of child nodes sharing the same parent
-                for (int p = 0; p < shared_parents.Count; p++)
-                {
-                    // for each child sharing the same parent node
-                    for (int c = 0; c < shared_parents[p].children.Count; c++)
-                    {
-
-                        // if last child is sharing the same parent, set parent = 0
-                        if (c == shared_parents[p].children.Count - 1)
-                        {
-                            nodes_jsrf[shared_parents[p].children[c]].shared_parent_id = 0;
-                            continue;
-                        }
-
-                        if (c >= 0)
-                        {
-                            nodes_jsrf[shared_parents[p].children[c]].shared_parent_id = shared_parents[p].children[c + 1];
-                            continue;
-                        }
-                    }
-                }
-
-                #endregion
-
-                #endregion
-
-                #region recalculate bone positions
-
-                for (int i = 0; i < smd_lastPart.skeleton_nodes.Count; i++)
-                {
-                    // recalculate bone position (substract bone.pos by parent_bone.pos)
-                    if (i > 0)
-                    {
-                        Vector3 pos = smd_lastPart.skeleton_nodes[i].pos;
-                        Vector3 vpp = new Vector3();
-
-                        if (i >= 0)
-                        {
-                            if (smd_lastPart.nodes[i].parent_ID != -1)
-                            {
-                                //vpp = smd_data.skeleton_nodes[nodes_jsrf[i].shared_parent_id].pos;
-                                vpp = smd_lastPart.skeleton_nodes[smd_lastPart.nodes[i].parent_ID].pos;
-                            }
-                        }
-
-                        // substract parent position 
-                        smd_lastPart.skeleton_nodes[i].pos = new Vector3(pos.X + vpp.X, pos.Y + vpp.Y, pos.Z + vpp.Z);
-                    }
-                }
-
-                #endregion
-
-                #region import lower model parts SMDs
-
-
-                string smd_part_path;
-                List<string> smd_not_found = new List<string>();
-
-                // import model parts if SMD file exists
-                for (int i = 0; i < mdl_parts_count - 1; i++)
-                {
-                    smd_part_path = Path.GetDirectoryName(smd_lastPart.FilePath) + "\\" + Path.GetFileNameWithoutExtension(smd_lastPart.FilePath) + "_p_" + i + ".smd";
-                    if (File.Exists(smd_part_path))
-                    {
-                        SMD_parts[i] = new SMD(smd_part_path);
-                    }
-                    else
-                    {
-                        smd_not_found.Add(i.ToString());
-
-                        // System.Windows.MessageBox.Show("MDLB_builder Error: could not find SMD model part " + i + "\nexpecting file: " + smd_part_path);
-                    }
-                }
-                /*
-                // if SMD model part not found give error message
-                if(smd_not_found.Count > 0)
-                {
-                    string mdl_nums = String.Empty;
-                    for (int i = 0; i < smd_not_found.Count; i++)
-                    {
-                        mdl_nums = mdl_nums + "  [p_" + smd_not_found[i] + "]";
-                    }
-
-
-                    System.Windows.MessageBox.Show("MDLB_builder Error: could not find SMD models parts: " + mdl_nums);
-                    return new byte[0];
-                }
-                */
-                #endregion
-            }
-            else
-            { // static model (only one model part = 1 mesh, no rigging)
-                SMD_parts[0] = smd_lastPart;
             }
 
             #endregion
+
+
+            #region copy smd nodes to list for JSRF nodes format
+            // generate nodes list for JSRF format
+            for (int i = 0; i < smd_lastPart.nodes.Count; i++)
+            {
+
+                if (smd_lastPart.nodes[i].parent_ID == -1)
+                {
+                    nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, smd_lastPart.nodes[i].parent_ID)); //smd_data.nodes[i].parent_ID
+                }
+                else
+                {
+                    nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, 0));
+                }
+
+
+                // if parent id is negative make last part the parent
+                if (nodes_jsrf[i].shared_parent_id == -1)
+                {
+                    nodes_jsrf[i].shared_parent_id = smd_lastPart.nodes.Count;
+                }
+
+                // get/set children node
+                if (i + 1 < smd_lastPart.nodes.Count)
+                {
+                    // if parent id is negative make last part the parent
+                    if (smd_lastPart.nodes[i + 1].parent_ID == i)
+                    {
+                        nodes_jsrf[i].child_id = i + 1;
+                    }
+
+                    if (nodes_jsrf[i].child_id == i)
+                    {
+                        nodes_jsrf[i].child_id = 0;
+                    }
+                }
+            }
+
+            // set last node's child = 0 (aka none)
+            nodes_jsrf[nodes_jsrf.Count - 1].child_id = 0;
+
+            #endregion
+
+            #region setup shared parent nodes ids
+            // for each list of child nodes sharing the same parent
+            for (int p = 0; p < shared_parents.Count; p++)
+            {
+                // for each child sharing the same parent node
+                for (int c = 0; c < shared_parents[p].children.Count; c++)
+                {
+
+                    // if last child is sharing the same parent, set parent = 0
+                    if (c == shared_parents[p].children.Count - 1)
+                    {
+                        nodes_jsrf[shared_parents[p].children[c]].shared_parent_id = 0;
+                        continue;
+                    }
+
+                    if (c >= 0)
+                    {
+                        nodes_jsrf[shared_parents[p].children[c]].shared_parent_id = shared_parents[p].children[c + 1];
+                        continue;
+                    }
+                }
+            }
+
+            #endregion
+
+            #endregion
+
+            #region recalculate bone positions relative to parents
+
+
+            for (int i = 0; i < smd_lastPart.skeleton_nodes.Count; i++)
+            {
+                // recalculate bone position (substract bone.pos by parent_bone.pos)
+                if (i > 0)
+                {
+                    Vector3 pos = smd_lastPart.skeleton_nodes[i].pos;
+                    Vector3 parent_pos = new Vector3();
+
+                    if (i >= 0)
+                    {
+                        if (smd_lastPart.nodes[i].parent_ID != -1)
+                        {
+                            //vpp = smd_data.skeleton_nodes[nodes_jsrf[i].shared_parent_id].pos;
+                            parent_pos = smd_lastPart.skeleton_nodes[smd_lastPart.nodes[i].parent_ID].pos;
+                        }
+                    }
+
+                    // substract parent position 
+                    smd_lastPart.skeleton_nodes[i].pos = new Vector3(pos.X + parent_pos.X, pos.Y + parent_pos.Y, pos.Z + parent_pos.Z);
+                }
+            }
+
+            #endregion
+
+            #endregion
+
+            
+
+            #region flip mesh along X axis
+
+            if (flip_on_X)
+            {
+                // for all model parts
+                for (int i = 0; i < SMD_parts.Length; i++)
+                {
+                    // flip vertex positions and normals on x axis
+                    for (int v = 0; v < SMD_parts[i].vertices_list.Count; v++)
+                    {
+                        SMD.vertex vt = SMD_parts[i].vertices_list[v];
+                        vt.pos = new Vector3(vt.pos.X * -1, vt.pos.Y, vt.pos.Z);
+                        vt.norm = new Vector3(vt.norm.X * -1, vt.norm.Y, vt.norm.Z);
+
+                        SMD_parts[i].vertices_list[v] = vt;
+                    }
+                }
+
+                /*
+                // for last part model
+                // flip vertex positions and normals on x axis
+                for (int v = 0; v < smd_lastPart.vertices_list.Count; v++)
+                {
+                    SMD.vertex vt = smd_lastPart.vertices_list[v];
+                    vt.pos = new Vector3(vt.pos.X * -1, vt.pos.Y, vt.pos.Z);
+                    vt.norm = new Vector3(vt.norm.X * -1, vt.norm.Y, vt.norm.Z);
+
+                    smd_lastPart.vertices_list[v] = vt;
+                }
+                */
+            }
+
+
+            #endregion
+
+
+            smd_lastPart.vertices_list = SMD_parts[SMD_parts.Length - 1].vertices_list;
+
+
+            if (mdl_list.Count == 1) { SMD_parts[0] = smd_lastPart; }
 
 
             #region triangle groups list
@@ -272,17 +315,12 @@ namespace JSRF_ModTool
                 if (SMD_parts[i].mat_groups_list.Count == 0 && i == SMD_parts.Length -1)
                 {
                     System.Windows.Forms.MessageBox.Show("Error importing model, the SMD or model have no material groups.");
+
                     return null;
                 }
 
-                // do not generate triangle group for the model parts that are bones
-                if (Main.current_model.Model_Parts_header_List[i].model_type == 2)
-                {
-                    continue;
-                }
-
                 // do not write material group for model_type = 1
-                if (Main.current_model.Model_Parts_header_List[i].materials_count == 1)
+                if(Main.current_model.Model_Parts_header_List[i].model_type == 1 && Main.current_model.Model_Parts_header_List[i].materials_count == 1)
                 {
                     continue;
                 }
@@ -290,29 +328,37 @@ namespace JSRF_ModTool
                 // for each material group from the imported SMD file
                 for (int m = 0; m < SMD_parts[i].mat_groups_list.Count; m++)
                 {
+                    // if original's Model_Parts_header_List[i] has no mat/tri group defined 
+                    // skip
+                    int mesh_type = 1;
                     int mat_num = 0;
+
                     if (SMD_parts[i].mat_groups_list[m].material_name.Contains("mat_"))
                     {
                         mat_num = Convert.ToInt32(SMD_parts[i].mat_groups_list[m].material_name.Replace("mat_", ""));
                     }
 
-
-                    int flag_12 = 0;
-                    // get original triangle group "flag_12" value
-                    if (m < Main.current_model.Model_Parts_header_List[i].triangle_groups_List.Count)
+                    // if its a visual mesh  set mesh_type to 0
+                    if (i == mdl_parts_count - 1)
                     {
-                        flag_12 = Main.current_model.Model_Parts_header_List[i].triangle_groups_List[m].flag_12;
+                        /*
+                        // if it's a head model the material index must be increased by one
+                        if (prev_mdl_parts_have_material)
+                        {
+                           // mat_num++;
+                        }
+                        */
+                        mesh_type = 0;
                     }
 
 
                     // TODO : determine if mat_index in triangle_group(_mat_index) needs to be shifted of +1 or not
                     // instance triangle group with SMD data and (mesh_type, material_index) default values
-                    tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) + 1, SMD_parts[i].mat_groups_list[m].triangle_start_index, flag_12, mat_num);
-
+                    tg = new MDLB_Import.MDLB_classes.triangle_group((SMD_parts[i].mat_groups_list[m].triangle_count / 3) +1, SMD_parts[i].mat_groups_list[m].triangle_start_index, mesh_type, mat_num);
+                        
                     // serialize and store in list
                     bytes_triangle_groups_list.Add(tg.serialize());
-                }
-                
+                }    
             }
           
             // convert triangles_group_list of byte arrays into a single array
@@ -378,6 +424,7 @@ namespace JSRF_ModTool
             // for each model part
             for (int i = 0; i < mdl_parts_count; i++)
             {
+
                 vertex_tris_header = new MDLB_Import.MDLB_classes.Vertex_triangles_buffers_header();
                 vtx_buffer_list = new List<byte[]>(); tris_buffer_list = new List<byte[]>();
                 List<byte[]> materials_buffer_list = new List<byte[]>();
@@ -416,14 +463,8 @@ namespace JSRF_ModTool
                         materials_buffer_list.Add(padding);
 
                         vtx_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
-
                     }
-
-
                 }
-
-
-
 
                 #endregion
 
@@ -463,7 +504,9 @@ namespace JSRF_ModTool
                         if (i < mdl_parts_count - 1)
                         {
                             vertex_tris_header.unk_flag = 530;
-                        } else {
+                        }
+                        else
+                        {
                             vertex_tris_header.unk_flag = 4376; ///4376; // 530 if bone
                         }
 
@@ -557,11 +600,28 @@ namespace JSRF_ModTool
                 vertex_tris_header.vertex_count = (vertex_tris_header.triangles_buffer_offset - vertex_tris_header.vertex_buffer_offset) / vertex_tris_header.vertex_def_size;
 
                 #region build triangles buffer
-                // for each triangle
-                foreach (var t in SMD_parts[i].triangles_list)
+
+
+                
+                if (flip_on_X)
                 {
-                    tris_buffer_list.Add(BitConverter.GetBytes(t));
+                    // (flip triangles for axis flip: X * -1) create triangle buffer list, while flipping the triangle winding order
+                    for (int t = 0; t < SMD_parts[i].triangles_list.Count; t += 3)
+                    {
+                        tris_buffer_list.Add(BitConverter.GetBytes(SMD_parts[i].triangles_list[t + 2]));
+                        tris_buffer_list.Add(BitConverter.GetBytes(SMD_parts[i].triangles_list[t + 1]));
+                        tris_buffer_list.Add(BitConverter.GetBytes(SMD_parts[i].triangles_list[t]));
+                    }
+                } else {
+                    // for triangle vertex index
+                    foreach (var t in SMD_parts[i].triangles_list)
+                    {
+                        tris_buffer_list.Add(BitConverter.GetBytes(t));
+                    }
                 }
+                
+
+
 
                 // calculate add remainder padding
                 //tris_buffer_list.Add(new byte[calc_remainder_padding(tris_buffer_list.Count * 2)]);
@@ -578,12 +638,17 @@ namespace JSRF_ModTool
 
                 List<byte[]> vertex_tris_buffers = new List<byte[]>();
 
+
                 if (Main.current_model.header.materials_count != 0)
                 {
                     vertex_tris_buffers.Add(vertex_tris_header.serialize());
+
+                    //head_mat_offset = vtx_materials_list_bytes.Length;
+                    //vertex_tris_buffers.Add(vtx_materials_list_bytes);
                 }
                 else
                 {
+                    // head_mat_offset = vtx_materials_list_bytes.Length;
                     vertex_tris_buffers.Add(vertex_tris_header.serialize());
                     vertex_tris_buffers.Add(vtx_materials_list_bytes);
                 }
@@ -646,6 +711,21 @@ namespace JSRF_ModTool
 
                 if (Main.current_model.header.materials_count == 0) //materials.Count == 0
                 {
+
+
+                    /*
+                    if (Main.model.header.materials_count != 0)
+                    {
+                        mdl_part_header.materials_count = Main.model.header.materials_count;
+                    } else {
+
+                        mdl_part_header.materials_count = SMD_parts[i].mat_groups_list.Count; //vtx_materials_count;
+                    }
+                    */
+
+
+
+
                     // if last model part
                     if (i == mdl_parts_count - 1)
                     {
@@ -683,7 +763,7 @@ namespace JSRF_ModTool
                     //mdl_part_header.triangle_groups_count = Main.model.Model_Parts_header_List[i].triangle_groups_count;
                     mdl_part_header.triangle_groups_count = SMD_parts[i].mat_groups_list.Count;
 
-
+                    /*
                    if (i < mdl_parts_count-1)
                    {
                         mdl_part_header.materials_count = 1;
@@ -692,7 +772,7 @@ namespace JSRF_ModTool
                    {
                         mdl_part_header.materials_count = materials.Count;
                    }
-                      
+                   */
 
                     mdl_part_header.materials_list_offset = (mdl_parts_count * 128) + triangle_groups_list_bytes.Length;
                 }
@@ -716,14 +796,13 @@ namespace JSRF_ModTool
                     // fix, if = 21 set to 20
                     if (nodes_jsrf[i].shared_parent_id == 21) { nodes_jsrf[i].shared_parent_id = 20; }
                     mdl_part_header.bone_parent_id = nodes_jsrf[i].shared_parent_id * 128;// * 128 (size of a Model_Part_header block)
-                    mdl_part_header.model_type = 2;
+                    mdl_part_header.model_type = 1;
                 }
                 else
                 { // last model part
                     mdl_part_header.bone_pos = new Vector3(0, 0, 0);
                     mdl_part_header.bone_child_id = 0; // * 128 (size of a Model_Part_header block)
-                    mdl_part_header.bone_parent_id = 0; // * 128 (size of a Model_Part_header block)
-                    mdl_part_header.model_type = 1;
+                    mdl_part_header.bone_parent_id = 0;// * 128 (size of a Model_Part_header block)
                 }
 
 
@@ -731,7 +810,7 @@ namespace JSRF_ModTool
                 // if model only has one part (static mesh)
                 if (mdl_parts_count == 1)
                 {
-                    mdl_part_header.model_type = 0; //0
+                    mdl_part_header.model_type = 0;
                 }
 
                 //mdl_part_header.unk_float1 = new Vector3(1f, 1f, 1f);

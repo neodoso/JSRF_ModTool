@@ -40,9 +40,9 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.color_0 = new JSRF_ModTool.MDLB_Import.Color();
             this.txtb_unk_id1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.color_0 = new JSRF_ModTool.MDLB_Import.Color();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -75,9 +75,9 @@
             this.label2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.label2.Location = new System.Drawing.Point(241, 33);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(69, 13);
+            this.label2.Size = new System.Drawing.Size(52, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Material ID";
+            this.label2.Text = "Material";
             // 
             // cb_material_id
             // 
@@ -168,14 +168,6 @@
             this.panel4.Size = new System.Drawing.Size(2, 64);
             this.panel4.TabIndex = 9;
             // 
-            // color_0
-            // 
-            this.color_0.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.color_0.Location = new System.Drawing.Point(12, 28);
-            this.color_0.Name = "color_0";
-            this.color_0.Size = new System.Drawing.Size(166, 47);
-            this.color_0.TabIndex = 0;
-            // 
             // txtb_unk_id1
             // 
             this.txtb_unk_id1.Location = new System.Drawing.Point(363, 50);
@@ -197,6 +189,14 @@
             this.label1.Size = new System.Drawing.Size(50, 13);
             this.label1.TabIndex = 10;
             this.label1.Text = "Unk ID 1";
+            // 
+            // color_0
+            // 
+            this.color_0.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.color_0.Location = new System.Drawing.Point(12, 28);
+            this.color_0.Name = "color_0";
+            this.color_0.Size = new System.Drawing.Size(166, 47);
+            this.color_0.TabIndex = 0;
             // 
             // Material_Inspector
             // 
