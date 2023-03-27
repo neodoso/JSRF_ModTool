@@ -78,8 +78,8 @@ namespace JSRF_ModTool
             InitializeComponent();
 
            startup_dir = GetShortPath(Application.StartupPath);
-           tmp_dir = GetShortPath(startup_dir + "\\resources\\tmp\\");
-           settings_dir = GetShortPath(startup_dir + "\\resources\\");
+           tmp_dir = startup_dir + "\\resources\\tmp\\";
+           settings_dir = startup_dir + "\\resources\\";
 
         }
 
@@ -103,17 +103,22 @@ namespace JSRF_ModTool
 
             #endregion
 
+            if (!Directory.Exists(tmp_dir)) { Directory.CreateDirectory(tmp_dir); }
+
 #if DEBUG
             btn_fix_drawdist.Visible = true;
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\People\People01.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
+
             Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
-            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[12];
+            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[8].Nodes[0];
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
 
-            //JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser stageBinParser = new JSRF_ModTool.DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
@@ -2718,7 +2723,6 @@ namespace JSRF_ModTool
 
 
                 Vector3 pos = mp.bone_pos;
-
                 // recalculate bone position (substract bone.pos by parent_bone.pos)
                 if (i > 0)
                 {
@@ -2938,13 +2942,6 @@ namespace JSRF_ModTool
 
                 jsrf_file.set_item_data(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, array);
                 Rebuild_file(true, true, true);
-
-#if DEBUG
-
-                //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
-                //Clear_game_cache();
-
-#endif
             }
         }
 
@@ -2966,6 +2963,100 @@ namespace JSRF_ModTool
 
 
         #region texture editing
+
+
+        // export texture to custom filepath
+        private void btn_save_texture_file_Click(object sender, EventArgs e)
+        {
+            #region check if texture item is selected and valid
+
+            File_Containers.item_data_type selected_node_type = File_Containers.get_item_data_type(current_item_data);
+
+            if (selected_node_type != File_Containers.item_data_type.Texture)
+            {
+                MessageBox.Show("Select a texture item first.");
+                return;
+            }
+
+            string texture_id = "";
+
+            if (selected_node_type == File_Containers.item_data_type.Texture)
+            {
+                //texture_id = Load_block_Texture(current_item_data, true, true);
+                texture_id = BitConverter.ToInt32(current_item_data, 0).ToString();
+
+                if (texture_id == "")
+                {
+                    MessageBox.Show("Could not read texture.");
+                    return;
+                }
+
+                /*
+                if (!File.Exists(tmp_dir + texture_id + ".png"))
+                {
+                    MessageBox.Show("Could not extract texture: ID " + texture_id);
+                    return;
+                }
+                */
+            }
+
+            #endregion
+
+            string texture_path = tmp_dir + "tmp" + ".png"; //GetShortPath()
+            #region setup Save File Dialog
+
+            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+
+            saveFileDialog1.Title = "Save texture";
+            saveFileDialog1.RestoreDirectory = true;
+
+            string filename = Path.GetFileNameWithoutExtension(jsrf_file.filepath);
+            string nodeName = Regex.Replace(current_node.Text, @"\s+", "_");
+
+            saveFileDialog1.FileName = filename + "_" + texture_id;
+            saveFileDialog1.DefaultExt = "png";
+            saveFileDialog1.Filter = "PNG file (*.png)|*.png";
+            saveFileDialog1.FilterIndex = 2;
+
+            #endregion
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (String.IsNullOrEmpty(saveFileDialog1.FileName))
+                {
+                    MessageBox.Show("Invalid file name.");
+                    return;
+                }
+
+                try
+                {
+                    File.Copy(texture_path, saveFileDialog1.FileName, true);
+
+                }
+                catch (Exception err)
+                {
+                    MessageBox.Show("Error: could not copy texture file.\n\n" + err.Message);
+                    return;
+                }
+            }
+        }
+
+        // import texture from file
+        private void btn_import_texture_file_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
+            dialog.Filter = "PNG file (*.PNG)|*.PNG";
+            dialog.RestoreDirectory = true;
+            dialog.Title = "Select a PNG file";
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                if (!File.Exists(dialog.FileName)) { MessageBox.Show("Error: file does not exist."); return; }
+
+                save_texture(dialog.FileName);
+            }
+        }
+
 
         private void Btn_edit_texture_Click(object sender, EventArgs e)
         {
@@ -3063,26 +3154,44 @@ namespace JSRF_ModTool
                 return;
             }
 
-            string texture_id = "";
 
-            if (selected_node_type == File_Containers.item_data_type.Texture)
+            save_texture();
+
+        }
+
+
+        /// <summary>
+        /// converts png image file to dds and saves it in current selected texture item in the jsrf file
+        /// if "png_filepath" is set, png is loaded that custom path, converted to dds and saved  in current selected texture item in the jsrf file
+        /// if "png_filepath" is not set, the png in tmp_dir (named with the ID of currently selected texture item) is saved in current selected texture item in the jsrf file
+        /// </summary>
+        /// <param name="png_filepath"> png is loaded from this custom path</param>
+        private void save_texture(string png_filepath = null)
+        {
+            //string texture_id = "";
+
+            // if texture is loaded from custom filepath
+            if (!string.IsNullOrEmpty(png_filepath))
             {
+                string png_filename = Path.GetFileNameWithoutExtension(png_filepath);
 
-                texture_id = BitConverter.ToInt32(current_item_data, 0).ToString();
-                // texture_id = load_block_Texture(data_block, true, true);
-
-                if (texture_id == "")
+                if (!File.Exists(png_filepath))
                 {
-                    MessageBox.Show("Could not read texture.");
+                    MessageBox.Show("Could not find image file " + png_filename + ".png " + "in:\n\n" + png_filepath);
                     return;
                 }
 
-                if (!File.Exists(tmp_dir + texture_id + ".png"))
+                try
                 {
-                    MessageBox.Show("Could not extract texture: ID " + texture_id);
+                    File.Copy(png_filepath, tmp_dir + "tmp.png", true);
+                } 
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: could not cope source file to tmp\\tmp.png\n\n" + ex.Message);
                     return;
                 }
             }
+
 
             #endregion
 
@@ -3135,8 +3244,11 @@ namespace JSRF_ModTool
             // so we get it to -genmipmap=1 so it doesn't generate any (only main texture)
             if (mipmap_count == 0) { mipmap_count = 1; }
 
-            #region convert texture_id.png to import.dds
-            string args = "-i=" + texture_id + ".png -o=" + "import.dds " + " -format=" + dxt_compression_type + " -genmipmaps=" + mipmap_count; // (mipmap_count-1).ToString()
+         
+
+            #region convert tmp.png to import.dds
+
+            string args = "-i=tmp.png -o=" + "import.dds " + " -format=" + dxt_compression_type + " -genmipmaps=" + mipmap_count; // (mipmap_count-1).ToString()
 
 
             Process proc = new Process
@@ -3155,6 +3267,7 @@ namespace JSRF_ModTool
             proc.Start();
             proc.WaitForExit();
             proc.Dispose();
+
             #endregion
 
             // import dds file to byte array (skip DDS header - 128 bytes)
@@ -3174,8 +3287,11 @@ namespace JSRF_ModTool
                     b.BaseStream.Position = 16;
                     width = b.ReadInt32();
                 }
-            } catch {
+            }
+            catch
+            {
                 MessageBox.Show("Error: could not read " + tmp_dir + "import.dds");
+                return;
             }
 
             #endregion
@@ -3197,7 +3313,7 @@ namespace JSRF_ModTool
                 //tex_rewrite_start_offset += 8;
             }
 
-            byte[] new_texture = new Byte[tex_size +32];
+            byte[] new_texture = new Byte[tex_size + 32];
 
             // get original texture header
             byte[] texture_header = new Byte[32];
@@ -3211,15 +3327,10 @@ namespace JSRF_ModTool
             texture_header[23] = wb[3];
 
 
-            //File.WriteAllBytes("C:\\Users\\Mike\\Desktop\\jsrf_texture_header.dat", texture_header);
-
             // copy jsrf texture header to new_texture
             Array.Copy(texture_header, 0, new_texture, 0, 32);
             // copy imported_texture data to new_texture (after 32 bytes header)
             Array.Copy(imported_texture, 0, new_texture, 32, imported_texture.Length);
-
-            // append header + texture data (leaves 8 bytes padding (0000 0000) at the end)
-            //imported_texture.CopyTo(new_texture,  32);
 
             #endregion
 
@@ -3601,27 +3712,25 @@ namespace JSRF_ModTool
         private void clear_cxbx_cache()
         {
             string cxbx_dir = txtb_cxbx_dir.Text;
-            // clear cache (for PC platform cxbx)
+
+  
             if (Directory.Exists(cxbx_dir + "EmuDisk\\"))
             {
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition2\\");
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition3\\");
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition4\\");
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition5\\");
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition6\\");
-                IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition7\\");
+                // clear Partition 2 to 7
+                for (int i = 2; i < 8; i++)
+                {
+                    IO.DeleteDirectoryContent(cxbx_dir + "EmuDisk\\Partition" + i + "\\");
+                }
             }
 
             string cxbx_roaming_dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Cxbx-Reloaded\\";
 
             if (Directory.Exists(cxbx_roaming_dir))
             {
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition2\\");
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition3\\");
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition4\\");
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition5\\");
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition6\\");
-                IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition7\\");
+                for (int i = 2; i < 8; i++)
+                {
+                    IO.DeleteDirectoryContent(cxbx_roaming_dir + "EmuDisk\\Partition" + i + "\\");
+                }
             }
         }
 
@@ -4008,5 +4117,7 @@ namespace JSRF_ModTool
         }
 
         #endregion
+
+
     }
 }

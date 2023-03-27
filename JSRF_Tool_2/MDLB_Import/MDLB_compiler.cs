@@ -106,6 +106,29 @@ namespace JSRF_ModTool
                 for (int i = 0; i < smd_lastPart.nodes.Count; i++)
                 {
 
+                    /*
+                    int parent_ID = smd_lastPart.nodes[i].parent_ID;
+                    int bone_parent_ID = 0;
+
+                    if (smd_lastPart.nodes[i].parent_ID != -1)
+                    {
+                        parent_ID = 0;
+                    }
+
+                    for (int j = i; j < smd_lastPart.nodes.Count-1; j++)
+                    {
+                        if (smd_lastPart.nodes[j+1].parent_ID == 0)
+                        {
+                            bone_parent_ID = j+1;
+                            break;
+                        }
+                    }
+
+                    if (smd_lastPart.nodes[i].parent_ID == -1) { bone_parent_ID = 0; }
+
+                    nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, parent_ID)); //, bone_parent_ID
+                    */
+
                     if (smd_lastPart.nodes[i].parent_ID == -1)
                     {
                         nodes_jsrf.Add(new node_jsrf(smd_lastPart.nodes[i].ID, smd_lastPart.nodes[i].parent_ID)); //smd_data.nodes[i].parent_ID
@@ -392,9 +415,23 @@ namespace JSRF_ModTool
                     // lower part
                     if (i < mdl_parts_count - 1 && Main.current_model.header.materials_count == 0) //materials.Count > 0
                     {
-                        //changed nor sure if this works
                         vtx_materials_count++;
-                        materials_buffer_list.Add(materials[0].serialize());
+
+                        DataFormats.JSRF.MDLB.Model_Part_header mdlPartHeader = Main.current_model.Model_Parts_header_List[i];
+
+                        if (mdlPartHeader.model_type == 1 || mdlPartHeader.model_type == 2)
+                        {
+                            // get the materials from original model part
+                            for (int m = 0; m < mdlPartHeader.vtx_buffer_materials.Count; m++)
+                            {
+                                materials_buffer_list.Add(mdlPartHeader.vtx_buffer_materials[m].serialize()); //materials[0].serialize()
+                            }
+                        } 
+                        else
+                        {
+                            materials_buffer_list.Add(materials[0].serialize()); //materials[0].serialize()
+                        }
+                    
                         materials_buffer_list.Add(BitConverter.GetBytes(SMD_parts[i].triangles_list.Count));
                         byte[] tmp_buff = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
                         byte[] tmp_padding = new byte[Parsing.calc_remainder_padding(tmp_buff.Length)];
@@ -413,17 +450,16 @@ namespace JSRF_ModTool
 
                         byte[] tmp_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
                         byte[] padding = new byte[Parsing.calc_remainder_padding(tmp_materials_list_bytes.Length)];
+
+                        // People.dat MDLB have the triangle count defined after the material (besides vertex_tris_header.triangles_count)
+                        byte[] triCountArr = BitConverter.GetBytes(SMD_parts[i].triangles_list.Count);
+                        triCountArr.CopyTo(padding, 0);
+
                         materials_buffer_list.Add(padding);
 
                         vtx_materials_list_bytes = materials_buffer_list.SelectMany(byteArr => byteArr).ToArray();
-
                     }
-
-
                 }
-
-
-
 
                 #endregion
 
@@ -545,7 +581,7 @@ namespace JSRF_ModTool
                 // if model part has multiple materials
                 if (Main.current_model.header.materials_count > 0)
                 {
-                    vertex_tris_header.vertex_buffer_offset = vertex_blocks_offset + 32; //vtx_materials_list_bytes.Length;
+                    vertex_tris_header.vertex_buffer_offset = vertex_blocks_offset + 32;
                     vertex_tris_header.triangles_buffer_offset = vertex_tris_header.vertex_buffer_offset + vtx_buffer.Length;
                 }
                 else // if model part has only one material
@@ -570,6 +606,7 @@ namespace JSRF_ModTool
 
                 // calculate "tris_buffer" remainder padding and add to the "tris_buffer_list" byte arrays list
                 tris_buffer_list.Add(new byte[Parsing.calc_remainder_padding(tris_buffer.Length)]);
+                tris_buffer_list.Add(new byte[16]); // padding
                 tris_buffer = tris_buffer_list.SelectMany(byteArr => byteArr).ToArray();
 
                 #endregion
@@ -601,7 +638,6 @@ namespace JSRF_ModTool
                 #region setup model part header
 
                 MDLB_Import.MDLB_classes.Model_Part_header mdl_part_header = new MDLB_Import.MDLB_classes.Model_Part_header();
-                mdl_part_header = new MDLB_Import.MDLB_classes.Model_Part_header();
 
                 #region set unknown parameters according the Model_Part_header_List[i]
 
@@ -621,6 +657,13 @@ namespace JSRF_ModTool
                 mdl_part_header.unk_float2 = mdl_part_ori.unk_float2;
                 mdl_part_header.unk_float_1 = mdl_part_ori.unk_float_1;
                 mdl_part_header.unk_float_2 = mdl_part_ori.unk_float_2;
+
+                mdl_part_header.model_type = mdl_part_ori.model_type;
+
+                if (mdl_part_ori.model_type == 1 || mdl_part_ori.model_type == 2)
+                {
+                    mdl_part_header.draw_distance = mdl_part_ori.draw_distance;
+                }
 
                 #endregion
 
@@ -702,8 +745,8 @@ namespace JSRF_ModTool
                 // set model part number
                 mdl_part_header.model_part_number = i;
                 // draw distance
-                mdl_part_header.draw_distance = mdl_list[i].draw_distance;
-           
+                mdl_part_header.draw_distance = mdl_part_ori.draw_distance; //mdl_list[i].draw_distance;
+
 
                 // lower part models
                 if (i < mdl_parts_count - 1)
@@ -713,29 +756,27 @@ namespace JSRF_ModTool
                     // TODO import bone hierarchy from each SMD model part? (currently using bone structure from last model part)
                     mdl_part_header.bone_child_id = nodes_jsrf[i].child_id * 128; // * 128 (size of a Model_Part_header block)
 
-                    // fix, if = 21 set to 20
+                    // fix :/
                     if (nodes_jsrf[i].shared_parent_id == 21) { nodes_jsrf[i].shared_parent_id = 20; }
-                    mdl_part_header.bone_parent_id = nodes_jsrf[i].shared_parent_id * 128;// * 128 (size of a Model_Part_header block)
-                    mdl_part_header.model_type = 2;
+                  
+                    mdl_part_header.bone_parent_id = mdl_part_ori.bone_parent_id * 128; //nodes_jsrf[i].shared_parent_id * 128;// * 128 (size of a Model_Part_header block)
+                    //mdl_part_header.model_type = 2;
                 }
                 else
                 { // last model part
                     mdl_part_header.bone_pos = new Vector3(0, 0, 0);
                     mdl_part_header.bone_child_id = 0; // * 128 (size of a Model_Part_header block)
                     mdl_part_header.bone_parent_id = 0; // * 128 (size of a Model_Part_header block)
-                    mdl_part_header.model_type = 1;
+                    //mdl_part_header.model_type = 1;
                 }
 
 
 
-                // if model only has one part (static mesh)
-                if (mdl_parts_count == 1)
-                {
-                    mdl_part_header.model_type = 0; //0
-                }
-
-                //mdl_part_header.unk_float1 = new Vector3(1f, 1f, 1f);
-                //mdl_part_header.unk_float2 = new Vector3(0f, 1f, 0f);
+                //// if model only has one part (static mesh)
+                //if (mdl_parts_count == 1)
+                //{
+                //    mdl_part_header.model_type = 0; //0
+                //}
 
 
                 //serialized and add Model_Part_header to serialized list
@@ -803,11 +844,13 @@ namespace JSRF_ModTool
         {
             public int child_id { get; set; }
             public int shared_parent_id { get; set; }
+            //public int bone_parent_id { get; set; }
 
-            public node_jsrf(int _child_id, int _shared_parent_id)
+            public node_jsrf(int _child_id, int _shared_parent_id) //, int _bone_parent_id
             {
                 this.child_id = _child_id;
                 this.shared_parent_id = _shared_parent_id;
+                //this.bone_parent_id = _bone_parent_id;
             }
         }
 

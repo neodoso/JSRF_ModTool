@@ -7,12 +7,6 @@ using JSRF_ModTool.DataFormats.JSRF;
 
 namespace JSRF_ModTool
 {
-    internal static class NativeMethods
-    {
-        [DllImport("kernel32.dll")]
-        internal static extern Boolean AllocConsole();
-    }
-
     static class Program
     {
         // / <summary>
