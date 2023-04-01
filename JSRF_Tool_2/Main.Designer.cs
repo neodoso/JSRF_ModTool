@@ -81,6 +81,8 @@
             this.btn_null_model = new System.Windows.Forms.Button();
             this.elementHost_model_editor = new System.Windows.Forms.Integration.ElementHost();
             this.tab_TextureViewer = new System.Windows.Forms.TabPage();
+            this.btn_import_texture_file = new System.Windows.Forms.Button();
+            this.btn_save_texture_file = new System.Windows.Forms.Button();
             this.btn_save_texture_edits = new System.Windows.Forms.Button();
             this.btn_edit_texture = new System.Windows.Forms.Button();
             this.rtxtb_textureinfo = new System.Windows.Forms.RichTextBox();
@@ -169,8 +171,6 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
-            this.btn_import_texture_file = new System.Windows.Forms.Button();
-            this.btn_save_texture_file = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -797,6 +797,35 @@
             this.tab_TextureViewer.Size = new System.Drawing.Size(742, 686);
             this.tab_TextureViewer.TabIndex = 3;
             this.tab_TextureViewer.Text = "Texture Viewer";
+            // 
+            // btn_import_texture_file
+            // 
+            this.btn_import_texture_file.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_import_texture_file.ForeColor = System.Drawing.Color.DarkGray;
+            this.btn_import_texture_file.Image = ((System.Drawing.Image)(resources.GetObject("btn_import_texture_file.Image")));
+            this.btn_import_texture_file.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btn_import_texture_file.Location = new System.Drawing.Point(8, 10);
+            this.btn_import_texture_file.Name = "btn_import_texture_file";
+            this.btn_import_texture_file.Size = new System.Drawing.Size(25, 25);
+            this.btn_import_texture_file.TabIndex = 13;
+            this.btn_import_texture_file.Tag = "Import texture";
+            this.btn_import_texture_file.UseVisualStyleBackColor = true;
+            this.btn_import_texture_file.Click += new System.EventHandler(this.btn_import_texture_file_Click);
+            // 
+            // btn_save_texture_file
+            // 
+            this.btn_save_texture_file.BackColor = System.Drawing.Color.Gainsboro;
+            this.btn_save_texture_file.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_save_texture_file.ForeColor = System.Drawing.Color.DarkGray;
+            this.btn_save_texture_file.Image = ((System.Drawing.Image)(resources.GetObject("btn_save_texture_file.Image")));
+            this.btn_save_texture_file.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btn_save_texture_file.Location = new System.Drawing.Point(39, 10);
+            this.btn_save_texture_file.Name = "btn_save_texture_file";
+            this.btn_save_texture_file.Size = new System.Drawing.Size(25, 25);
+            this.btn_save_texture_file.TabIndex = 14;
+            this.btn_save_texture_file.Tag = "Save File";
+            this.btn_save_texture_file.UseVisualStyleBackColor = false;
+            this.btn_save_texture_file.Click += new System.EventHandler(this.btn_save_texture_file_Click);
             // 
             // btn_save_texture_edits
             // 
@@ -1728,35 +1757,6 @@
             this.btn_import_block.Text = "Impt.";
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
-            // 
-            // btn_import_texture_file
-            // 
-            this.btn_import_texture_file.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_import_texture_file.ForeColor = System.Drawing.Color.DarkGray;
-            this.btn_import_texture_file.Image = ((System.Drawing.Image)(resources.GetObject("btn_import_texture_file.Image")));
-            this.btn_import_texture_file.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btn_import_texture_file.Location = new System.Drawing.Point(8, 10);
-            this.btn_import_texture_file.Name = "btn_import_texture_file";
-            this.btn_import_texture_file.Size = new System.Drawing.Size(25, 25);
-            this.btn_import_texture_file.TabIndex = 13;
-            this.btn_import_texture_file.Tag = "Import texture";
-            this.btn_import_texture_file.UseVisualStyleBackColor = true;
-            this.btn_import_texture_file.Click += new System.EventHandler(this.btn_import_texture_file_Click);
-            // 
-            // btn_save_texture_file
-            // 
-            this.btn_save_texture_file.BackColor = System.Drawing.Color.Gainsboro;
-            this.btn_save_texture_file.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_save_texture_file.ForeColor = System.Drawing.Color.DarkGray;
-            this.btn_save_texture_file.Image = ((System.Drawing.Image)(resources.GetObject("btn_save_texture_file.Image")));
-            this.btn_save_texture_file.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btn_save_texture_file.Location = new System.Drawing.Point(39, 10);
-            this.btn_save_texture_file.Name = "btn_save_texture_file";
-            this.btn_save_texture_file.Size = new System.Drawing.Size(25, 25);
-            this.btn_save_texture_file.TabIndex = 14;
-            this.btn_save_texture_file.Tag = "Save File";
-            this.btn_save_texture_file.UseVisualStyleBackColor = false;
-            this.btn_save_texture_file.Click += new System.EventHandler(this.btn_save_texture_file_Click);
             // 
             // Main
             // 

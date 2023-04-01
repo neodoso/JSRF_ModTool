@@ -11,20 +11,17 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Media;
+using System.Threading;
 
 using JSRF_ModTool.DataFormats;
 using JSRF_ModTool.DataFormats.JSRF; 
 using JSRF_ModTool.Vector;
 using JSRF_ModTool.Functions;
 
-using System.Threading;
 
 using HelixToolkit.Wpf;
-using static JSRF_ModTool.SMD;
-using System.Runtime.InteropServices.ComTypes;
-using System.Media;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-//using Microsoft.Win32;
+
 
 namespace JSRF_ModTool
 {
@@ -64,7 +61,7 @@ namespace JSRF_ModTool
         private static Process proc_ImgEditor;
 
         private List<string> settings = new List<string>();
-
+        private List<string> settings_dirs = new List<string>();
 
         private string current_filepath = "";
 
@@ -114,7 +111,7 @@ namespace JSRF_ModTool
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
 
             Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
-            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[8].Nodes[0];
+            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 8 0 for texture
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
@@ -582,10 +579,13 @@ namespace JSRF_ModTool
 
         }
 
-        OpenFileDialog dialog_impSMD = new System.Windows.Forms.OpenFileDialog();
+        
         // import model
         private void Btn_import_mdl_Click(object sender, EventArgs e)
         {
+
+            System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
+
             // check selected item is valid
             if (!selected_MDLB_is_valid())
             {
@@ -596,13 +596,19 @@ namespace JSRF_ModTool
 
             string filepath = String.Empty;
             //System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
-            dialog_impSMD.Filter = "dat files (*.smd)|*.smd";
-            dialog_impSMD.RestoreDirectory = true;
-            dialog_impSMD.Title = "Select an SMD file";
+            dialog.Filter = "dat files (*.smd)|*.smd";
+            //dialog_impSMD.RestoreDirectory = true;
+            dialog.Title = "Select an SMD file";
+
+            // restore previous saved directory
+            string import_dir = Setting_load("smd_import_dir");
+            if (Directory.Exists(import_dir)) { dialog.InitialDirectory = import_dir; }
+           
+
             //dialog.Multiselect = true;
-            if (dialog_impSMD.ShowDialog() == DialogResult.OK)
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                filepath = dialog_impSMD.FileName;
+                filepath = dialog.FileName;
             }
             else
             {
@@ -611,6 +617,8 @@ namespace JSRF_ModTool
 
             #endregion
 
+
+            Setting_save(Path.GetDirectoryName(filepath) + "\\", "smd_import_dir");
 
             byte[] imported_MDLB_data = new byte[0];
 
@@ -755,6 +763,7 @@ namespace JSRF_ModTool
                 string obj_name = "";
                 string arg = "";
 
+           
 
                 if (sender.GetType() == typeof(CheckBox))
                 {
@@ -819,12 +828,10 @@ namespace JSRF_ModTool
 
         private void Settings_load()
         {
-
             settings.Clear();
 
             try
             {
-
                 if (File.Exists(settings_dir + "settings.ini"))
                 {
 
@@ -844,34 +851,112 @@ namespace JSRF_ModTool
 
                     foreach (string s in lines)
                     {
-
                         string[] arg = s.Split('<');
-
-                        Object prop = this.Controls.Find(arg[1], true)[0];
-
                         settings.Add(s);
 
-                        if (prop != null)
+                        Object prop =null;
+
+                        try
                         {
-                            if (prop.GetType() == typeof(CheckBox))
-                            {
-                                CheckBox obj = (CheckBox)prop;
-                                if (arg[0].ToLower() == "true") { obj.Checked = true; }
-                                if (arg[0].ToLower() == "false") { obj.Checked = false; }
-                            }
+                            prop = this.Controls.Find(arg[1], true)[0];
+                        } catch
+                        {
 
-                            if (prop.GetType() == typeof(TextBox))
-                            {
-                                TextBox obj = (TextBox)prop;
-                                obj.Text = arg[0];
-                            }
+                        }
 
-                            if (prop.GetType() == typeof(ComboBox))
-                            {
-                                ComboBox obj = (ComboBox)prop;
-                                obj.SelectedIndex = Convert.ToInt32(arg[0]);
-                            }
+                        // if setting is not a control
+                        if (prop == null) { continue; }
+       
+                        if (prop.GetType() == typeof(CheckBox))
+                        {
+                            CheckBox obj = (CheckBox)prop;
+                            if (arg[0].ToLower() == "true") { obj.Checked = true; }
+                            if (arg[0].ToLower() == "false") { obj.Checked = false; }
+                        }
 
+                        if (prop.GetType() == typeof(TextBox))
+                        {
+                            TextBox obj = (TextBox)prop;
+                            obj.Text = arg[0];
+                        }
+
+                        if (prop.GetType() == typeof(ComboBox))
+                        {
+                            ComboBox obj = (ComboBox)prop;
+                            obj.SelectedIndex = Convert.ToInt32(arg[0]);
+                        } 
+                    }
+                }
+            }
+
+            catch (System.Exception excep)
+            {
+                // MessageBox.Show("Error saving settings " + excep.Message);
+            }
+        }
+
+
+        private void Setting_save(string arg, string obj_name)
+        {
+            if (!File.Exists(settings_dir + "settings_dirs.ini")) { File.Create(settings_dir + "settings_dirs.ini"); }
+
+            List<string> lines = new List<string>();
+            try
+            {
+               lines = File.ReadAllLines(settings_dir + "settings_dirs.ini").ToList();
+            }
+            catch (System.Exception excep)
+            {
+                MessageBox.Show("Error saving settings " + excep.Message);
+            }
+
+            try
+            {
+
+                bool found = false;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    string[] args = lines[i].Split('<');
+                    if (args[1] == obj_name)
+                    {
+                        lines[i] = arg + "<" + obj_name;
+                        found = true;
+                    }
+                }
+
+                if(!found)
+                {
+                    lines.Add(arg + "<" + obj_name);
+                }
+
+                File.WriteAllLines(settings_dir + "settings_dirs.ini", lines);
+            }
+            catch (System.Exception excep)
+            {
+                MessageBox.Show("Error saving settings " + excep.Message);
+            }
+
+
+        }
+
+        private string Setting_load(string obj_name)
+        {
+            try
+            {
+                if (!File.Exists(settings_dir + "settings_dirs.ini")) { return ""; }
+
+                string f = settings_dir + "settings_dirs.ini";
+                //List<string> lines = new List<string>();
+
+                using (StreamReader r = new StreamReader(f))
+                {
+                    string line;
+                    while ((line = r.ReadLine()) != null)
+                    {
+                        string[] arg = line.Split('<');
+                        if (arg[1] == obj_name)
+                        {
+                            return arg[0];
                         }
                     }
                 }
@@ -879,10 +964,12 @@ namespace JSRF_ModTool
 
             catch (System.Exception excep)
             {
-                 MessageBox.Show("Error saving settings " + excep.Message);
+                MessageBox.Show("Error saving settings " + excep.Message);
+                return "";
             }
-        }
 
+            return "";
+        }
 
         #endregion
 
@@ -2460,7 +2547,11 @@ namespace JSRF_ModTool
             saveFileDiag.DefaultExt = "smd";
             saveFileDiag.Filter = "SMD files (*.smd)|*.smd";
             saveFileDiag.FilterIndex = 2;
-            saveFileDiag.RestoreDirectory = true;
+            //saveFileDiag.RestoreDirectory = true;
+
+            // restore previous saved directory
+            string import_dir = Setting_load("smd_export_dir");
+            if (Directory.Exists(import_dir)) { saveFileDiag.InitialDirectory = import_dir; }
 
             #endregion
 
@@ -2471,6 +2562,8 @@ namespace JSRF_ModTool
                 string filepath = saveFileDiag.FileName;
                 string save_dir = Path.GetDirectoryName(filepath)  +"\\";
                 string filename = Path.GetFileNameWithoutExtension(filepath);
+
+                Setting_save(save_dir, "smd_export_dir");
 
                 #region make sure filepath and filename are valid
 
@@ -3005,10 +3098,10 @@ namespace JSRF_ModTool
             string texture_path = tmp_dir + "tmp" + ".png"; //GetShortPath()
             #region setup Save File Dialog
 
-            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
             saveFileDialog1.Title = "Save texture";
-            saveFileDialog1.RestoreDirectory = true;
+            //saveFileDialog1.RestoreDirectory = true;
 
             string filename = Path.GetFileNameWithoutExtension(jsrf_file.filepath);
             string nodeName = Regex.Replace(current_node.Text, @"\s+", "_");
@@ -3017,6 +3110,10 @@ namespace JSRF_ModTool
             saveFileDialog1.DefaultExt = "png";
             saveFileDialog1.Filter = "PNG file (*.png)|*.png";
             saveFileDialog1.FilterIndex = 2;
+
+            // restore previous saved directory
+            string export_dir = Setting_load("tex_export_dir");
+            if (Directory.Exists(export_dir)) { saveFileDialog1.InitialDirectory = export_dir; }
 
             #endregion
 
@@ -3030,6 +3127,8 @@ namespace JSRF_ModTool
 
                 try
                 {
+                    Setting_save(Path.GetDirectoryName(saveFileDialog1.FileName) + "\\", "tex_export_dir");
+
                     File.Copy(texture_path, saveFileDialog1.FileName, true);
 
                 }
@@ -3046,12 +3145,19 @@ namespace JSRF_ModTool
         {
             System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
             dialog.Filter = "PNG file (*.PNG)|*.PNG";
-            dialog.RestoreDirectory = true;
+            //dialog.RestoreDirectory = true;
             dialog.Title = "Select a PNG file";
             dialog.Multiselect = false;
+
+            // restore previous saved directory
+            string export_dir = Setting_load("tex_import_dir");
+            if (Directory.Exists(export_dir)) { dialog.InitialDirectory = export_dir; }
+
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 if (!File.Exists(dialog.FileName)) { MessageBox.Show("Error: file does not exist."); return; }
+
+                Setting_save(Path.GetDirectoryName(dialog.FileName) + "\\", "tex_import_dir");
 
                 save_texture(dialog.FileName);
             }
@@ -3888,7 +3994,8 @@ namespace JSRF_ModTool
         // import sound
         private void btn_import_sound_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+            System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+
             openFileDialog.Multiselect = true;
             openFileDialog.Filter = "WAV files (*.wav)|*.wav";
            // openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
@@ -4116,8 +4223,7 @@ namespace JSRF_ModTool
             System.Diagnostics.Process.Start("https://github.com/neodoso/JSRF_ModTool");
         }
 
+
         #endregion
-
-
     }
 }
