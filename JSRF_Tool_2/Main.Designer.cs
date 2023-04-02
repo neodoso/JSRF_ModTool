@@ -171,6 +171,8 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
+            this.txtb_sound_import_delay = new System.Windows.Forms.TextBox();
+            this.label40 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -1134,6 +1136,8 @@
             // tab_Settings
             // 
             this.tab_Settings.BackColor = System.Drawing.Color.Gainsboro;
+            this.tab_Settings.Controls.Add(this.txtb_sound_import_delay);
+            this.tab_Settings.Controls.Add(this.label40);
             this.tab_Settings.Controls.Add(this.txtb_cxbx_dir);
             this.tab_Settings.Controls.Add(this.btn_sel_cxbx_dir);
             this.tab_Settings.Controls.Add(this.label27);
@@ -1758,6 +1762,28 @@
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
             // 
+            // txtb_sound_import_delay
+            // 
+            this.txtb_sound_import_delay.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.txtb_sound_import_delay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtb_sound_import_delay.Location = new System.Drawing.Point(6, 570);
+            this.txtb_sound_import_delay.Name = "txtb_sound_import_delay";
+            this.txtb_sound_import_delay.Size = new System.Drawing.Size(135, 20);
+            this.txtb_sound_import_delay.TabIndex = 57;
+            this.txtb_sound_import_delay.Text = "500";
+            this.txtb_sound_import_delay.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtb_sound_import_delay.TextChanged += new System.EventHandler(this.Settings_save);
+            this.txtb_sound_import_delay.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtb_sound_import_delay_KeyPress);
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(7, 551);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(139, 13);
+            this.label40.TabIndex = 58;
+            this.label40.Text = "Sound tool import delay (ms)";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1976,6 +2002,8 @@
         private System.Windows.Forms.Label label39;
         private System.Windows.Forms.Button btn_import_texture_file;
         private System.Windows.Forms.Button btn_save_texture_file;
+        private System.Windows.Forms.TextBox txtb_sound_import_delay;
+        private System.Windows.Forms.Label label40;
     }
 }
 

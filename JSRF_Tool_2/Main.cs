@@ -21,6 +21,7 @@ using JSRF_ModTool.Functions;
 
 
 using HelixToolkit.Wpf;
+using Microsoft.Win32;
 
 
 namespace JSRF_ModTool
@@ -110,8 +111,8 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\People\People01.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
 
-            Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
-            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 8 0 for texture
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 0 8 0 for texture
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
@@ -120,8 +121,8 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
 
-            // Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[157];
+            Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
+            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
 
 
             // load stg00_.bin
@@ -3098,7 +3099,7 @@ namespace JSRF_ModTool
             string texture_path = tmp_dir + "tmp" + ".png"; //GetShortPath()
             #region setup Save File Dialog
 
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 
             saveFileDialog1.Title = "Save texture";
             //saveFileDialog1.RestoreDirectory = true;
@@ -3249,7 +3250,6 @@ namespace JSRF_ModTool
         // save texture changes: convert tmp.png to tmp.dds and import to selected texture node
         private void Btn_save_texture_edits_Click(object sender, EventArgs e)
         {
-
             #region get texture id from last loaded node data block
 
             File_Containers.item_data_type selected_node_type = File_Containers.get_item_data_type(current_item_data);
@@ -3260,9 +3260,7 @@ namespace JSRF_ModTool
                 return;
             }
 
-
             save_texture();
-
         }
 
 
@@ -3889,11 +3887,15 @@ namespace JSRF_ModTool
 
 
             saveFileDialog1.Title = "Save sound .wav file";
-            saveFileDialog1.RestoreDirectory = true;
+            //saveFileDialog1.RestoreDirectory = true;
             saveFileDialog1.FileName = lab_filename.Text.Replace(".dat", "") + "_" + current_node.Index.ToString();
             saveFileDialog1.DefaultExt = "wav";
             saveFileDialog1.Filter = "Wav file (*.wav)|*.wav";
             saveFileDialog1.FilterIndex = 2;
+
+            // restore previous saved directory
+            string export_dir = Setting_load("sound_export_dir");
+            if (Directory.Exists(export_dir)) { saveFileDialog1.InitialDirectory = export_dir; }
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -3909,7 +3911,12 @@ namespace JSRF_ModTool
                 {
                     try
                     {
+
+                        Setting_save(Path.GetDirectoryName(saveFileDialog1.FileName) + "\\", "sound_export_dir");
+
                         File.Copy(tmp_dir + "tmp.wav", saveFileDialog1.FileName, true);
+
+                        
                     }
                     catch (Exception error)
                     {
@@ -3941,8 +3948,13 @@ namespace JSRF_ModTool
             saveFileDiag.DefaultExt = "wav";
             saveFileDiag.Filter = "WAV files (*.wav)|*.wav";
             saveFileDiag.FilterIndex = 2;
-            saveFileDiag.RestoreDirectory = true;
+            //saveFileDiag.RestoreDirectory = true;
             saveFileDiag.FileName = "Save Here";
+
+            // restore previous saved directory
+            string export_dir = Setting_load("sound_export_dir");
+            if (Directory.Exists(export_dir)) { saveFileDiag.InitialDirectory = export_dir; }
+
             #endregion
 
             // if save file dialog result is OK
@@ -3963,6 +3975,8 @@ namespace JSRF_ModTool
 
 
                 #endregion
+
+                Setting_save(save_dir, "sound_export_dir");
 
 
                 // for each sound item in file
@@ -3998,11 +4012,17 @@ namespace JSRF_ModTool
 
             openFileDialog.Multiselect = true;
             openFileDialog.Filter = "WAV files (*.wav)|*.wav";
-           // openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            // openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+
+            // restore previous saved directory
+            string import_dir = Setting_load("sound_import_dir");
+            if (Directory.Exists(import_dir)) { openFileDialog.InitialDirectory = import_dir; }
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string[] fileNames = openFileDialog.FileNames;
+
+                Setting_save(Path.GetDirectoryName(openFileDialog.FileNames[0]) + "\\", "sound_import_dir");
 
                 for (int i = 0; i < fileNames.Length; i++)
                 {
@@ -4053,7 +4073,7 @@ namespace JSRF_ModTool
 
                     import_sound_file(filepath);
 
-                    Thread.Sleep(500);  
+                    Thread.Sleep(Int32.Parse(txtb_sound_import_delay.Text));  
 
                     jsrf_file.set_item_data(0, num, File.ReadAllBytes(tmp_dir + "tmp_import.wav"));
                 }
@@ -4207,7 +4227,11 @@ namespace JSRF_ModTool
             }
         }
 
-
+        // textbox accept numbers only
+        private void txtb_sound_import_delay_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
 
         #endregion
 
@@ -4225,5 +4249,7 @@ namespace JSRF_ModTool
 
 
         #endregion
+
+
     }
 }
