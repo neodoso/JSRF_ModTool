@@ -17,7 +17,7 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
         public block_01 block_01; // grind paths
         public block_02 block_02; // decals, object spawns (spawns/positions:decals, MDLB contained in StgXX_XX.dat and StgObj)
 
-		Boolean export_data = false;
+		Boolean export_data = true;
 
 		public Parser(string stage_bin_filepath)
         {
@@ -123,10 +123,10 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 			{
 				string export_dir = debug_data_export_dir + Path.GetFileNameWithoutExtension(stage_bin_filepath).Split('_')[0] + "\\";
 
-				//block_00.export_all_collision_meshes(export_dir);
+				block_00.export_all_collision_meshes(export_dir + "\\coll\\");
 
 				// exports single collision model
-				//export_coll_mesh(export_dir, 14, 3);
+				//export_coll_mesh(export_dir + "\\coll\\", 14, 3);
 
 				//block_01.export_grind_path_data(export_dir + "grind_paths.txt");
 				//block_01.export_grind_path_data_blender(export_dir + "grind_paths_blender.obj");

@@ -22,6 +22,8 @@ using JSRF_ModTool.Functions;
 
 using HelixToolkit.Wpf;
 using Microsoft.Win32;
+using System.Runtime.InteropServices.ComTypes;
+//using System.Windows.Shapes;
 
 
 namespace JSRF_ModTool
@@ -111,8 +113,8 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\People\People01.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
 
-            //Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Gum.dat");
-            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 0 8 0 for texture
+            Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Corn.dat");
+           trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 0 8 0 for texture
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
@@ -121,12 +123,15 @@ namespace JSRF_ModTool
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Stage\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[4];
 
-            Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_beat.dat");
-            trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Sounds\SE\pv_yoyo.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
 
 
             // load stg00_.bin
-            //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_.bin");
+            //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_original_dir.Text + "\\Stage\\stg11_.bin");
+
+            //Load_file(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_00.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
 
             #region loading methods
 
@@ -723,16 +728,30 @@ namespace JSRF_ModTool
             }
         }
 
-       
 
+        private string _btn_sel_vis_mdl_dir_selectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
         private void btn_sel_vis_mdl_dir_Click(object sender, EventArgs e)
         {
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+
+
+
+            FolderBrowserDialog dialog = new FolderBrowserDialog()
             {
-                string path = folderBrowserDialog1.SelectedPath;
-                txtb_stage_source_dir.Text = path;
-            }
+                SelectedPath = _btn_sel_vis_mdl_dir_selectedPath
+            };
+            dialog.ShowDialog();
+            _btn_sel_vis_mdl_dir_selectedPath = dialog.SelectedPath;
+
+            txtb_stage_source_dir.Text = dialog.SelectedPath;
+
+
+
+            //if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            //{
+            //    string path = folderBrowserDialog1.SelectedPath;
+            //    txtb_stage_source_dir.Text = path;
+            //}
         }
 
 
@@ -2044,6 +2063,8 @@ namespace JSRF_ModTool
 
             Parsing.ByteArrayToFile(tmp_dir + "\\" + filename + ".dds", texture_file);
 
+
+
             #region convert dds to png
 
 
@@ -3229,6 +3250,34 @@ namespace JSRF_ModTool
             Launch_image_editor(texture_path);
         }
 
+        private void Launch_image_editor(string args)
+        {
+
+            Process.Start(GetShortPath(txtb_img_editor_path.Text), args);
+            /*
+            #region setup process
+
+            proc_ImgEditor = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    WorkingDirectory = tmp_dir,
+                    FileName = txtb_img_editor_path.Text,
+                    Arguments = args,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            #endregion
+
+            //Directory.SetCurrentDirectory(Directory.GetCurrentDirectory());
+            proc_ImgEditor.Start();
+            */
+
+        }
+
         private void wait(int milliseconds)
         {
             System.Windows.Forms.Timer timer1 = new System.Windows.Forms.Timer();
@@ -3463,29 +3512,7 @@ namespace JSRF_ModTool
             return shortPath.ToString();
         }
 
-        private void Launch_image_editor(string args)
-        {
-            #region setup process
 
-            proc_ImgEditor = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = tmp_dir,
-                    FileName = txtb_img_editor_path.Text,
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-
-            #endregion
-        
-            Directory.SetCurrentDirectory(Directory.GetCurrentDirectory());
-            proc_ImgEditor.Start();
-            
-        }
 
         #endregion
 
@@ -4065,6 +4092,7 @@ namespace JSRF_ModTool
                     #endregion
 
                     byte[] array = File.ReadAllBytes(filepath);
+
                     if(BitConverter.ToInt16(array, 34) != 16 )
                     {
                         MessageBox.Show("Error: wav file " + name + ".wav is not 16 Bit,\nplease save the file as 16 bit PCM wav.");

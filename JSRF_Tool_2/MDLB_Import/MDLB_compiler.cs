@@ -304,11 +304,11 @@ namespace JSRF_ModTool
                     continue;
                 }
 
-                // do not write material group for model_type = 1
-                if (Main.current_model.Model_Parts_header_List[i].materials_count == 1)
-                {
-                    continue;
-                }
+                //// do not write material group for model_type = 1
+                //if (Main.current_model.Model_Parts_header_List[i].materials_count == 1)
+                //{
+                //    continue;
+                //}
 
                 // for each material group from the imported SMD file
                 for (int m = 0; m < SMD_parts[i].mat_groups_list.Count; m++)

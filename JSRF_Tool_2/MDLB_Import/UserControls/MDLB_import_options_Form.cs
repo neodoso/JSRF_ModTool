@@ -321,9 +321,15 @@ namespace JSRF_ModTool.MDLB_Import
                     // if no input material is defined, load values from last material inspector
                     if (mat == null)
                     {
-                        Material_Inspector mi_last = mat_inspector_list[mat_inspector_list.Count - 1];
-                        // set material inspector values taken from last material inspector
-                       ((Material_Inspector)ct).set_values(mi_last.get_color(), mi_last.get_shader_type(), mi_last.get_unk_id1(), mi_last.get_unk_id2(), mi_last.get_hb());
+                        if(mat_inspector_list.Count == 0)
+                        {
+                             
+                        } else
+                        {
+                            Material_Inspector mi_last = mat_inspector_list[mat_inspector_list.Count - 1];
+                            // set material inspector values taken from last material inspector
+                            ((Material_Inspector)ct).set_values(mi_last.get_color(), mi_last.get_shader_type(), mi_last.get_unk_id1(), mi_last.get_unk_id2(), mi_last.get_hb());
+                        }
 
                     } else {
                         // set material inspector values from input Material (mat)

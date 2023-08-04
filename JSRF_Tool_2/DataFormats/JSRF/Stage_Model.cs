@@ -9,7 +9,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
     {
         //MDLBL_header header;
         //header_second header_sec;
-        public pre_Header preHeader;
         public Header header;
         public List<Int32> texture_ids;
         public List<material> materials;
@@ -53,18 +52,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
             materials = new List<material>();
             materials_groups = new List<material_group>();
 
-
-            /////////////////// PRE HEADER ///////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            preHeader = (pre_Header)(Parsing.binary_to_struct(data, offset, typeof(pre_Header)));
-            offset += 16;
-
-
-
-            /////////////////// HEADER  //////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////// HEADER  //////////////////////////////////////////////////////////////////////////////////////////////
             // get second header part
             header = (Header)(Parsing.binary_to_struct(data, offset, typeof(Header)));
-            offset += 128; //128
+            offset += 144; //144
 
             /////////////////// MATERIALS LIST  //////////////////////////////////////////////////////////////////////////////////////////////
             // get list of materials
@@ -76,7 +67,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // calculate offset after materials (1 material definition = 20 bytes)
             offset += header.x124_mat_count * 20;
 
-            // if no materials, there's still 20 bytes of padding to skip
+            // if not materials, there's still 20 bytes of padding to skip
             // see stg00_00 : Stage model number 23
             if(header.x124_mat_count == 0 )
             {
@@ -98,7 +89,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 materials_groups.Add((material_group)(Parsing.binary_to_struct(data, offset + i, typeof(material_group))));
 
                 // recalculate triangle counts
-                materials_groups[materials_groups.Count - 1].index_offset /= 3;
+               //materials_groups[materials_groups.Count - 1].triangle_start_index /= 3;
             }
 
             // set offset after triangles groups
@@ -111,7 +102,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
             // get each material group bouding box
             for (int i = offset; i < mat_group_BBoxes_end; i += 16)
             {
-                mat_group_boundary_list.Add((material_group_boundary)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_boundary))));
+                //  mat_group_boundary_list.Add((material_group_boundary)(Parsing.binary_to_struct(data, offset + i, typeof(material_group_boundary))));
+                mat_group_boundary_list.Add((material_group_boundary)(Parsing.binary_to_struct(data, i, typeof(material_group_boundary))));
             }
 
             offset = mat_group_BBoxes_end;
@@ -154,8 +146,6 @@ namespace JSRF_ModTool.DataFormats.JSRF
             }
 
             /////////////////// READ AND STORE TRIANGLES VERT INDICES  //////////////////////////////////////////////////////////////////////////////////////////////
-            ///
-            /*
             List<short> tri_indx = new List<short>();
             triangles_list = new List<triangle>();
             int triangles_buffer_end = vertex_buffer_end + vtx_tri_buff_head.triangle_buffer_size * 2;
@@ -165,40 +155,29 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 if(i < data.Length)
                 tri_indx.Add((short)(BitConverter.ToInt16(data, i) +1));
             }
+
+            /*
+            List<string> tri_indices = new List<string>();
+            for (int i = 0; i < tri_indx.Count-2; i+=3)
+            {
+                tri_indices.Add((tri_indx[i]).ToString() + " " + (tri_indx[i +1]).ToString() + " " + (tri_indx[i+2]).ToString());
+            }
+
+            // debug data export
+            System.IO.File.Delete(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stripped_tris.txt");
+            System.IO.File.AppendAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\stripped_tris.txt", tri_indices);
             */
 
-            List<short> tri_indx = new List<short>();
-            triangles_list = new List<triangle>();
+            List<String> tris_list = new List<string>();
 
-            if (materials_groups.Count > 0)
-            {
-                for (int j = 0; j < materials_groups.Count; ++j)
-                {
-                    int triangles_buffer_end = vertex_buffer_end + materials_groups[j].index_count * 2;
-                    for (int i = vertex_buffer_end + materials_groups[j].index_offset * 2; i < triangles_buffer_end; i += 2)
-                    {
-                        tri_indx.Add((short)(BitConverter.ToInt16(data, i) + 1 + materials_groups[j].index_offset));
-                    }
-                }
-            }
-            else
-            {
-                int triangles_buffer_end = vertex_buffer_end + vtx_tri_buff_head.triangle_buffer_size * 2;
-
-                for (int i = vertex_buffer_end; i < triangles_buffer_end; i += 2)
-                {
-                    tri_indx.Add((short)(BitConverter.ToInt16(data, i) + 1));
-                }
-            }
-
-
+            List<int> tri_lstart = new List<int>();
 
             /////////////////// PROCESS TRIANGLES  //////////////////////////////////////////////////////////////////////////////////////////////
             // if mesh is stripped
             if (vtx_tri_buff_head.is_stripped == 0)
             {
                 // for each triangle vertex index
-                for (int i = 0; i < tri_indx.Count-3; i += 3)
+                for (int i = 0; i < tri_indx.Count-1; i += 3)
                 {
                     triangles_list.Add(new triangle(tri_indx[i], tri_indx[i + 1], tri_indx[i + 2]));
                 }
@@ -208,7 +187,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
                 #region stripped triangles processing
 
                 short a, b, c;
-                bool prev_is_invalid = false;
+                bool is_invalid = false; bool prev_is_invalid = false;
                 int prev_valid_count = 0; int curr_valid_count = 0;
                 int prev_invalid_count = 0; bool plus_one = false;
                 int invalid_count = 0;
@@ -217,7 +196,7 @@ namespace JSRF_ModTool.DataFormats.JSRF
 
                 // for each triangle vertex index
                 // convert strip to list
-                for (int i = 0; i < tri_indx.Count - 3; i++)
+                for (int i = 0; i < tri_indx.Count - 2; i++)
                 {
                     a = tri_indx[i]; b = tri_indx[i + 1]; c = tri_indx[i + 2];
 
@@ -239,37 +218,37 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             if (curr_valid_count == 6 && prev_invalid_count == 1 && (curr_valid_count - prev_valid_count) > 2)
                             {
                                 // ensure that list of triangles is bigger than 5 (substracting the extra +1 from previous lone triangle)
-                                if (plus_one && curr_valid_count - 1 > 5)
+                                if(plus_one && curr_valid_count-1 > 5)
                                 {
                                     int index = triangles_list.Count - (Math.Abs(curr_valid_count - prev_valid_count));
                                     triangles_list.RemoveRange(index, 2);
                                 }
                             }
 
-                            // if triangle list hast more than 4 triangles
-                            if (curr_valid_count > 6 && (curr_valid_count - prev_valid_count) > 2) // (curr_valid_count > (prev_valid_count + 1))
-                            {
+                                // if triangle list hast more than 4 triangles
+                                if (curr_valid_count > 6 && (curr_valid_count - prev_valid_count) > 2) // (curr_valid_count > (prev_valid_count + 1))
+                                {
                                 plus_one = false;
                                 int index = triangles_list.Count - (Math.Abs(curr_valid_count - prev_valid_count));
 
                                 triangles_list.RemoveRange(index, 2);
-                            }
+                                }
                         }
 
-                        prev_is_invalid = true;
+                        is_invalid = true; prev_is_invalid = true;
                         invalid_count++;
                     }
                     else  // valid triangle
                     {
                         // if previous triangle was invalid
                         if (prev_is_invalid)
-                        {
+                        { 
                             prev_is_invalid = false;
                             prev_invalid_count = invalid_count;
                             prev_valid_count = curr_valid_count;
                             curr_valid_count = 0;
 
-                            if (prev_invalid_count == 1 && prev_valid_count == 1)
+                            if(prev_invalid_count == 1 && prev_valid_count == 1)
                             {
                                 plus_one = true;
                                 curr_valid_count++;
@@ -279,65 +258,42 @@ namespace JSRF_ModTool.DataFormats.JSRF
                             invalid_count = 0;
                         }
 
-                        curr_valid_count++;
+                        is_invalid = false; curr_valid_count++;
                     }
+                        
 
 
                     #region set triangles
 
                     if (i % 2 == 0)
                     {
-                        triangles_list.Add(new triangle(a, b, c));
+                       // tris_list.Add(a + " " + b + " " + c + ((is_invalid) ? " #" : "") + " :" + curr_valid_count + ":" + prev_valid_count + "    | " + i); ;
+                        if (!is_invalid)
+                        {
+                            triangles_list.Add(new triangle(a, b, c));
+                        }
                     }
                     else
                     {
-                        triangles_list.Add(new triangle(c, b, a));
+                       // tris_list.Add(c + " " + b + " " + a + ((is_invalid) ? " #" : "") + " :" + curr_valid_count + ":" + prev_valid_count + "    | " + i); ;
+                        if (!is_invalid)
+                        {
+                            triangles_list.Add(new triangle(c, b, a));
+                        }
                     }
 
                     #endregion
 
+                   
+
                 }
 
                 #endregion
-
-                /*
-                // for each triangle vertex index
-                // convert strip to list
-                for (int i = 0; i < tri_indx.Count - 2; i++)
-                {
-
-                    if (i % 2 == 0)
-                    {
-                            triangles_list.Add(new triangle(tri_indx[i], tri_indx[i + 1], tri_indx[i + 2]));
-                    }
-                    else
-                    {
-                            triangles_list.Add(new triangle(tri_indx[i + 2], tri_indx[i + 1], tri_indx[i]));
-                    }
-
-                }
-
-
-
-
-                int mg_size = 0;
-
-                for (int i = 0; i < materials_groups.Count; i++)
-                {
-                    material_group mg = materials_groups[i];
-
-                    mg_size += mg.triangle_count;
-
-                    // for each triangle vertex index
-                    for (int g = mg.triangle_start_index * 3; g < mg_size; g += 3)
-                    {
-                        triangles_list.Add(new triangle(tri_indx[g], tri_indx[g + 1], tri_indx[g + 2])); 
-                    }  
-                }
-                */
-
             }
 
+            // debug data export
+            //System.IO.File.Delete(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt");
+            //System.IO.File.AppendAllLines(@"C:\Users\Mike\Desktop\JSRF\research\mdls_stg\export\destripped_tris.txt", tris_list);
         }
 
         public void export_model(string filepath)
@@ -373,11 +329,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
             for (int g = 0; g < this.materials_groups.Count; g++)
             {     
                 material_group grp = this.materials_groups[g];
-                tri_end += grp.index_count;
+                tri_end += grp.triangle_count;
 
                 mat_group_indices.Add(Tuple.Create(tri_end, texture_ids[grp.material_num]));
 
-                tri_group_offset += grp.index_count;
+                tri_group_offset += grp.triangle_count;
 
                 // write mtl material
                 mtl_lines.Add("newmtl mat_" + texture_ids[grp.material_num]);
@@ -474,25 +430,19 @@ namespace JSRF_ModTool.DataFormats.JSRF
         }
 
         /// <summary>
-        /// pre-Header 16 bytes
+        ///  second header 144 bytes
         /// </summary>
-        public class pre_Header
+        public class Header
         {
             public Int32 x000_unk { get; set; }
             public Int32 x004_unk { get; set; } // always = 1
             public Int32 x008_unk { get; set; }
             public Int32 x012_unk { get; set; }
-        }
 
-        /// <summary>
-        ///  second header 128 bytes
-        /// </summary>
-        public class Header
-        {
-            public Int32 mat_group_start_offset { get; set; } // position relative to this Int32, cound from this position x016 + mat_group_start_offset
+            public Int32 mat_group_start_offset { get; set; } // 148 position relative to this Int32, cound from this position x016 + mat_group_start_offset
             public Int32 x020_unk { get; set; } // always 128
             public Int32 x024_unk { get; set; }
-            public Int32 x00028_unk { get; set; }
+            public Int32 x028_unk { get; set; }
 
             public Vector3 model_center { get; set; }
             public float model_radius { get; set; }
@@ -547,8 +497,8 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// </summary>
         public class material_group
         {
-            public Int32 index_count { get; set; } //
-            public Int32 index_offset { get; set; } // divide by 9
+            public Int32 triangle_count { get; set; } //
+            public Int32 triangle_start_index { get; set; } // divide by 9
             public Int32 unk_08 { get; set; } // increases by +16 for each triangle group // first tri group start value seems th be the number of bytes from the start position to end of triangles group, minus -16
             public Int32 material_num { get; set; } // tri count
 
@@ -567,10 +517,10 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// should preferabily be grouped close together (distance/space-wise), otherwise the calculated radius will be larger which means the material group
         /// will be more likely to be constantly rendering, and if most of the materials groups have a large radius then nearly everything will be constantly rendering, it will add up and be costly on graphics performance
         /// </summary>
-        private class material_group_boundary
+        public class material_group_boundary
         {
-            Vector3 position { get; set; }
-            float radius { get; set; }
+            public Vector3 position { get; set; }
+            public float radius { get; set; }
         }
 
         /// <summary>
