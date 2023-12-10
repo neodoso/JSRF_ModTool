@@ -67,12 +67,24 @@
   <PropertyGroup>
     <ApplicationIcon>jsrf_soul_icon_64.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>JSRF_ModTool.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="HelixToolkit, Version=2.7.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
       <HintPath>..\packages\HelixToolkit.2.7.0\lib\netstandard1.1\HelixToolkit.dll</HintPath>
     </Reference>
     <Reference Include="HelixToolkit.Wpf, Version=2.7.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
       <HintPath>..\packages\HelixToolkit.Wpf.2.7.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Magick.NET-Q8-AnyCPU, Version=7.23.1.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>..\packages\Magick.NET-Q8-AnyCPU.7.23.1\lib\net40\Magick.NET-Q8-AnyCPU.dll</HintPath>
+    </Reference>
+    <Reference Include="Magick.NET.Core, Version=6.1.0.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>..\packages\Magick.NET.Core.6.1.0\lib\net40\Magick.NET.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Magick.NET.SystemDrawing, Version=2.0.11.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>..\packages\Magick.NET.SystemDrawing.2.0.11\lib\net40\Magick.NET.SystemDrawing.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -94,9 +106,13 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WPFHexaEditor, Version=2.1.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFHexaEditor.2.1.7\lib\net48\WPFHexaEditor.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataFormats\3D Model Formats\OBJ.cs" />
+    <Compile Include="DataFormats\Bmp.cs" />
     <Compile Include="DataFormats\JSRF\File_Containers.cs" />
     <Compile Include="DataFormats\JSRF\Stage_Bin\block_00.cs" />
     <Compile Include="DataFormats\JSRF\Stage_Bin\block_01.cs" />
@@ -111,6 +127,7 @@
     <Compile Include="DataFormats\JSRF\Stage_Data_Metrics.cs" />
     <Compile Include="DataFormats\JSRF\Texture_header.cs" />
     <Compile Include="DataFormats\Xbox\TextureSwizzle.cs" />
+    <Compile Include="DataFormats\Xbox\TextureSwizzleParsing.cs" />
     <Compile Include="Functions\FTP.cs" />
     <Compile Include="Functions\FileExplorer.cs" />
     <Compile Include="Functions\IO.cs" />
@@ -203,6 +220,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Resources\EBCDIC-NoSpecialChar.tbl" />
+    <None Include="Resources\EBCDIC.tbl" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="HelixModelViewer.xaml">
@@ -229,6 +248,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>; Move all assemblies and related files to lib folder
+ROBOCOPY "$(TargetDir) " "$(TargetDir)lib\ " /XF *.exe *.config *.manifest /XD lib resources logs data /E /IS /MOVE
+if %25errorlevel%25 leq 4 exit 0 else exit %25errorlevel%25</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

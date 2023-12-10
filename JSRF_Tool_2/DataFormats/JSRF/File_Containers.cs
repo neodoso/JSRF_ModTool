@@ -525,11 +525,11 @@ namespace JSRF_ModTool.DataFormats.JSRF
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public void insert_item_after(int x, int y, item_data_type type, byte[] data)
+        public void insert_item_after(int y, item_data_type type, byte[] data)
         {
             if (this.type == container_types.MULT)
             {
-                this.MULT_root.items[x].items.Insert(y, new item(type, data));
+                this.MULT_root.items[y].items.Insert(this.MULT_root.items[y].items.Count, new item(type, data));
             }
 
             if (this.type == container_types.NORM)

@@ -182,6 +182,8 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
                 grind_path_item_count = 0;
                 item_count++;
             }
+            if (!System.IO.Directory.Exists(Path.GetDirectoryName(filepath)))
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
 
             System.IO.File.WriteAllLines(filepath, lines);
 

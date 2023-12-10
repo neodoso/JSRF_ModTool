@@ -10,17 +10,22 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 {
     public class Parser
     {
-		string debug_data_export_dir = @"C:\Users\Mike\Desktop\JSRF\Stage_Collision_to_Visual\Stage_Collision_Decompiled\"; // Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
-		public JSRF.Stage_Bin.header header = new JSRF.Stage_Bin.header();
+		string debug_data_export_dir = @"C:\Users\Mike\Desktop\JSRF\Stg_Decompiled\stg10\bin\"; // // @"C:\Users\Mike\Desktop\JSRF\Stg_Bin_Export\" // Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        public JSRF.Stage_Bin.header header = new JSRF.Stage_Bin.header();
 
         public block_00 block_00; // stage physics collision 3d model data
         public block_01 block_01; // grind paths
         public block_02 block_02; // decals, object spawns (spawns/positions:decals, MDLB contained in StgXX_XX.dat and StgObj)
 
-		Boolean export_data = true;
+		bool export_data;
 
 		public Parser(string stage_bin_filepath)
         {
+
+			#if DEBUG
+             export_data = true;
+			#endif
+
             // load file to byte array
             byte[] data = Parsing.FileToByteArray(stage_bin_filepath, 0);
 
@@ -100,8 +105,6 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 
 			#endregion
 
-			//block_00.export_all_collision_meshes(debug_data_export_dir);
-
 
 			// load block 01
 			byte[] data_block_01 = new byte[header.block_01_size];
@@ -123,14 +126,19 @@ namespace JSRF_ModTool.DataFormats.JSRF.Stage_Bin
 			{
 				string export_dir = debug_data_export_dir + Path.GetFileNameWithoutExtension(stage_bin_filepath).Split('_')[0] + "\\";
 
-				block_00.export_all_collision_meshes(export_dir + "\\coll\\");
+				// export collision meshes
+                block_00.export_all_collision_meshes(debug_data_export_dir);
 
-				// exports single collision model
-				//export_coll_mesh(export_dir + "\\coll\\", 14, 3);
+                //block_00.export_all_collision_meshes(export_dir + "\\coll\\");
 
-				//block_01.export_grind_path_data(export_dir + "grind_paths.txt");
+                // exports single collision model
+                //export_coll_mesh(export_dir + "\\coll\\", 14, 3);
+
+				// export grind paths
+                block_01.export_grind_path_data(export_dir + "grind_paths.txt");
 				//block_01.export_grind_path_data_blender(export_dir + "grind_paths_blender.obj");
 
+				// export PVS
 				block_02.export_PVS_data(export_dir);
 			}
 

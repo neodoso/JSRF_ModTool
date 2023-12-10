@@ -23,6 +23,11 @@ using JSRF_ModTool.Functions;
 using HelixToolkit.Wpf;
 using Microsoft.Win32;
 using System.Runtime.InteropServices.ComTypes;
+
+
+using ImageMagick;
+using WpfHexaEditor.Core;
+using WpfHexaEditor;
 //using System.Windows.Shapes;
 
 
@@ -77,7 +82,7 @@ namespace JSRF_ModTool
         {
             InitializeComponent();
 
-           startup_dir = GetShortPath(Application.StartupPath);
+           startup_dir = AddQuotesIfRequired( GetShortPath(Application.StartupPath));
            tmp_dir = startup_dir + "\\resources\\tmp\\";
            settings_dir = startup_dir + "\\resources\\";
 
@@ -110,11 +115,17 @@ namespace JSRF_ModTool
             panel_lvl_mdl_info.Visible = true;
             label5.Visible = true;
 
+           //Load_file(txtb_jsrf_mod_dir.Text + @"\\StgObj\StgObj31.bin");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[2].Nodes[0];
+
+            //Load_file(txtb_jsrf_mod_dir.Text + @"\Disp\SprNorm.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
+
             //Load_file(txtb_jsrf_mod_dir.Text + @"\People\People01.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0];
 
-            Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Corn.dat");
-           trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 0 8 0 for texture
+            // Load_file(txtb_jsrf_mod_dir.Text + @"\Player\Corn.dat");
+            //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1].Nodes[0]; // 0 8 0 for texture
 
             //Load_file(txtb_jsrf_mod_dir.Text + @"\Event\Event\e291.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[9].Nodes[0];
@@ -127,8 +138,8 @@ namespace JSRF_ModTool
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[0];
 
 
-            // load stg00_.bin
-            //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_original_dir.Text + "\\Stage\\stg11_.bin");
+            //load stg00_.bin
+            //DataFormats.JSRF.Stage_Bin.Parser stgBin_00 = new DataFormats.JSRF.Stage_Bin.Parser(txtb_jsrf_mod_dir.Text + "\\Stage\\stg10_.bin");
 
             //Load_file(txtb_jsrf_mod_dir.Text + "\\Stage\\stg00_00.dat");
             //trv_file.SelectedNode = trv_file.Nodes[0].Nodes[1];
@@ -295,6 +306,8 @@ namespace JSRF_ModTool
         {
             Reset_vars();
 
+            hexEditor.CloseProvider();
+
             jsrf_file = new File_Containers(filepath);
 
             if (filepath.Contains(".dat") && load_bin_materials)
@@ -375,6 +388,15 @@ namespace JSRF_ModTool
             Load_model_to_HelixModelViewer(meshes, mesh_data.mesh_center, mesh_data.mesh_bounds, mesh_data.avg_distance);
 
             #endregion
+        }
+
+
+        public string AddQuotesIfRequired(string path)
+        {
+            return !string.IsNullOrWhiteSpace(path) ?
+                path.Contains(" ") && (!path.StartsWith("\"") && !path.EndsWith("\"")) ?
+                    "\"" + path + "\"" : path :
+                    string.Empty;
         }
 
         #endregion
@@ -994,6 +1016,29 @@ namespace JSRF_ModTool
         #endregion
 
 
+        private void LoadDataToHexEditor(byte[] data)
+        {
+            hexEditor.CloseProvider();
+
+            if (current_item_data == null) return;  
+            if (current_item_data.Length == 0) return;
+
+            File.WriteAllBytes(tmp_dir + "data.dat", data);
+            //hexEditor.ByteSize = ByteSizeType.Bit32;
+            hexEditor.ByteGrouping = ByteSpacerGroup.FourByte;
+       
+            //hexEditor.ByteSize = ByteSizeType.Bit16;
+            //hexEditor.ByteShiftLeft = 4;
+            //hexEditor.BytePerLine = 16;
+
+            hexEditor.PreloadByteInEditorMode = PreloadByteInEditor.None;
+            hexEditor.ForegroundSecondColor = System.Windows.Media.Brushes.Blue;
+            hexEditor.FileName = tmp_dir + "data.dat";
+
+            //hexEditor.LoadTblFile(tmp_dir + "data.dat");
+            //hexEditor.TypeOfCharacterTable = CharacterTableType.TblFile;
+        }
+
         #region TreeView
 
 
@@ -1155,6 +1200,7 @@ namespace JSRF_ModTool
         private void Trv_file_AfterSelect(object sender, TreeViewEventArgs e)
         {
             Load_TreeView_item(e.Node);
+
             current_node = e.Node; //e.Node
             last_selected_node = e.Node; //e.Node
         }
@@ -1251,6 +1297,16 @@ namespace JSRF_ModTool
                     tabControl1.SelectedIndex = 3;
                     break;
             }
+
+
+            // hex editor
+            if (tabControl1.SelectedIndex == 4)
+            {
+                LoadDataToHexEditor(item.data);
+            }
+
+            if (cb_lock_hexEditor.Checked == true)
+                tabControl1.SelectedIndex = 4;
         }
 
 
@@ -1266,7 +1322,7 @@ namespace JSRF_ModTool
 
             // check if selected item is an MDLB
             File_Containers.item selected_item = jsrf_file.get_item(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index);
-            if (selected_item.type != File_Containers.item_data_type.MDLB)
+            if (selected_item.type != File_Containers.item_data_type.MDLB && selected_item.type != File_Containers.item_data_type.Stage_MDLB)
             {
                 MessageBox.Show("Selected item is not a MDLB.");
                 return false;
@@ -1917,6 +1973,7 @@ namespace JSRF_ModTool
         #endregion
 
 
+
         #region load Texture
 
         /// <summary>
@@ -1927,6 +1984,9 @@ namespace JSRF_ModTool
         /// <param name="silent">load bitmap into picturebox</param>
         private string Load_block_Texture(byte[] data, bool silent, bool by_id) //string id,
         {
+            if (!CheckVampConvertExeExists())
+                return "";
+
             DDS_CompressionFormat compressionFormat = DDS_CompressionFormat.unknown1;
             string dxt_compression_type = "unknown";
 
@@ -2020,105 +2080,100 @@ namespace JSRF_ModTool
             byte[] dds_header = Generate_dds_header(res_x, dxt_compression_type);
             byte[] texture_file = new byte[dds_header.Length + data_noheader.Length + 32];
 
+            // set picture box display size mode
+            if (res_x > 512)
+            {
+                pictureBox_texture_editor.SizeMode = PictureBoxSizeMode.StretchImage;
+            }
+            else
+            {
+                pictureBox_texture_editor.SizeMode = PictureBoxSizeMode.CenterImage;
+            }
+
+
+            // if texture is swizzeled
             if (swizzled == 1)
             {
                 byte[] data_unswizz = DataFormats.Xbox.TextureSwizzle.QuadtreeUnswizzle(data_noheader, res_x);
-                byte[] dds_header_1 = GenerateDdsHeader(compressionFormat, res_x, mipmap_count);
+                //byte[] dds_header_1 = GenerateDdsHeader(compressionFormat, res_x, mipmap_count);
 
-                System.Buffer.BlockCopy(dds_header_1, 0, texture_file, 0, dds_header_1.Length);
-                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header_1.Length, data_unswizz.Length);
+                //System.Buffer.BlockCopy(dds_header_1, 0, texture_file, 0, dds_header_1.Length);
+                //System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header_1.Length, data_unswizz.Length);
 
-                /*
-                byte[] data_unswizz = new byte[data.Length - 32];
-                data_unswizz = DataFormats.Xbox.TextureSwizzle.(data_noheader, 0, res_x, res_x, (int)numupDown_tex_depth.Value, (int)numupDown_tex_bitCount.Value, true);
+                var bmp = new Bmp(data_unswizz, res_x);
+                var im = new MagickImage(bmp.ToByteArray(), 0, bmp.Size, MagickFormat.Bmp);
+                im.ToBitmap().Save(tmp_dir + "\\tmp.png");
 
-                if (data_unswizz == null) { System.Media.SystemSounds.Asterisk.Play(); return ""; }
 
-                System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
-                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
-                */
-                /*
-                //byte[] data_decompressed = new byte[data.Length - 32];
-                //DataFormats.Xbox.TextureSwizzle.DecompressDxt3(data_decompressed, data_noheader, res_x, res_x);
+                Image image = im.ToBitmap();
+                pictureBox_texture_editor.Image = image;
 
-                byte[] data_unswizz = new byte[data.Length - 32];
-                data_unswizz = DataFormats.Xbox.TextureSwizzle.Swizzle(data_noheader, res_x, res_x, (int)numupDown_tex_depth.Value, (int)numupDown_tex_bitCount.Value, true);
+                return id.ToString();
+               // Bitmap unswizelled_texture = im.ToBitmap();
 
-                if (data_unswizz == null) { System.Media.SystemSounds.Asterisk.Play(); return ""; }
-
-                System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
-                System.Buffer.BlockCopy(data_unswizz, 0, texture_file, dds_header.Length, data_unswizz.Length);
-                */
-
-            } else {
+            } 
+            else // regular texture (no swizzle)
+            {
                 System.Buffer.BlockCopy(dds_header, 0, texture_file, 0, dds_header.Length);
                 System.Buffer.BlockCopy(data_noheader, 0, texture_file, dds_header.Length, data_noheader.Length);
-            }
+
+
+                string filename = "tmp";
+
+                if (by_id) { filename = id.ToString(); }
+
+                Parsing.ByteArrayToFile(tmp_dir + "\\" + filename + ".dds", texture_file);
+
+
+                #region convert dds to png
+
+                string args = "-i=" + filename + ".dds -o=" + filename + ".png -genmipmaps=1";
+
+                Process proc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        WorkingDirectory = startup_dir + "\\resources\\tmp\\",
+                        FileName = startup_dir + "\\resources\\tools\\VampConvert.exe",
+                        Arguments = args,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+
+                proc.Start();
+                proc.WaitForExit();
+                proc.Dispose();
+
+                if (!File.Exists(tmp_dir + filename + ".png"))
+                {
+                    MessageBox.Show("Could not load texture file: \n" + tmp_dir + filename + ".png");
+                    return "";
+                }
+
+                #endregion
+
+                // if not in silent mode: load bitmap into picturebox and texture info in textbox
+                if (!silent)
+                {
+                    Stream BitmapStream = System.IO.File.Open(tmp_dir + filename + ".png", System.IO.FileMode.Open);
+                    Image imgPhoto = Image.FromStream(BitmapStream, true);
+
+                    BitmapStream.Dispose();
+                    BitmapStream.Close();
+
+                    Image bmp = new Bitmap(imgPhoto);
+                    pictureBox_texture_editor.Image = bmp;
+                }
           
 
 
-            string filename = "tmp";
-
-            if (by_id) { filename = id.ToString(); }
-
-            Parsing.ByteArrayToFile(tmp_dir + "\\" + filename + ".dds", texture_file);
-
-
-
-            #region convert dds to png
-
-
-            string args = "-i=" + filename + ".dds -o=" + filename + ".png -genmipmaps=1";
-
-            Process proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Application.StartupPath + "\\resources\\tmp\\",
-                    FileName = Application.StartupPath + "\\resources\\tools\\VampConvert.exe",
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-
-            proc.Start();
-            proc.WaitForExit();
-            proc.Dispose();
-
-            if (!File.Exists(tmp_dir + filename + ".png"))
-            {
-                MessageBox.Show("Could not load texture file: \n" + tmp_dir + filename + ".png");
-                return "";
-            }
-
-            #endregion
-
-            // if not in silent mode: load bitmap into picturebox and texture info in textbox
-            if (!silent)
-            {
-                if (res_x > 512)
-                {
-                    pictureBox_texture_editor.SizeMode = PictureBoxSizeMode.StretchImage;
-                }
-                else
-                {
-                    pictureBox_texture_editor.SizeMode = PictureBoxSizeMode.CenterImage;
-                }
-
-                Stream BitmapStream = System.IO.File.Open(tmp_dir + filename + ".png", System.IO.FileMode.Open);
-                Image imgPhoto = Image.FromStream(BitmapStream, true);
-
-                BitmapStream.Dispose();
-                BitmapStream.Close();
-
-                Image bmp = new Bitmap(imgPhoto);
-                pictureBox_texture_editor.Image = bmp;
             }
 
             return id.ToString();
         }
+
 
         public enum DDS_CompressionFormat
         {
@@ -2331,6 +2386,20 @@ namespace JSRF_ModTool
 
         }
 
+
+
+        private bool CheckVampConvertExeExists()
+        {
+
+            if (!File.Exists(startup_dir + "\\resources\\tools\\VampConvert.exe"))
+            {
+                MessageBox.Show(startup_dir + "\\resources\\tools\\VampConvert.exe\n\n" + "VampConvert.exe file is missing, please make sure to extract (from the JSRF Mod Tool .zip file) the 'resources' folder that comes with the tool, in the same folder as JSRF_ModTool.exe");
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion
 
 
@@ -2420,7 +2489,9 @@ namespace JSRF_ModTool
             {
                 if (m == trv_file.SelectedNode.Index)
                 {
-                    texture_id = materials_bin_list[m].texture_id[0];
+                    // TODO handle if materials_bin_list[m].texture_id.Count == 0
+                    if (materials_bin_list[m].texture_id.Count > 0)
+                        texture_id = materials_bin_list[m].texture_id[0];
                 }
             }
 
@@ -3408,8 +3479,8 @@ namespace JSRF_ModTool
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    WorkingDirectory = Application.StartupPath + "\\resources\\tmp\\",
-                    FileName = Application.StartupPath + "\\resources\\tools\\VampConvert.exe",
+                    WorkingDirectory = startup_dir + "\\resources\\tmp\\",
+                    FileName = startup_dir + "\\resources\\tools\\VampConvert.exe",
                     Arguments = args,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -3548,30 +3619,37 @@ namespace JSRF_ModTool
             {
                 try
                 {
-                    // if MULT container
-                    if (jsrf_file.type == File_Containers.container_types.MULT)
-                    {
+                    //// if MULT container
+                    //if (jsrf_file.type == File_Containers.container_types.MULT)
+                    //{
 
-                        if (y >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
-                        {
-                            y = trv_file.Nodes[0].Nodes[x].Nodes.Count - 1;
-                        }
+                    //    //if (y >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
+                    //    //{
+                    //    //    y = trv_file.Nodes[0].Nodes[x].Nodes.Count - 1;
+                    //    //}
 
-                        trv_file.SelectedNode = trv_file.Nodes[0].Nodes[x].Nodes[y];
-                    }
+                    //    trv_file.SelectedNode = trv_file.Nodes[0].Nodes[x].Nodes[y];
+                    //}
 
-                    // if NORM or indexed root type of container
-                    if (jsrf_file.type == File_Containers.container_types.NORM || jsrf_file.type == File_Containers.container_types.indexed)
-                    {
-                        if (x >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
-                        {
-                            x = trv_file.Nodes[0].Nodes[x].Nodes.Count - 1;
-                        }
+                    //// if NORM or indexed root type of container
+                    //if (jsrf_file.type == File_Containers.container_types.NORM || jsrf_file.type == File_Containers.container_types.indexed)
+                    //{
+                    //    //if (x >= trv_file.Nodes[0].Nodes[x].Nodes.Count)
+                    //    //{
+                    //    //    x = trv_file.Nodes[0].Nodes[x].Nodes.Count - 1;
+                    //    //}
 
-                        trv_file.SelectedNode = trv_file.Nodes[0].Nodes[y];
-                    }
+                    //    trv_file.SelectedNode = trv_file.Nodes[0].Nodes[y];
+                    //}
 
                     // expand selected node
+
+                    if(x == 0)
+                        trv_file.SelectedNode = trv_file.Nodes[0].Nodes[y];
+
+                    if (x > 0)
+                        trv_file.SelectedNode = trv_file.Nodes[0].Nodes[x].Nodes[y];
+
                     trv_file.SelectedNode.Expand();
 
                 }
@@ -3671,17 +3749,17 @@ namespace JSRF_ModTool
         /// <param name="e"></param>
         private void Btn_insert_block_Click(object sender, EventArgs e)
         {
-            if (block_copy_clipboard == null)
-            {
-                MessageBox.Show("Clipboard is empty, copy a block first.");
-                return;
-            }
+            //if (block_copy_clipboard == null)
+            //{
+            //    MessageBox.Show("Clipboard is empty, copy a block first.");
+            //    return;
+            //}
 
-            if (block_copy_clipboard.Length == 0)
-            {
-                MessageBox.Show("Clipboard is empty, copy a block first.");
-                return;
-            }
+            //if (block_copy_clipboard.Length == 0)
+            //{
+            //    MessageBox.Show("Clipboard is empty, copy a block first.");
+            //    return;
+            //}
 
             if (trv_file.SelectedNode == null || trv_file.SelectedNode.Index == -1)
             {
@@ -3689,7 +3767,38 @@ namespace JSRF_ModTool
                 return;
             }
 
-            jsrf_file.insert_item_after(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index, File_Containers.item_data_type.unknown, block_copy_clipboard);
+
+            if (block_copy_clipboard != null)
+            {
+                if (block_copy_clipboard.Length > 0)
+                {
+                    jsrf_file.insert_item_after(trv_file.SelectedNode.Index, File_Containers.item_data_type.unknown, block_copy_clipboard); // jsrf_file.empty_item_data(trv_file.SelectedNode.Parent.Index, trv_file.SelectedNode.Index);
+                }
+
+                Rebuild_file(true, true, true);
+                return;
+            }
+
+            jsrf_file.insert_item_after(trv_file.SelectedNode.Index, File_Containers.item_data_type.empty, new byte[0]);
+
+
+            //if (block_copy_clipboard == null)
+            //{
+            //    jsrf_file.insert_item_after(trv_file.SelectedNode.Index, File_Containers.item_data_type.empty, new byte[0]);
+            //}
+
+            //if (block_copy_clipboard != null)
+            //{
+            //    if (block_copy_clipboard.Length == 0)
+            //    {
+            //        jsrf_file.insert_item_after(trv_file.SelectedNode.Index, File_Containers.item_data_type.empty, new byte[0]); //trv_file.SelectedNode.Parent.Index, 
+            //    }
+            //}
+
+
+
+
+         
 
             Rebuild_file(true, true, true);
         }
@@ -4193,7 +4302,7 @@ namespace JSRF_ModTool
                     StartInfo = new ProcessStartInfo
                     {
                         WorkingDirectory = tmp_dir,
-                        FileName = Application.StartupPath + "\\resources\\tools\\xbadpdec.exe", // xbadpdec XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
+                        FileName = startup_dir + "\\resources\\tools\\xbadpdec.exe", // xbadpdec XboxADPCM.exe doesn't convert some of the sound files so we use xbadpdec
                         Arguments = args,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
@@ -4236,7 +4345,7 @@ namespace JSRF_ModTool
                     StartInfo = new ProcessStartInfo
                     {
                         WorkingDirectory = tmp_dir,
-                        FileName = Application.StartupPath + "\\resources\\tools\\XboxADPCM.exe", // xbadpdec.exe
+                        FileName = startup_dir + "\\resources\\tools\\XboxADPCM.exe", // xbadpdec.exe
                         Arguments = args,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
@@ -4276,8 +4385,13 @@ namespace JSRF_ModTool
         }
 
 
+
         #endregion
 
-
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedIndex == 4)
+                LoadDataToHexEditor(current_item_data);
+        }
     }
 }

@@ -93,6 +93,7 @@
             this.rtxtb_materials = new System.Windows.Forms.RichTextBox();
             this.btn_save_mat_data = new System.Windows.Forms.Button();
             this.tab_SoundEditor = new System.Windows.Forms.TabPage();
+            this.label41 = new System.Windows.Forms.Label();
             this.cb_auto_play_sound = new System.Windows.Forms.CheckBox();
             this.panel10 = new System.Windows.Forms.Panel();
             this.label30 = new System.Windows.Forms.Label();
@@ -173,7 +174,10 @@
             this.lab_itemSel_length = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.btn_import_block = new System.Windows.Forms.Button();
-            this.label41 = new System.Windows.Forms.Label();
+            this.tab_HexEditor = new System.Windows.Forms.TabPage();
+            this.elemHost_HexEDitor = new System.Windows.Forms.Integration.ElementHost();
+            this.hexEditor = new WpfHexaEditor.HexEditor();
+            this.cb_lock_hexEditor = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tab_ModelViewer.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -197,6 +201,7 @@
             this.tab_About.SuspendLayout();
             this.panel11.SuspendLayout();
             this.panel4.SuspendLayout();
+            this.tab_HexEditor.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -236,6 +241,7 @@
             this.tabControl1.Controls.Add(this.tab_TextureViewer);
             this.tabControl1.Controls.Add(this.tab_mat_editor);
             this.tabControl1.Controls.Add(this.tab_SoundEditor);
+            this.tabControl1.Controls.Add(this.tab_HexEditor);
             this.tabControl1.Controls.Add(this.tab_StageComp);
             this.tabControl1.Controls.Add(this.tab_Settings);
             this.tabControl1.Controls.Add(this.tab_About);
@@ -244,6 +250,7 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(750, 712);
             this.tabControl1.TabIndex = 2;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tab_ModelViewer
             // 
@@ -938,6 +945,15 @@
             this.tab_SoundEditor.Size = new System.Drawing.Size(742, 686);
             this.tab_SoundEditor.TabIndex = 6;
             this.tab_SoundEditor.Text = "Sound Editor";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(212, 65);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(41, 13);
+            this.label41.TabIndex = 37;
+            this.label41.Text = "label41";
             // 
             // cb_auto_play_sound
             // 
@@ -1684,17 +1700,17 @@
             // 
             // btn_ftp_to_xbox
             // 
-            this.btn_ftp_to_xbox.Location = new System.Drawing.Point(1120, 12);
+            this.btn_ftp_to_xbox.Location = new System.Drawing.Point(1151, 12);
             this.btn_ftp_to_xbox.Name = "btn_ftp_to_xbox";
-            this.btn_ftp_to_xbox.Size = new System.Drawing.Size(101, 27);
+            this.btn_ftp_to_xbox.Size = new System.Drawing.Size(70, 27);
             this.btn_ftp_to_xbox.TabIndex = 8;
-            this.btn_ftp_to_xbox.Text = "FTP file to Xbox";
+            this.btn_ftp_to_xbox.Text = "File to Xbox";
             this.btn_ftp_to_xbox.UseVisualStyleBackColor = true;
             this.btn_ftp_to_xbox.Click += new System.EventHandler(this.Btn_ftp_to_xbox_Click);
             // 
             // btn_restore_original_file
             // 
-            this.btn_restore_original_file.Location = new System.Drawing.Point(1003, 12);
+            this.btn_restore_original_file.Location = new System.Drawing.Point(1032, 12);
             this.btn_restore_original_file.Name = "btn_restore_original_file";
             this.btn_restore_original_file.Size = new System.Drawing.Size(114, 27);
             this.btn_restore_original_file.TabIndex = 9;
@@ -1786,14 +1802,37 @@
             this.btn_import_block.UseVisualStyleBackColor = true;
             this.btn_import_block.Click += new System.EventHandler(this.Btn_import_block_Click);
             // 
-            // label41
+            // tab_HexEditor
             // 
-            this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(212, 65);
-            this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(41, 13);
-            this.label41.TabIndex = 37;
-            this.label41.Text = "label41";
+            this.tab_HexEditor.Controls.Add(this.cb_lock_hexEditor);
+            this.tab_HexEditor.Controls.Add(this.elemHost_HexEDitor);
+            this.tab_HexEditor.Location = new System.Drawing.Point(4, 22);
+            this.tab_HexEditor.Name = "tab_HexEditor";
+            this.tab_HexEditor.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_HexEditor.Size = new System.Drawing.Size(742, 686);
+            this.tab_HexEditor.TabIndex = 8;
+            this.tab_HexEditor.Text = "Hex Editor";
+            this.tab_HexEditor.UseVisualStyleBackColor = true;
+            // 
+            // elemHost_HexEDitor
+            // 
+            this.elemHost_HexEDitor.Location = new System.Drawing.Point(0, 0);
+            this.elemHost_HexEDitor.Name = "elemHost_HexEDitor";
+            this.elemHost_HexEDitor.Size = new System.Drawing.Size(742, 686);
+            this.elemHost_HexEDitor.TabIndex = 0;
+            this.elemHost_HexEDitor.Text = "elementHost1";
+            this.elemHost_HexEDitor.Child = this.hexEditor;
+            // 
+            // cb_lock_hexEditor
+            // 
+            this.cb_lock_hexEditor.AutoSize = true;
+            this.cb_lock_hexEditor.BackColor = System.Drawing.SystemColors.MenuBar;
+            this.cb_lock_hexEditor.Location = new System.Drawing.Point(668, 663);
+            this.cb_lock_hexEditor.Name = "cb_lock_hexEditor";
+            this.cb_lock_hexEditor.Size = new System.Drawing.Size(68, 17);
+            this.cb_lock_hexEditor.TabIndex = 1;
+            this.cb_lock_hexEditor.Text = "Lock tab";
+            this.cb_lock_hexEditor.UseVisualStyleBackColor = false;
             // 
             // Main
             // 
@@ -1862,6 +1901,8 @@
             this.panel11.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            this.tab_HexEditor.ResumeLayout(false);
+            this.tab_HexEditor.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2016,6 +2057,10 @@
         private System.Windows.Forms.TextBox txtb_sound_import_delay;
         private System.Windows.Forms.Label label40;
         private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.TabPage tab_HexEditor;
+        private System.Windows.Forms.Integration.ElementHost elemHost_HexEDitor;
+        private WpfHexaEditor.HexEditor hexEditor;
+        private System.Windows.Forms.CheckBox cb_lock_hexEditor;
     }
 }
 
